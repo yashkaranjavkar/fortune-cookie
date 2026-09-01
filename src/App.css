@@ -1,0 +1,567 @@
+@import url('https://fonts.googleapis.com/css2?family=Mulish:wght@500;600&family=STIX+Two+Text:ital,wght@0,500;1,500&display=swap');
+
+:root {
+  --font-family: 'Mulish', sans-serif;
+  --font-title: 'STIX Two Text', serif;
+  --gold: #e6a817;
+  --gold-dark: #DF9F31;
+  --card-cream: #FFFDF5;
+  --text-black: #323232;
+  --text-grey: #AAAAAA;
+}
+
+body {
+  margin: 0;
+  background-color: #1a1a1a;
+  font-family: var(--font-family);
+  color: #333;
+  overflow: hidden;
+  user-select: none;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* Generic Card Screen (Used by Start, Intro, Job App, etc.) */
+.card {
+  background: var(--card-cream);
+  border: 4px solid var(--gold);
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  max-width: 800px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.title {
+  font-family: var(--font-title);
+  font-size: 32px;
+  font-weight: bold;
+  font-style: italic;
+  color: var(--text-black);
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  margin-bottom: 20px;
+  color: #444;
+}
+
+
+/* FCI Logo Image */
+.right-col .fci-logo {
+  width: 100%;
+  height: 300px; /* Or 'auto' if you want it to be natural height */
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+
+/* Standard Buttons */
+.next-btn {
+  background: var(--gold);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 8px;
+  font-size: 18px;
+  cursor: pointer;
+  margin-top: 20px;
+  width: 100%;
+  transition: all 0.2s;
+}
+
+.next-btn:hover:not(:disabled) {
+  background: var(--gold-dark);
+}
+
+.next-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Inputs */
+.form-group { margin-bottom: 25px; }
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #000;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.form-group input,
+.dropdown-input input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  background: #fff;
+}
+
+/* Custom Dropdown (Searchable) */
+.dropdown-wrapper, .multiselect-wrapper { position: relative; }
+.dropdown-input, .multiselect-input {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+}
+.dropdown-input input, .multiselect-input input {
+  border: none;
+  outline: none;
+  flex: 1;
+}
+.arrow { font-size: 12px; color: #888; }
+.dropdown-list, .multiselect-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.dropdown-item, .multiselect-item {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+.dropdown-item:hover, .multiselect-item:hover { background: #f5f5f5; }
+.add-new { color: var(--gold); font-weight: bold; }
+
+/* MultiSelect Chips */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.chip {
+  background: #f8f1e7;
+  color: #845A12;
+  border: 1px solid var(--gold);
+  padding: 4px 8px;
+  border-radius: 15px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Job Application Layout */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 30px;
+  margin-top: 20px;
+}
+.right-col img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+.radio-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+.radio-label input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--gold);
+}
+
+/* Related Chips */
+.related-section { margin-top: 20px; }
+.related-section label { font-weight: bold; display: block; margin-bottom: 8px; }
+.related-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.related-chip {
+  background: #f8f1e7;
+  border: 1px solid var(--gold);
+  color: #845A12;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+/* Websites Screen */
+.website-grid { display: flex; flex-wrap: wrap; gap: 10px; max-height: 300px; overflow-y: auto; margin-top: 20px; }
+.website-btn {
+  background: #fff;
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.website-btn.selected { background: var(--gold); color: white; }
+
+
+/* Fortune Selection Screen */
+.fortune-selection-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.85); /* Dark background for the screen */
+}
+
+.fortune-header {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  background: #fffdf5;
+  border: 2px solid #e6a817;
+  border-radius: 10px;
+  padding: 15px 30px;
+  margin-bottom: 30px;
+  max-width: 800px;
+  width: 100%;
+}
+
+.fortune-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 900px;
+}
+
+/* THE WHITE FORTUNE STRIP */
+/* FORTUNE STRIPS (Paper Layout) */
+.fortune-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 900px;
+}
+
+.fortune-row {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Space between cookie and paper */
+  cursor: pointer;
+}
+
+/* The Cookie sits outside the white box */
+.fortune-cookie {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  z-index: 2; /* Brings it forward */
+}
+
+.fortune-cookie img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+}
+
+/* The White Paper Strip */
+.fortune-paper {
+  background: #FFFFFF;
+  padding: 15px 25px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* 3D Paper Shadow */
+  font-size: 18px;
+  line-height: 1.6;
+  color: #333;
+  flex: 1;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+/* Selected state */
+.fortune-row.selected .fortune-paper {
+  border-color: #e6a817;
+  background: #fff5e0;
+}
+
+
+.cracked-cookie {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cookie-broken-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.fortune-text {
+  font-size: 18px;
+  line-height: 1.5;
+  color: #333;
+  text-align: left;
+  flex: 1;
+}
+
+/* Next Button on Fortune Screen */
+.fortune-selection-screen .next-btn {
+  margin-top: 30px;
+  width: 200px;
+}
+
+
+/* Thank You / Success Screens */
+.icon { font-size: 80px; text-align: center; color: var(--gold); margin-bottom: 20px; }
+.thank-you .card { text-align: center; }
+
+/* Welcome Screen */
+.welcome-screen .card { text-align: center; }
+
+/* Game and Instruction Screens */
+.dark-screen {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center; z-index: 100;
+}
+.intro-content { max-width: 600px; text-align: left; color: white; }
+
+.tray-dots { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+.dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--gold); display: inline-block; }
+.dot.active { background-color: var(--gold); }
+
+.tray-selection-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+.instruction-bar { background: var(--card-cream); border: 2px solid var(--gold); border-radius: 10px; padding: 15px 30px; margin-bottom: 50px; font-size: 18px; text-align: center; max-width: 700px; }
+/* Horizontal Tray */
+.tray-container {
+  width: 700px; /* Adjust to fit your actual tray.png aspect ratio */
+  height: 350px;
+  background-image: url('./assets/cookies/tray.png');
+  background-size: 100% 100%; /* Prevents stretching/cropping */
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0; /* Removes the huge padding that pushed it out */
+  box-sizing: border-box;
+}
+
+/* Bunch Images */
+.bunch {
+  cursor: pointer;
+  width: 200px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.bunch:hover {
+  transform: scale(1.05);
+}
+
+.bunch-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* --- FORTUNE SCREEN (Covers full screen for Breaking & Selection) --- */
+.fortune-selection-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* --- PAPER STRIP HIDDEN STATE --- */
+/* This keeps the layout perfectly aligned so the cookie doesn't move */
+.fortune-paper.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(30px); /* Starts slightly to the right */
+}
+
+/* --- COOKIE BREAKING ANIMATION --- */
+.breaking-cookie-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+.breaking-cookie-img.cracked {
+  animation: crack-shake 0.6s ease-in-out forwards;
+}
+
+@keyframes crack-shake {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-10deg) scale(1.1); }
+  50% { transform: rotate(10deg) scale(0.9); }
+  75% { transform: rotate(-5deg) scale(1.05); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+/* --- FORTUNE SLIDE IN ANIMATION --- */
+.fortune-paper:not(.hidden) {
+  animation: slide-in-paper 0.6s ease-out forwards;
+}
+
+@keyframes slide-in-paper {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+
+/* --- INSTRUCTION SCREEN LAYOUT --- */
+.instruction-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.instruction-card {
+  background: #FFFDF5;
+  border: 5px solid #DF9F31;
+  border-radius: 30px;
+  padding: 50px;
+  width: 80%;
+  max-width: 1100px;
+  position: relative;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.instruction-next-btn {
+  background: #e6a817;
+  color: white;
+  border: none;
+  padding: 12px 40px;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  align-self: flex-end; /* Pushes it to the bottom right */
+  margin-top: auto;
+}
+
+.instruction-progress-bar {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  height: 10px;
+  background: #555;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #e6a817;
+  transition: width 0.3s ease;
+}
+
+.how-to-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  margin-top: 40px;
+  text-align: center;
+}
+
+.instruction-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.instruction-step img {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  object-fit: contain;
+  margin-bottom: 20px;
+}
+
+.instruction-step p {
+  font-size: 16px;
+  color: #333;
+  line-height: 1.5;
+  max-width: 280px;
+}
+
+.cookie { width: 70px; height: 70px; background: radial-gradient(circle, #f5c542, #d18d00); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
+
+/* Demo Screen */
+.demo-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: #fff; position: relative; }
+.demo-title { position: absolute; top: 20px; left: 40px; font-size: 24px; font-style: italic; color: #333; }
+.demo-dome-container { position: relative; width: 300px; height: 200px; margin-bottom: 40px; display: flex; justify-content: center; align-items: flex-end; transition: all 0.3s; }
+.demo-dome { width: 150px; height: 100px; background: #999; border-radius: 75px 75px 0 0; position: relative; transition: all 0.3s; transform-origin: bottom center; }
+.demo-dome-container.lifted .demo-dome { transform: translateY(-50px) rotate(-45deg); background: #aaa; }
+.demo-timer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 30px; color: red; font-weight: bold; }
+.demo-fortune { position: absolute; top: 30px; width: 300px; height: 120px; background: var(--gold); border-radius: 20px 40px 30px 20px; display: flex; align-items: center; justify-content: center; cursor: grab; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+.demo-fortune .fortune-text { background: #ccc; padding: 5px; border-radius: 4px; font-size: 14px; color: #333; text-align: center; }
+.demo-drop-zones { display: flex; gap: 40px; margin-top: 20px; }
+.drop-zone { width: 150px; height: 150px; border: 3px solid; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
+.drop-zone.approved { border-color: green; background: #ccffcc; color: darkgreen; }
+.drop-zone.faulty { border-color: red; background: #ffcccc; color: darkred; }
+.wasted-message { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); color: red; font-size: 24px; font-weight: bold; }
