@@ -1,7 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+// Import your exact single assets
+import domeClosed from '../assets/demo/dome-closed.png';
+import domeLifted from '../assets/demo/dome-lifted.png';
+import fortune from '../assets/demo/fortune.png';
+import approvedBox from '../assets/demo/approved-box.png';
+import faultyBox from '../assets/demo/faulty-box.png';
+import brokenCookie from '../assets/demo/broken-cookie.png';
+
 export default function DemoGameScreen({ onComplete }) {
-  const [phase, setPhase] = useState('idle'); // idle, hovering, revealed, wasted, done
+  const [phase, setPhase] = useState('idle'); // idle, revealed, approved, wasted
   const [timer, setTimer] = useState(10);
   const hoverTimeout = useRef(null);
   const intervalRef = useRef(null);
@@ -17,9 +25,8 @@ export default function DemoGameScreen({ onComplete }) {
   };
 
   const handleMouseLeave = () => {
-    if (phase === 'idle' || phase === 'hovering') {
+    if (phase === 'idle') {
       clearTimeout(hoverTimeout.current);
-      setPhase('idle');
     }
   };
 
@@ -30,7 +37,7 @@ export default function DemoGameScreen({ onComplete }) {
         setTimer(prev => {
           if (prev <= 1) {
             clearInterval(intervalRef.current);
-            setPhase('wasted'); // Trigger wasted time UI
+            setPhase('wasted'); // Timer ran out
             return 0;
           }
           return prev - 1;
@@ -49,10 +56,13 @@ export default function DemoGameScreen({ onComplete }) {
   const handleDrop = (e, type) => {
     e.preventDefault();
     clearInterval(intervalRef.current);
-    // In real game, check if fortune is faulty or approved here
-    // For demo, just complete it
-    setPhase('done');
-    setTimeout(onComplete, 500);
+    
+    if (type === 'faulty') {
+      setPhase('wasted'); // Dropped in Red Box
+    } else {
+      setPhase('approved'); // Dropped in Green Box - SUCCESS!
+      setTimeout(onComplete, 1500); // Show success briefly, then move on
+    }
   };
 
   const handleDragOver = (e) => {
@@ -67,68 +77,78 @@ export default function DemoGameScreen({ onComplete }) {
   };
 
   return (
-    <div className="demo-screen">
+    <div className="demo-fullscreen">
       <div className="demo-title">Demonstration</div>
       
-      {phase !== 'done' && (
-        <div 
-          className={`demo-dome-container ${phase === 'revealed' || phase === 'wasted' ? 'lifted' : ''}`}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <div className={`demo-dome ${phase === 'wasted' ? 'broken' : ''}`}>
-            <div className="knob"></div>
+      {/* THE CENTER STAGE */}
+      <div 
+        className="demo-stage"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Idle State */}
+        {phase === 'idle' && (
+          <>
+            <img src={domeClosed} alt="Closed Dome" className="dome-img" />
+            <div className="demo-hover-text">Hover over the food dome</div>
+          </>
+        )}
+
+        {/* Revealed State */}
+        {phase === 'revealed' && (
+          <div className="demo-lifted-stage">
+            <img src={domeLifted} alt="Lifted Dome" className="dome-img" />
+            <div className="timer-overlay">{timer < 10 ? `0${timer}` : timer}</div>
+            <img 
+              src={fortune} 
+              alt="Fortune" 
+              className="fortune-img"
+              draggable="true"
+              onDragStart={handleDragStart}
+            />
           </div>
-          
-          {(phase === 'revealed' || phase === 'wasted') && (
-            <>
-              <div className="demo-timer">{timer < 10 ? `0${timer}` : timer}</div>
-              
-              <div 
-                className={`demo-fortune ${phase === 'wasted' ? 'broken-cookie' : ''}`}
-                draggable={phase === 'revealed'}
-                onDragStart={handleDragStart}
-              >
-                <div className="fortune-text">
-                  You are soon going to recieve your Mac mini delivery on https://aribba.corn.tcs-support
-                </div>
-              </div>
+        )}
 
-              {phase === 'wasted' && (
-                <div className="wasted-message">You wasted time</div>
-              )}
-            </>
-          )}
-          
-          {phase === 'idle' && <div className="demo-instruction">Hover over the food dome</div>}
-        </div>
-      )}
+        {/* Approved State (Success) */}
+        {phase === 'approved' && (
+          <div className="demo-approved-stage">
+            <div className="approved-text">Approved!</div>
+            <img src={domeLifted} alt="Success" className="dome-img" />
+          </div>
+        )}
 
-      {/* Drop Zones */}
-      {(phase === 'revealed' || phase === 'wasted') && (
+        {/* Wasted State (Time out or dropped in Red) */}
+        {phase === 'wasted' && (
+          <div className="demo-wasted-stage">
+            <div className="wasted-text">You wasted time</div>
+            <img src={brokenCookie} alt="Broken Cookie" className="dome-img" />
+          </div>
+        )}
+      </div>
+
+      {/* DROP ZONES (Only show when revealed) */}
+      {phase === 'revealed' && (
         <div className="demo-drop-zones">
           <div 
-            className="drop-zone approved"
+            className="demo-drop-zone approved-zone"
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, 'approved')}
           >
-            Approved Tray
+            <img src={approvedBox} alt="Approved Tray" />
           </div>
           <div 
-            className="drop-zone faulty"
+            className="demo-drop-zone faulty-zone"
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, 'faulty')}
           >
-            Faulty Tray
+            <img src={faultyBox} alt="Faulty Tray" />
           </div>
         </div>
       )}
 
-      {phase === 'done' && (
-        <div className="demo-success">
-          <h2>Demo Complete!</h2>
-          <button className="next-btn" onClick={onComplete}>Start Actual Game</button>
-        </div>
+      {/* Replay Button (Only in wasted state) */}
+      {phase === 'wasted' && (
+        <button className="demo-replay-btn" onClick={resetDemo}>Replay</button>
       )}
     </div>
   );

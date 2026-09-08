@@ -76,3 +76,4 @@ export default function FortuneSelectionScreen({ trayNumber, bunchNumber, fortun
     </div>
   );
 }
+

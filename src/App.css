@@ -27,7 +27,7 @@ body {
   padding: 20px;
 }
 
-/* Generic Card Screen (Used by Start, Intro, Job App, etc.) */
+/* Generic Card Screen */
 .card {
   background: var(--card-cream);
   border: 4px solid var(--gold);
@@ -53,15 +53,13 @@ body {
   color: #444;
 }
 
-
-/* FCI Logo Image */
+/* FCI Logo */
 .right-col .fci-logo {
   width: 100%;
-  height: 300px; /* Or 'auto' if you want it to be natural height */
+  height: 300px;
   object-fit: contain;
   border-radius: 10px;
 }
-
 
 /* Standard Buttons */
 .next-btn {
@@ -106,7 +104,7 @@ body {
   background: #fff;
 }
 
-/* Custom Dropdown (Searchable) */
+/* Custom Dropdown */
 .dropdown-wrapper, .multiselect-wrapper { position: relative; }
 .dropdown-input, .multiselect-input {
   border: 1px solid #ddd;
@@ -137,20 +135,12 @@ body {
   z-index: 10;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
-.dropdown-item, .multiselect-item {
-  padding: 10px;
-  cursor: pointer;
-  font-size: 16px;
-}
+.dropdown-item, .multiselect-item { padding: 10px; cursor: pointer; font-size: 16px; }
 .dropdown-item:hover, .multiselect-item:hover { background: #f5f5f5; }
 .add-new { color: var(--gold); font-weight: bold; }
 
 /* MultiSelect Chips */
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
 .chip {
   background: #f8f1e7;
   color: #845A12;
@@ -161,35 +151,12 @@ body {
   cursor: pointer;
 }
 
-/* Job Application Layout */
-.two-col {
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 30px;
-  margin-top: 20px;
-}
-.right-col img {
-  width: 100%;
-  height: auto;
-  border-radius: 10px;
-}
-.radio-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.radio-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 16px;
-  cursor: pointer;
-}
-.radio-label input[type="radio"] {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--gold);
-}
+/* Job Application */
+.two-col { display: grid; grid-template-columns: 1fr 300px; gap: 30px; margin-top: 20px; }
+.right-col img { width: 100%; height: auto; border-radius: 10px; }
+.radio-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.radio-label { display: flex; align-items: center; gap: 8px; font-size: 16px; cursor: pointer; }
+.radio-label input[type="radio"] { width: 18px; height: 18px; accent-color: var(--gold); }
 
 /* Related Chips */
 .related-section { margin-top: 20px; }
@@ -206,250 +173,66 @@ body {
 
 /* Websites Screen */
 .website-grid { display: flex; flex-wrap: wrap; gap: 10px; max-height: 300px; overflow-y: auto; margin-top: 20px; }
-.website-btn {
-  background: #fff;
-  border: 1px solid var(--gold);
-  border-radius: 6px;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 14px;
-}
+.website-btn { background: #fff; border: 1px solid var(--gold); border-radius: 6px; padding: 8px 12px; cursor: pointer; font-size: 14px; }
 .website-btn.selected { background: var(--gold); color: white; }
-
 
 /* Fortune Selection Screen */
 .fortune-selection-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: rgba(0, 0, 0, 0.85); /* Dark background for the screen */
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 100; padding: 20px; overflow-y: auto;
 }
 
 .fortune-header {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  background: #fffdf5;
-  border: 2px solid #e6a817;
-  border-radius: 10px;
-  padding: 15px 30px;
-  margin-bottom: 30px;
-  max-width: 800px;
-  width: 100%;
+  display: flex; gap: 20px; align-items: center;
+  background: #fffdf5; border: 2px solid #e6a817; border-radius: 10px;
+  padding: 15px 30px; margin-bottom: 30px; max-width: 800px; width: 100%;
 }
 
-.fortune-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: 100%;
-  max-width: 900px;
-}
+.fortune-list { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 900px; }
+.fortune-row { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+.fortune-cookie { width: 80px; height: 80px; flex-shrink: 0; z-index: 2; }
+.fortune-cookie img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
+.fortune-paper { background: #FFFFFF; padding: 15px 25px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); font-size: 18px; line-height: 1.6; color: #333; flex: 1; border: 2px solid transparent; transition: all 0.2s; }
+.fortune-row.selected .fortune-paper { border-color: #e6a817; background: #fff5e0; }
+.fortune-paper.hidden { opacity: 0; visibility: hidden; transform: translateX(30px); }
+.fortune-paper:not(.hidden) { animation: slide-in-paper 0.6s ease-out forwards; }
+@keyframes slide-in-paper { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
 
-/* THE WHITE FORTUNE STRIP */
-/* FORTUNE STRIPS (Paper Layout) */
-.fortune-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: 100%;
-  max-width: 900px;
-}
+/* Cookie Breaking Animation */
+.breaking-cookie-img { width: 80px; height: 80px; object-fit: contain; }
+.breaking-cookie-img.cracked { animation: crack-shake 0.6s ease-in-out forwards; }
+@keyframes crack-shake { 0% { transform: rotate(0deg) scale(1); } 25% { transform: rotate(-10deg) scale(1.1); } 50% { transform: rotate(10deg) scale(0.9); } 75% { transform: rotate(-5deg) scale(1.05); } 100% { transform: rotate(0deg) scale(1); } }
 
-.fortune-row {
-  display: flex;
-  align-items: center;
-  gap: 15px; /* Space between cookie and paper */
-  cursor: pointer;
-}
-
-/* The Cookie sits outside the white box */
-.fortune-cookie {
-  width: 80px;
-  height: 80px;
-  flex-shrink: 0;
-  z-index: 2; /* Brings it forward */
-}
-
-.fortune-cookie img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
-}
-
-/* The White Paper Strip */
-.fortune-paper {
-  background: #FFFFFF;
-  padding: 15px 25px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* 3D Paper Shadow */
-  font-size: 18px;
-  line-height: 1.6;
-  color: #333;
-  flex: 1;
-  border: 2px solid transparent;
-  transition: all 0.2s;
-}
-
-/* Selected state */
-.fortune-row.selected .fortune-paper {
-  border-color: #e6a817;
-  background: #fff5e0;
-}
-
-
-.cracked-cookie {
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.cookie-broken-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.fortune-text {
-  font-size: 18px;
-  line-height: 1.5;
-  color: #333;
-  text-align: left;
-  flex: 1;
-}
-
-/* Next Button on Fortune Screen */
-.fortune-selection-screen .next-btn {
-  margin-top: 30px;
-  width: 200px;
-}
-
-
-/* Thank You / Success Screens */
+/* Thank You / Success / Welcome */
 .icon { font-size: 80px; text-align: center; color: var(--gold); margin-bottom: 20px; }
-.thank-you .card { text-align: center; }
+.thank-you .card, .welcome-screen .card { text-align: center; }
 
-/* Welcome Screen */
-.welcome-screen .card { text-align: center; }
-
-/* Game and Instruction Screens */
-.dark-screen {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center; z-index: 100;
+/* Fix the Next Button on the Fortune Selection Screen */
+.fortune-selection-screen .next-btn {
+  width: 200px;
+  margin-top: 30px;
+  margin-left: auto;
+  margin-right: auto; /* Centers the button */
+  display: block;
 }
-.intro-content { max-width: 600px; text-align: left; color: white; }
 
-.tray-dots { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
-.dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--gold); display: inline-block; }
-.dot.active { background-color: var(--gold); }
 
+/* Tray Selection */
 .tray-selection-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
 .instruction-bar { background: var(--card-cream); border: 2px solid var(--gold); border-radius: 10px; padding: 15px 30px; margin-bottom: 50px; font-size: 18px; text-align: center; max-width: 700px; }
-/* Horizontal Tray */
-.tray-container {
-  width: 700px; /* Adjust to fit your actual tray.png aspect ratio */
-  height: 350px;
-  background-image: url('./assets/cookies/tray.png');
-  background-size: 100% 100%; /* Prevents stretching/cropping */
-  background-repeat: no-repeat;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 0; /* Removes the huge padding that pushed it out */
-  box-sizing: border-box;
-}
+.tray-container { width: 700px; height: 350px; background-image: url('./assets/cookies/tray.png'); background-size: 100% 100%; background-repeat: no-repeat; display: flex; justify-content: space-around; align-items: center; padding: 0; box-sizing: border-box; }
+.bunch { cursor: pointer; width: 200px; height: 150px; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease; }
+.bunch:hover { transform: scale(1.05); }
+.bunch-img { width: 100%; height: 100%; object-fit: contain; }
 
-/* Bunch Images */
-.bunch {
-  cursor: pointer;
-  width: 200px;
-  height: 150px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.3s ease;
-}
-
-.bunch:hover {
-  transform: scale(1.05);
-}
-
-.bunch-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-/* --- FORTUNE SCREEN (Covers full screen for Breaking & Selection) --- */
-.fortune-selection-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.95);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  padding: 20px;
-  overflow-y: auto;
-}
-
-/* --- PAPER STRIP HIDDEN STATE --- */
-/* This keeps the layout perfectly aligned so the cookie doesn't move */
-.fortune-paper.hidden {
-  opacity: 0;
-  visibility: hidden;
-  transform: translateX(30px); /* Starts slightly to the right */
-}
-
-/* --- COOKIE BREAKING ANIMATION --- */
-.breaking-cookie-img {
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-}
-
-.breaking-cookie-img.cracked {
-  animation: crack-shake 0.6s ease-in-out forwards;
-}
-
-@keyframes crack-shake {
-  0% { transform: rotate(0deg) scale(1); }
-  25% { transform: rotate(-10deg) scale(1.1); }
-  50% { transform: rotate(10deg) scale(0.9); }
-  75% { transform: rotate(-5deg) scale(1.05); }
-  100% { transform: rotate(0deg) scale(1); }
-}
-
-/* --- FORTUNE SLIDE IN ANIMATION --- */
-.fortune-paper:not(.hidden) {
-  animation: slide-in-paper 0.6s ease-out forwards;
-}
-
-@keyframes slide-in-paper {
-  from { opacity: 0; transform: translateX(30px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-
-/* --- INSTRUCTION SCREEN LAYOUT --- */
+/* Instruction Screens Layout */
 .instruction-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   background: rgba(0, 0, 0, 0.85);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
   z-index: 100;
 }
 
@@ -457,38 +240,29 @@ body {
   background: #FFFDF5;
   border: 5px solid #DF9F31;
   border-radius: 30px;
-  padding: 50px;
-  width: 80%;
-  max-width: 1100px;
+  padding: 30px;
+  width: 75%; max-width: 900px;
   position: relative;
-  min-height: 500px;
-  display: flex;
-  flex-direction: column;
+  min-height: 400px;
+  display: flex; flex-direction: column;
+  margin-bottom: 80px;
+  overflow: hidden; 
 }
 
+/* Back Button */
 .back-btn {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background: transparent;
-  color: white;
-  border: 2px solid white;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  font-size: 24px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
+  position: absolute; top: 20px; left: 20px;
+  background: transparent; color: white; border: 2px solid white; border-radius: 50%;
+  width: 50px; height: 50px; font-size: 24px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; z-index: 10;
 }
 
-.back-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
+/* Next & Replay Buttons - OUTSIDE the card (User's Custom Positions) */
+/* Next Button - Bottom Right */
 .instruction-next-btn {
+  position: absolute;
+  bottom: 30px;
+  right: 90px; /* Or 30px if you want it further right, but 90px matches your previous setup */
   background: #e6a817;
   color: white;
   border: none;
@@ -497,71 +271,1041 @@ body {
   font-size: 18px;
   font-weight: bold;
   cursor: pointer;
-  align-self: flex-end; /* Pushes it to the bottom right */
-  margin-top: auto;
+  z-index: 200;
+}
+.instruction-replay-btn {
+  position: absolute; bottom: 30px; right: 250px;
+  background: #afafaf; color: rgb(41, 41, 41); border: none; padding: 12px 40px;
+  border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; z-index: 200;
 }
 
+/* Progress Bar - OUTSIDE the card */
 .instruction-progress-bar {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 400px;
-  height: 10px;
-  background: #555;
-  border-radius: 5px;
+  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+  width: 400px; height: 10px; background: #555; border-radius: 5px; overflow: hidden; z-index: 200;
+}
+.progress-fill { height: 100%; background: #e6a817; transition: width 0.3s ease; }
+.progress-fill.green { background-color: #4CAF50; }
+
+/* How To Grid */
+.how-to-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 30px; align-items: start; text-align: center; }
+.instruction-step { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+.instruction-step img { height: 150px; max-width: 100%; object-fit: contain; margin-bottom: 20px; }
+.instruction-step p { max-width: 250px; font-size: 16px; line-height: 1.5; color: #333; margin: 0 0 10px 0; min-height: 50px; }
+.step-num { font-size: 16px; color: #555; font-weight: 500; }
+
+/* Sorting Content */
+.sorting-content { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; gap: 20px; }
+.dome-timer-img { max-width: 400px; width: 100%; height: auto; object-fit: contain; }
+.sorting-options { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 750px; margin: 0 auto; }
+.tray-option-img { max-width: 280px; max-height: 200px; width: 100%; height: auto; object-fit: contain; }
+.or-text { font-size: 24px; font-weight: 800; color: #333; margin: 0 10px; font-style: italic; flex-shrink: 0; }
+
+/* ---------------------------------------------------------------------------------------------------- */
+/* --- DEMO SCREEN (Full Screen) --- */
+.demo-fullscreen {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: #fffdf5; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 200; overflow: hidden;
+}
+
+.demo-title { position: absolute; top: 30px; left: 50px; font-size: 28px; font-family: var(--font-title); font-style: italic; color: #333; }
+
+.demo-stage { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; width: 600px; height: 400px; }
+
+.dome-img { width: 250px; height: auto; object-fit: contain; margin-bottom: 20px; }
+.demo-hover-text { margin-top: 20px; font-size: 20px; color: #333; }
+.demo-lifted-stage { display: flex; flex-direction: column; align-items: center; position: relative; }
+
+.timer-overlay { position: absolute; top: 0; left: 50%; transform: translateX(-50%); font-size: 40px; color: red; font-weight: bold; z-index: 10; }
+.fortune-img { position: absolute; top: 60px; width: 300px; height: auto; object-fit: contain; cursor: grab; z-index: 20; }
+
+/* Wasted State */
+.demo-wasted-stage { display: flex; flex-direction: column; align-items: center; }
+.wasted-text { color: red; font-size: 30px; font-weight: bold; margin-bottom: 20px; }
+
+/* Approved State (Success) */
+.demo-approved-stage { display: flex; flex-direction: column; align-items: center; }
+.approved-text { color: green; font-size: 30px; font-weight: bold; margin-bottom: 20px; }
+
+/* Drag & Drop Zones */
+.demo-drop-zones { display: flex; gap: 60px; margin-top: 40px; }
+.demo-drop-zone { width: 250px; height: 180px; cursor: pointer; }
+.demo-drop-zone img { width: 100%; height: 100%; object-fit: contain; }
+
+/* Buttons */
+.demo-replay-btn {
+  position: absolute; bottom: 30px; left: 30px;
+  background: #444; color: white; border: none; padding: 12px 40px;
+  border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; z-index: 200;
+}
+
+.demo-next-btn {
+  position: absolute; bottom: 30px; right: 30px;
+  background: #e6a817; color: white; border: none; padding: 12px 40px;
+  border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; z-index: 200;
+}
+
+/* LEVEL 1 INSTRUCTIONS */
+.level-one-screen {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 100;
+}
+
+.level-one-card {
+  width: 85%; max-width: 1000px; height: 85vh;
+  background: #FFFDF5;
+  border: 5px solid #DF9F31;
+  border-radius: 30px;
+  padding: 40px;
+  display: flex; flex-direction: column;
+  position: relative;
   overflow: hidden;
 }
 
-.progress-fill {
-  height: 100%;
-  background: #e6a817;
-  transition: width 0.3s ease;
+.level-one-title {
+  font-family: var(--font-title);
+  font-size: 32px; font-style: italic; color: #323232;
+  margin-bottom: 30px;
 }
 
-.how-to-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 40px;
-  margin-top: 40px;
-  text-align: center;
+.level-one-content {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  overflow-y: auto;
 }
 
-.instruction-step {
+.level-one-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 20px;
+  border-top: 1px solid #ddd;
+}
+
+.level-one-back, .level-one-next {
+  background: transparent;
+  border: none;
+  font-size: 20px; color: #323232;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.level-one-back { color: #555; }
+.level-one-next { color: #C67E02; }
+.level-one-back:hover { text-decoration: underline; }
+.level-one-next:hover { text-decoration: underline; }
+
+/* Payment Screen */
+/* Payment as per inspection (DARK LAYOUT) */
+.payment-dark-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #1a1a1a; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
+.payment-title { color: white; font-size: 34px; font-weight: bold; text-decoration: underline; margin-bottom: 60px; }
+.payment-table { width: 70%; max-width: 600px; }
+.payment-header { display: flex; justify-content: space-between; font-size: 22px; color: white; margin-bottom: 30px; }
+.payment-row { display: flex; justify-content: space-between; align-items: center; font-size: 22px; margin-bottom: 25px; color: white; white-space: nowrap; }
+.green-incentive { color: #4CAF50; }
+.grey-incentive { color: #888888; }
+.red-incentive { color: #D32F2F; }
+.let-start-btn { background-color: #C67E02; color: white; border: none; padding: 18px 60px; border-radius: 8px; font-size: 22px; font-weight: bold; cursor: pointer; margin-top: 60px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+.orange-btn {
+  background: #C67E02; color: white; border: none;
+  padding: 12px 40px; border-radius: 8px; font-size: 18px;
+  cursor: pointer;
+}
+
+/* URL & Fortune Rules */
+.center-content { text-align: center; }
+.black-label { background: #222; color: white; padding: 10px 20px; border-radius: 4px; display: inline-block; margin-bottom: 20px; }
+.fortune-box {
+  background: #fff; padding: 15px 25px; border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1); font-size: 18px;
+  position: relative; margin-bottom: 20px;
+}
+.highlight-grey { background: #ddd; padding: 2px 5px; }
+.url-arrow { position: absolute; right: -40px; top: 10px; font-size: 14px; background: #ffeaa7; padding: 4px 8px; border-radius: 4px; }
+.rule-text { font-size: 20px; margin-bottom: 15px; }
+.valid-box { border: 2px solid #4CAF50; padding: 20px; border-radius: 8px; display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+.valid-label { color: #4CAF50; font-size: 18px; font-weight: bold; }
+.faulty-box { border: 2px solid #D32F2F; padding: 20px; border-radius: 8px; display: flex; align-items: center; gap: 20px; }
+.faulty-label { color: #D32F2F; font-size: 18px; font-weight: bold; }
+.red-highlight { background: #ffcccc; padding: 2px 5px; border-radius: 3px; }
+
+/* Invalid URL */
+.large-url { font-size: 28px; }
+.split-url { display: flex; gap: 10px; font-size: 28px; }
+.color-coded-url { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+.url-part { display: flex; flex-direction: column; padding: 10px 20px; border-radius: 4px; border: 1px solid #ddd; background: white; }
+.url-part small { font-size: 12px; color: #555; margin-top: 5px; text-align: center; }
+.url-part.blue span { color: #1976d2; } .url-part.blue small { color: #1976d2; }
+.url-part.yellow span { color: #fbc02d; } .url-part.yellow small { color: #fbc02d; }
+.url-part.grey span { color: #555; } .url-part.grey small { color: #555; }
+.url-part.green span { color: #388e3c; } .url-part.green small { color: #388e3c; }
+
+.domain-info-box { border: 1px solid #ddd; border-radius: 8px; padding: 20px; text-align: left; margin-bottom: 20px; }
+.info-title { display: flex; align-items: center; gap: 10px; font-weight: bold; margin-bottom: 15px; }
+.domain-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.check-icon { color: #4CAF50; } .warn-icon { color: #fbc02d; } .cross-icon { color: #D32F2F; }
+.ip-address-row { display: flex; align-items: center; gap: 15px; font-size: 16px; }
+.red-box { background: #ffcccc; border: 1px solid red; padding: 2px 5px; }
+
+/* Balloons */
+.balloon-full-screen {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 200;
+}
+.balloon-container { display: flex; gap: 20px; margin-bottom: 40px; }
+.balloon {
+  width: 100px; height: 120px; border-radius: 50%;
+  cursor: pointer; position: relative;
+  transition: all 0.3s;
+}
+.balloon.orange { background: #fca311; }
+.balloon.blue { background: #4ea8de; }
+.balloon.green { background: #76c893; }
+.balloon.popped { transform: scale(0); opacity: 0; }
+
+.balloon-text { color: white; font-size: 20px; text-align: center; margin-bottom: 30px; }
+.balloon-text strong { color: #fca311; }
+
+/* LEVEL 1 GAME SCREEN */
+.level1-game-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: #fffdf5;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  z-index: 100;
+  overflow: hidden;
 }
 
-.instruction-step img {
+.balloon-cluster { position: absolute; top: 20px; left: 20px; font-size: 40px; opacity: 0.8; }
+
+.level1-game-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
+  margin-top: 20px;
+}
+
+
+
+.tray-bg {
   width: 100%;
-  max-width: 300px;
+  display: block; 
+  border-radius: 12px; /* Rounds the corners of the box */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Nice drop shadow */
+}
+
+
+
+.tray-cookie-img {
+  width: 100%; /* CHANGED: Makes them much bigger! */
+  max-width: 100px;
   height: auto;
   object-fit: contain;
+}
+
+
+/* Faulty Label - Solid Red */
+.faulty-label {
+  background: #d9534f !important; /* Forces solid red */
+  color: white !important; /* Forces white text */
+  text-shadow: none !important; /* Removes the gold glow/shadow */
+}
+/* Approved Label - Solid Green */
+.approved-label {
+  background: #5cb85c !important; /* Forces solid green */
+  color: white !important; /* Forces white text */
+  text-shadow: none !important; /* Removes the gold glow/shadow */
+}
+
+/* Center Tray */
+.domes-tray {
+  border: 4px solid #e6a817;
+  background: #fff8e7;
+  border-radius: 20px;
+  padding: 30px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+  position: relative;
+  min-width: 300px;
+  min-height: 300px;
+}
+
+.dome-slot { position: relative; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+.dome-img { width: 100%; height: 100%; object-fit: contain; }
+
+/* Draggable Fortune */
+.fortune-drag {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: auto;
+  cursor: grab;
+  z-index: 10;
+}
+
+.timer-display {
+  position: absolute;
+  top: -20px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 32px;
+  color: red;
+  font-weight: bold;
+  z-index: 20;
+}
+
+.wasted-text {
+  position: absolute;
+  top: -30px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  color: red;
+  font-weight: bold;
+  white-space: nowrap;
+  z-index: 20;
+}
+
+/* Empty Lifted Dome (Faded) */
+.dome-img.emptied {
+  opacity: 0.35; /* Matches the faded look from your reference */
+  filter: grayscale(100%); /* Removes any color, making it pure grey */
+  pointer-events: none; /* Prevents the dome from being hovered again */
+}
+
+/* Remove the old text style if no longer used, or leave it hidden */
+.sorted-overlay {
+  display: none; 
+}
+
+.sorted-overlay { font-size: 18px; font-weight: bold; color: #444; }
+.completed-mark { font-size: 40px; color: green; font-weight: bold; }
+
+/* Footer & Next Button */
+.level1-footer { margin-top: 30px; display: flex; align-items: center; justify-content: center; height: 60px; }
+.counter-pill { background: #eee; border: 2px solid #ccc; border-radius: 30px; padding: 10px 30px; font-size: 24px; color: #555; }
+.level1-footer .next-btn { width: auto; padding: 15px 60px; font-size: 20px; margin-top: 0; }
+
+/* HARD FIX: Fortune Header Layout */
+.fortune-header {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 30px !important;
+  width: 100% !important;
+  max-width: 900px !important;
+  background: #fffdf5 !important;
+  border: 2px solid #e6a817 !important;
+  border-radius: 10px !important;
+  padding: 15px 30px !important;
+  box-shadow: none !important;
+  margin-bottom: 30px !important;
+}
+
+.tray-label {
+  background: transparent !important;
+  border: none !important;
+  display: block !important;
+  width: auto !important;
+  min-width: 80px !important;
+  flex-shrink: 0 !important; /* Prevents it from squishing */
+  font-size: 14px !important;
+  color: #e6a817 !important;
+  text-transform: uppercase !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.tray-num {
+  font-size: 24px !important;
+  color: #000 !important;
+  font-style: italic !important;
+  text-transform: lowercase !important;
+  display: block !important;
+  margin-top: 5px !important;
+}
+
+.instruction {
+  display: block !important;
+  flex: 1 !important; /* Forces it to take up all remaining space */
+  font-size: 16px !important;
+  color: #333 !important;
+  line-height: 1.5 !important;
+  text-align: left !important;
+  white-space: normal !important; /* Stops the vertical letter-by-letter wrapping */
+  overflow: visible !important;
+}
+
+/* Transition & Instruction phases */
+.level1-transition-layout,
+.level1-instruction-layout {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.moving-center {
+  animation: moveFaultyToCenter 2s ease-in-out forwards;
+}
+
+@keyframes moveFaultyToCenter {
+  0% { transform: translateX(-200px); }
+  100% { transform: translateX(0); }
+}
+
+/* Truck CSS */
+.truck-shipping {
+  position: absolute;
+  right: 50px;
+  animation: driveOut 2s ease-in forwards;
+}
+.truck-box {
+  width: 250px; height: 120px; background: #5cb85c; border: 4px solid #4cae4c;
+  border-radius: 10px; color: white; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+.truck-wheels { display: flex; justify-content: space-around; margin-top: 5px; }
+.wheel { width: 30px; height: 30px; background: #333; border-radius: 50%; }
+@keyframes driveOut {
+  0% { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(500px); opacity: 0; }
+}
+
+/* Instruction Card (CONTAINED LAYOUT) */
+.instruction-card {
+  position: relative;
+  top: unset;
+  left: unset;
+  transform: unset;
+  
+  background: #fffdf5;
+  border: 5px solid #DF9F31;
+  border-radius: 20px;
+  padding: 30px 40px;
+  width: 80%;
+  max-width: 700px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Center the tray inside the card */
+.drop-zone.centered {
+  margin: 0 auto;
+  position: static;
+}
+
+.instruction-text {
+  font-size: 18px;
+  color: #333;
+}
+
+.sample-fortune {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  font-size: 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+
+
+.instruction-card .next-btn {
+  width: 150px;
+  margin: 0 auto;
+}
+
+/* --- FIX: Level 1 Game Screen --- */
+
+/* Force the drop zone to hold its children */
+.level1-game-screen .drop-zone {
+  position: relative; 
+}
+
+/* Cookies strictly inside the tray */
+.level1-game-screen .tray-contents {
+  position: absolute;
+  top: 15%;
+  left: 15%;
+  width: 70%;
+  height: 70%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.level1-game-screen .tray-cookie-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+/* Fix the "FAULTY/APPROVED" labels so they are solid buttons */
+.level1-game-screen .tray-label {
+  position: static;
+  width: 100%;
+  text-align: center;
+  padding: 12px 0;
+  border-radius: 8px;
+  font-size: 22px;
+  font-weight: bold;
+  color: white !important;
+  text-shadow: none !important; /* Removes the gold glow */
+  box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+  margin-top: 15px;
+  border: none;
+}
+
+.level1-game-screen .faulty-label {
+  background-color: #d9534f !important; /* Solid Red */
+}
+
+.level1-game-screen .approved-label {
+  background-color: #5cb85c !important; /* Solid Green */
+}
+
+/* Blue Highlighter for the URL */
+.invalid-url {
+  background: #b3e5fc; /* Light blue marker */
+  color: #333;
+  border: none;
+  border-bottom: 2px solid #29b6f6; /* Blue underline marker stroke */
+  padding: 0 4px;
+  border-radius: 2px;
+  font-weight: normal;
+  position: relative;
+}
+
+/* Level 2 Instructions */
+.level2-content { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-top: 30px; }
+
+/* Align the tray and timer side by side */
+.timer-thirty-layout {
+  display: flex;
+  gap: 60px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+/* Force the tray to hold its children */
+.compact-tray {
+  width: 300px;
+  height: 220px;
+  position: relative;
+}
+
+.compact-tray .tray-contents {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 80%;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.compact-tray .tray-cookie-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+/* Remove this old emoji style so it doesn't conflict */
+.faulty-tray-compact {
+  display: none;
+}
+
+.timer-circle {
+  width: 80px; height: 80px; border-radius: 50%;
+  border: 3px solid red; color: red; font-size: 30px; font-weight: bold;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle, white, #ffeeee);
+}
+
+.faulty-tray-icon { font-size: 40px; margin-bottom: 10px; }
+
+/* Inspection Machine */
+.inspection-machine { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+.machine-body { width: 50px; height: 80px; background: #2b5b8c; border-radius: 5px; position: relative; border-bottom: 20px solid #e6a817; }
+.machine-red-btn { width: 20px; height: 20px; background: #ff3b3b; border-radius: 50%; position: absolute; top: 15px; left: 15px; }
+.machine-arrow { font-size: 30px; color: black; }
+.machine-text { font-size: 20px; color: #333; }
+
+/* Dark Room / Torch */
+.inspection-room-screen {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: #1a1a1a; color: white; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; z-index: 100;
+}
+.inspection-title { font-size: 32px; font-weight: 900; color: #f56d6d; margin-bottom: 50px; letter-spacing: 2px; }
+.torch-slide-instruction { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; }
+.torch-icon { font-size: 50px; }
+.torch-text { font-size: 24px; font-weight: bold; }
+
+.torch-slider {
+  -webkit-appearance: none; width: 400px; height: 20px; background: #444; border-radius: 10px; margin-bottom: 30px; outline: none;
+}
+.torch-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 40px; height: 40px; border-radius: 50%; background: #fff; cursor: pointer; border: 5px solid #555;
+}
+
+.fortune-reveal { opacity: 0.2; transition: opacity 0.5s; text-align: center; }
+.fortune-reveal.revealed { opacity: 1; }
+
+.sample-fortune-dark { background: #333; padding: 20px; font-size: 20px; border-radius: 8px; }
+.url-correct { background: #66bb6a; color: white; padding: 2px 5px; }
+
+.legend-results { display: flex; gap: 30px; margin-top: 30px; justify-content: center; }
+.legend-color { font-size: 16px; font-weight: bold; padding: 5px 10px; border-radius: 5px; }
+.legend-color.correct { background: #66bb6a; color: white; }
+.legend-color.wrong { background: #ef5350; color: white; }
+.legend-color.missed { background: #777; color: white; }
+.legend-item p { font-size: 14px; margin-top: 5px; color: #ccc; }
+
+/* Payment / Let's Start / Start Marking */
+.grey-incentive { color: #777; }
+.let-start-btn {
+  background: #C67E02; color: white; border: none; padding: 15px 50px;
+  font-size: 20px; border-radius: 8px; cursor: pointer; margin-top: 30px;
+}
+
+/* Start Marking Screen - Pixel Perfect Fix */
+.start-marking-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #FFFDF5; /* Cream background */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  z-index: 100;
+}
+
+.start-marking-tray-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Force the label to be a small red button ABOVE the tray */
+.start-marking-screen .tray-label {
+  position: static !important;
+  margin: 0 0 10px 0 !important;
+  width: auto !important;
+  padding: 10px 25px !important;
+  border-radius: 8px !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+}
+
+/* Force the button to NOT stretch across the screen */
+.start-marking-screen .let-start-btn {
+  width: auto !important;
+  min-width: 180px;
+  padding: 12px 30px !important;
+  font-size: 18px !important;
+  margin-top: 0 !important;
+}
+
+/* Reusing the existing drop-zone and cookie styles for the tray */
+.start-marking-screen .drop-zone {
+  width: 250px;
+  height: 180px;
+  position: relative;
+}
+
+.start-marking-screen .tray-contents {
+  position: absolute;
+  top: 15%;
+  left: 15%;
+  width: 70%;
+  height: 70%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.start-marking-screen .tray-cookie-img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+/* Level 2 - 30 Seconds Screen Specific Styles */
+.compact-tray {
+  width: 300px;
+  height: 220px;
+  position: relative;
+}
+
+/* Make sure the cookies are visible and stacked vertically inside the tray */
+.compact-tray .tray-contents {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 80%;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.compact-tray .tray-cookie-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+/* Align the tray and timer side by side */
+.timer-thirty-layout {
+  display: flex;
+  gap: 60px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+/* Machine Button Styling */
+.machine-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s;
+}
+.machine-button:active {
+  transform: scale(0.95); /* Sinks in when clicked */
+}
+.machine-button:hover .machine-red-btn {
+  box-shadow: 0 0 15px 5px rgba(255, 0, 0, 0.6); /* Glows when hovered */
+}
+
+/* Torch Slider & Handle */
+.torch-slider-wrapper {
+  position: relative;
+  width: 400px;
+  height: 100px; /* Tall enough to hold handle and glow */
   margin-bottom: 20px;
 }
 
-.instruction-step p {
-  font-size: 16px;
-  color: #333;
-  line-height: 1.5;
-  max-width: 280px;
+.torch-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px;
+  background: #444;
+  border-radius: 10px;
+  outline: none;
+  position: absolute;
+  top: 20px;
+  left: 0;
+  margin: 0;
+  cursor: pointer;
+  /* CRITICAL FIX: Slider is the topmost interactive layer */
+  z-index: 20; 
 }
 
-.cookie { width: 70px; height: 70px; background: radial-gradient(circle, #f5c542, #d18d00); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
+/* FIXED THUMB: Transparent, but large enough to click/drag! */
+.torch-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
 
-/* Demo Screen */
-.demo-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: #fff; position: relative; }
-.demo-title { position: absolute; top: 20px; left: 40px; font-size: 24px; font-style: italic; color: #333; }
-.demo-dome-container { position: relative; width: 300px; height: 200px; margin-bottom: 40px; display: flex; justify-content: center; align-items: flex-end; transition: all 0.3s; }
-.demo-dome { width: 150px; height: 100px; background: #999; border-radius: 75px 75px 0 0; position: relative; transition: all 0.3s; transform-origin: bottom center; }
-.demo-dome-container.lifted .demo-dome { transform: translateY(-50px) rotate(-45deg); background: #aaa; }
-.demo-timer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 30px; color: red; font-weight: bold; }
-.demo-fortune { position: absolute; top: 30px; width: 300px; height: 120px; background: var(--gold); border-radius: 20px 40px 30px 20px; display: flex; align-items: center; justify-content: center; cursor: grab; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-.demo-fortune .fortune-text { background: #ccc; padding: 5px; border-radius: 4px; font-size: 14px; color: #333; text-align: center; }
-.demo-drop-zones { display: flex; gap: 40px; margin-top: 20px; }
-.drop-zone { width: 150px; height: 150px; border: 3px solid; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
-.drop-zone.approved { border-color: green; background: #ccffcc; color: darkgreen; }
-.drop-zone.faulty { border-color: red; background: #ffcccc; color: darkred; }
-.wasted-message { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); color: red; font-size: 24px; font-weight: bold; }
+.torch-slider::-moz-range-thumb {
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+/* Container that moves with the slider */
+.torch-handle-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translateX(-50%);
+  width: 0;
+  height: 100%;
+  /* CRITICAL FIX: Allows clicks to pass to the slider above it */
+  pointer-events: none; 
+  /* FIX: Placed visually above the slider track (15 is higher than 20? No, 20 is input. We need to make this visually on top of the text) */
+  z-index: 15; 
+}
+
+/* The Blue Torch */
+.torch-handle {
+  position: absolute;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 25px;
+  height: 50px;
+  background: #2b5b8c;
+  border-radius: 5px;
+  border-bottom: 12px solid #e6a817;
+}
+
+/* The red button on the torch */
+.torch-handle::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  background: #ff3b3b;
+  border-radius: 50%;
+}
+
+/* The Glow */
+.torch-light {
+  position: absolute;
+  top: 70px; 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  background: transparent;
+  box-shadow: 0 0 60px 30px rgba(255, 255, 255, 0.25),
+              0 0 120px 60px rgba(255, 255, 255, 0.15);
+}
+
+
+/* Reveal Logic */
+.fortune-reveal {
+  opacity: 0.2; /* Dark until torch passes */
+  transition: opacity 0.3s;
+}
+.fortune-reveal.revealed {
+  opacity: 1;
+}
+.sample-fortune-dark {
+  background: #333;
+  padding: 20px;
+  font-size: 20px;
+  border-radius: 8px;
+  border: 1px solid #555;
+  width: 100%;
+  text-align: center;
+}
+
+/* Fix the Next Button on the Inspection Room Screen */
+.inspection-room-screen .next-btn {
+  width: 200px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  margin-top: 30px;
+}
+
+/* MARKING SCREEN (30 Seconds) */
+.marking-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: #ffebeb; /* Pink background from reference */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 40px;
+  z-index: 100;
+}
+
+.marking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 80%;
+  max-width: 800px;
+  margin-bottom: 30px;
+}
+
+.marking-list {
+  width: 80%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.marking-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* The fortune text box with HIGHLIGHTER CURSOR */
+.fortune-paper {
+  background: white;
+  padding: 15px 25px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  font-size: 18px;
+  line-height: 1.6;
+  color: #333;
+  flex: 1;
+  
+  /* Normal text selection cursor */
+  cursor: text;
+  
+  /* Allows the user to select text naturally */
+  user-select: text; 
+  
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+/* The permanent highlighter mark (the blue block) */
+.permanent-highlight {
+  background: #b3e5fc; /* Light blue marker */
+  color: #333;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* Small helper text to tell them how to unmark */
+.remove-highlight-btn {
+  display: block;
+  margin-top: 10px;
+  font-size: 12px;
+  color: #888;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Updated Cookie Image Sizing */
+.marking-cookie {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+/* Next Button Logic */
+.marking-screen .next-btn {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  margin-top: 0;
+  background: #ccc; /* Disabled state */
+  cursor: not-allowed;
+}
+
+.marking-screen .next-btn.enabled {
+  background: var(--gold); /* Gold enabled state */
+  cursor: pointer;
+}
+
+/* FIX: Level 1 Payment Screen (Light Background) */
+.level-one-screen .payment-table { color: #323232; } /* Force dark text for table */
+.level-one-screen .payment-header { color: #323232; } /* Force dark text for headers */
+.level-one-screen .payment-row { color: #323232; }    /* Force dark text for rows */
+.level-one-screen .green-incentive { color: #4CAF50; }
+.level-one-screen .red-incentive { color: #D32F2F; }
+.level-one-screen .standalone-next { display: flex; justify-content: center; margin-top: 20px; }
+.level-one-screen .orange-btn {
+  background: #C67E02; color: white; border: none;
+  padding: 12px 40px; border-radius: 8px; font-size: 18px;
+  cursor: pointer;
+}
+
+/* LOADER SCREEN */
+.loader-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: #FFFDF5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 100;
+}
+
+.loader-text {
+  font-size: 24px;
+  color: #333;
+  margin-top: 20px;
+}
+
+.marking-tray-box {
+  position: relative;
+  width: 250px;
+  height: 180px;
+  margin-top: 10px;
+}
+
+/* INSPECTION ROOM FORTUNES LIST */
+.inspection-fortunes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+  width: 100%;
+  align-items: center;
+}
+
+.inspection-fortune-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  justify-content: center;
+}
+
+.inspection-cookie-img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.inspection-fortune-row .sample-fortune {
+  width: 80%;
+  max-width: 600px;
+}

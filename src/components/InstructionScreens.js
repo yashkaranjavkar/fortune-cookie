@@ -1,24 +1,41 @@
 import React from 'react';
 
-// Import ONLY your 3 combined images
+// How-to Interact Assets
 import step1 from '../assets/instructions/1.png';
 import step2 from '../assets/instructions/2.png';
 import step3 from '../assets/instructions/3.png';
 
-// Shared Layout Component
-const InstructionLayout = ({ stepIndex, totalSteps, onBack, onNext, children }) => (
+// Sorting Assets
+import domeTimer from '../assets/instructions/dome-timer.png';
+import faultyTray from '../assets/instructions/faulty-tray.png';
+import approvedTray from '../assets/instructions/approved-tray.png';
+import faultyBox from '../assets/instructions/faulty-box.png';
+import approvedBox from '../assets/instructions/approved-box.png';
+
+// New Timer Assets
+import timerQuestion from '../assets/instructions/timer-question.png';
+import timerEnd from '../assets/instructions/timer-end.png';
+
+// Shared Layout Component (Supports Green Bar & Left Replay Button)
+const InstructionLayout = ({ stepIndex, totalSteps, onBack, onNext, onReplay, children, isFinal }) => (
   <div className="instruction-screen">
-    {/* UPDATED: Show back button only if stepIndex > 0 (2nd screen onwards) */}
     {onBack && stepIndex > 0 && <button className="back-btn" onClick={onBack}>←</button>}
     
     <div className="instruction-card">
       {children}
-      <button className="instruction-next-btn" onClick={onNext}>Next</button>
     </div>
 
-    {/* Functionable Progress Bar */}
+    {/* Next Button (Bottom Right) */}
+    <button className="instruction-next-btn" onClick={onNext}>Next</button>
+
+    {/* Replay Button (Bottom Left - Outside the card) */}
+    {onReplay && (
+      <button className="instruction-replay-btn" onClick={onReplay}>Replay</button>
+    )}
+
+    {/* Progress Bar */}
     <div className="instruction-progress-bar">
-      <div className="progress-fill" style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}></div>
+      <div className={`progress-fill ${isFinal ? 'green' : ''}`} style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}></div>
     </div>
   </div>
 );
@@ -49,20 +66,22 @@ export function HowToInteractScreen({ onNext, onBack, stepIndex, totalSteps }) {
       <div className="title">How to interact with the cookie?</div>
       
       <div className="how-to-grid">
-        {/* Use your combined images directly in each column */}
         <div className="instruction-step">
           <img src={step1} alt="Food Dome" />
-          <p>(i) Food Dome covers the food and helps it to keep hot</p>
+          <p>Food Dome covers the food and helps it to keep hot</p>
+          <span className="step-num">(i)</span>
         </div>
         
         <div className="instruction-step">
           <img src={step2} alt="Dome Lifting" />
-          <p>(ii) Food Dome lifts as you hover over it. There is a fortune cookie under it.</p>
+          <p>Food Dome lifts as you hover over it. There is a fortune cookie under it.</p>
+          <span className="step-num">(ii)</span>
         </div>
         
         <div className="instruction-step">
           <img src={step3} alt="Fortune Open" />
-          <p>(iii) Hovering over it will open the fortune cookie with a fortune inside.</p>
+          <p>Hovering over it will open the fortune cookie with a fortune inside.</p>
+          <span className="step-num">(iii)</span>
         </div>
       </div>
     </InstructionLayout>
@@ -73,18 +92,14 @@ export function SortingIntroScreen({ onNext, onBack, stepIndex, totalSteps }) {
   return (
     <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext}>
       <div className="title">Sorting Fortunes</div>
-      <p><strong>10 sec timer to verify and sort.</strong></p>
-      <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', marginTop: '30px' }}>
-        <div style={{ textAlign: 'center', color: 'red' }}>
-          <p>Drag and drop to Faulty Tray if you don't want that batch to deliver.</p>
-          <div style={{ border: '2px solid red', padding: '20px', borderRadius: '10px' }}>Drag & Drop</div>
-          <button style={{background:'red', color:'white', padding:'5px 20px', marginTop:'10px', border:'none'}}>Faulty Tray</button>
-        </div>
-        <span>OR</span>
-        <div style={{ textAlign: 'center', color: 'green' }}>
-          <p>Drag and drop to Approved Tray if you want that batch to deliver.</p>
-          <div style={{ border: '2px solid green', padding: '20px', borderRadius: '10px' }}>Drag & Drop</div>
-          <button style={{background:'green', color:'white', padding:'5px 20px', marginTop:'10px', border:'none'}}>Approved Tray</button>
+      
+      <div className="sorting-content">
+        <img src={domeTimer} alt="10 sec timer" className="dome-timer-img" />
+
+        <div className="sorting-options">
+          <img src={faultyTray} alt="Faulty Tray" className="tray-option-img" />
+          <span className="or-text">OR</span>
+          <img src={approvedTray} alt="Approved Tray" className="tray-option-img" />
         </div>
       </div>
     </InstructionLayout>
@@ -95,11 +110,13 @@ export function FaultyTrayScreen({ onNext, onBack, stepIndex, totalSteps }) {
   return (
     <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext}>
       <div className="title">Sorting Fortunes</div>
-      <p>10 sec timer to verify and sort</p>
-      <div style={{ marginTop: '30px', padding: '20px', border: '2px dashed red', borderRadius: '10px', width: '300px' }}>
-        <p style={{ color: 'red' }}>Suspicious Fortunes are collected for inspection</p>
-        <div style={{ background: 'pink', padding: '10px', borderRadius: '5px' }}>🍪 <span style={{color:'#ccc'}}>__________</span></div>
-        <button style={{background:'#a33', color:'white', padding:'5px 20px', marginTop:'10px', border:'none'}}>Faulty Tray</button>
+      
+      <div className="sorting-content">
+        <img src={domeTimer} alt="10 sec timer" className="dome-timer-img" />
+        <div className="sorting-options">
+          <img src={faultyBox} alt="Faulty Box" className="tray-option-img" />
+          <img src={approvedTray} alt="Approved Tray" className="tray-option-img" />
+        </div>
       </div>
     </InstructionLayout>
   );
@@ -109,27 +126,50 @@ export function ApprovedTrayScreen({ onNext, onBack, stepIndex, totalSteps }) {
   return (
     <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext}>
       <div className="title">Sorting Fortunes</div>
-      <p>10 sec timer to verify and sort</p>
-      <div style={{ marginTop: '30px', padding: '20px', border: '2px dashed green', borderRadius: '10px', width: '300px' }}>
-        <p style={{ color: 'green' }}>Approved Fortune Cookies batches are dispatched</p>
-        <div style={{ background: 'lightgreen', padding: '10px', borderRadius: '5px' }}>🍪 <span style={{color:'#ccc'}}>__________</span></div>
-        <button style={{background:'green', color:'white', padding:'5px 20px', marginTop:'10px', border:'none'}}>Approved Tray</button>
+      
+      <div className="sorting-content">
+        <img src={domeTimer} alt="10 sec timer" className="dome-timer-img" />
+        <div className="sorting-options">
+          <img src={faultyTray} alt="Faulty Tray" className="tray-option-img" />
+          <img src={approvedBox} alt="Approved Box" className="tray-option-img" />
+        </div>
       </div>
     </InstructionLayout>
   );
 }
 
-export function TimerEndsScreen({ onNext, onReplay, onBack, stepIndex, totalSteps }) {
+/* NEW: First Timer Screen */
+export function TimerQuestionScreen({ onNext, onBack, stepIndex, totalSteps }) {
   return (
     <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext}>
       <div className="title">Timer Ends</div>
-      <p>What if the timer ends before sorting? <span style={{color:'red'}}>00</span></p>
-      <div style={{ marginTop: '30px' }}>
-        <div style={{ fontSize: '50px' }}>⏱️ 00 🔻</div>
-        <p>If you did not sort before the timer ends, that sample is spoilt and the batch won't go out for delivery. <span style={{ color: 'red' }}>This will cost in loss of ₹800 per fortune cookie left without sorting.</span></p>
+      
+      <div className="sorting-content">
+        <img src={timerQuestion} alt="Timer ends before sorting" className="dome-timer-img" />
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '40px' }}>
-        <button className="instruction-next-btn" onClick={onReplay} style={{ background: '#444' }}>Replay</button>
+    </InstructionLayout>
+  );
+}
+
+/* NEW: Final Timer Screen (with Green Bar and Replay) */
+export function TimerEndScreen({ onNext, onReplay, onBack, stepIndex, totalSteps }) {
+  return (
+    <InstructionLayout 
+      stepIndex={stepIndex} 
+      totalSteps={totalSteps} 
+      onBack={onBack} 
+      onNext={onNext} 
+      onReplay={onReplay} // Passed here now
+      isFinal={true}
+    >
+      <div className="title">Timer Ends</div>
+      
+      <div className="sorting-content">
+        <img src={timerEnd} alt="Timer ends with broken cookie" className="dome-timer-img" />
+        <p>
+          If you did not sort before the timer ends, that sample is spoilt and the batch won't go out for delivery. 
+          <span style={{ color: 'red' }}> This will cost in loss of ₹800 per fortune cookie left without sorting.</span>
+        </p>
       </div>
     </InstructionLayout>
   );
