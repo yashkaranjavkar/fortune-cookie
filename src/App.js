@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
 import './App.css';
+
+import {
+  SupervisionIntroScreen,
+  SupervisionInstructionsScreen,
+  SupervisionChecklistScreen
+} from './components/SupervisionPhase';
+
 import StartScreen from './components/StartScreen';
 import IntroScreen from './components/IntroScreen';
 import JobApplication from './components/JobApplication';
@@ -10,8 +17,29 @@ import WelcomeScreen from './components/WelcomeScreen';
 import TraySelectionScreen from './components/TraySelectionScreen';
 import FortuneSelectionScreen from './components/FortuneSelectionScreen';
 import Level1Game from './components/Level1Game';
+import Level2Game from './components/Level2Game';
 import MarkingScreen from './components/MarkingScreen';
 import LoaderScreen from './components/LoaderScreen';
+import DemoGameScreen from './components/DemoGameScreen';
+
+import Level3Game from './components/Level3Game';
+
+
+
+import { 
+  ThirtySecondsScreen,
+  InspectionIntroScreen,
+  TorchInspectScreen,
+  PaymentInspectionScreen,
+  StartMarkingScreen,
+  CheckSamplesScreen,
+  ResultsScreen,
+  WhoshhScreen,
+  WhoshhTwoScreen,
+  WhoshhThreeScreen        // <-- Make sure this is here
+} from './components/Level2Instructions';
+
+
 import { 
   PaymentScreen, 
   URLsPartScreen, 
@@ -20,14 +48,6 @@ import {
   ValidVsFaultyScreen, 
   BalloonScreen 
 } from './components/LevelOneInstructions';
-
-import { 
-  ThirtySecondsScreen,
-  InspectionIntroScreen,
-  TorchInspectScreen,
-  PaymentInspectionScreen,
-  StartMarkingScreen
-} from './components/Level2Instructions';
 
 import { 
   ObjectiveScreen, 
@@ -39,10 +59,33 @@ import {
   TimerQuestionScreen,  
   TimerEndScreen        
 } from './components/InstructionScreens';
-import DemoGameScreen from './components/DemoGameScreen';
+
+import {
+  EventTwoScreen,
+  FortuneElementsScreen,
+  ContextValidFaultyScreen,
+  InvalidURLIntroScreen,
+  InvalidURLSplitScreen,
+  InvalidURLFullScreen,
+  ContextUnrelatedScreen,
+  BalloonsTwoScreen
+} from './components/Level2GameInstructions';
+
+import {
+  EventThreeScreen,
+  FortuneElementsThreeScreen,
+  ValidFaultyThreeScreen,
+  ContextMatchesInvalidScreen,
+  InvalidURLThreeIntroScreen,
+  InvalidURLThreeSplitScreen,
+  InvalidURLThreeFullScreen,
+  BalloonsThreeScreen
+} from './components/Level3GameInstructions';
+
 
 function App() {
   const [gameFaultyItems, setGameFaultyItems] = useState([]);
+  const [markedFortunes, setMarkedFortunes] = useState([]);
   const [step, setStep] = useState(1);
   const [employeeId, setEmployeeId] = useState('');
   const [designation, setDesignation] = useState('');
@@ -50,10 +93,16 @@ function App() {
   const [region, setRegion] = useState('');
   const [interests, setInterests] = useState([]);
 
+  const handleSortingNext = () => {
+  setPhase('transition');
+  setTimeout(() => setPhase('instruction'), 2000);
+};
+  
+
   const [gamePhase, setGamePhase] = useState('selection'); 
   const [trayIndex, setTrayIndex] = useState(0);
   const [bunchIndex, setBunchIndex] = useState(0);
-  const [brokenBunch, setBrokenBunch] = useState(null);
+  const [brokenBunches, setBrokenBunches] = useState([]);
   const [allSelections, setAllSelections] = useState([]); 
 
   const handleConfirm = () => setStep(2);
@@ -63,29 +112,42 @@ function App() {
   const handleThankYouNext = () => setStep(6); 
   const handleAccept = () => setStep(7); 
 
+  const [level2FaultyItems, setLevel2FaultyItems] = useState([]);
+
+
+
   const handleReady = () => {
-    setTrayIndex(0); setBunchIndex(0); setBrokenBunch(null);
-    setGamePhase('selection'); setStep(8); 
+  setTrayIndex(0);
+  setBunchIndex(0);
+  setBrokenBunches([]);       // <-- Changed
+  setGamePhase('selection');
+  setStep(8);
   };
 
   const handleSelectBunch = (bunch) => {
-    setBunchIndex(bunch); setBrokenBunch(bunch); setGamePhase('fortune');
-  };
+  setBunchIndex(bunch);
+  setBrokenBunches(prev => [...prev, bunch]);   // <-- Accumulate
+  setGamePhase('fortune');
+  }; 
 
   const handleSubmitFortunes = (selectedIndexes) => {
-    const selection = { tray: trayIndex, bunch: bunchIndex, selected: selectedIndexes };
-    setAllSelections(prev => [...prev, selection]);
+  const selection = { tray: trayIndex, bunch: bunchIndex, selected: selectedIndexes };
+  setAllSelections(prev => [...prev, selection]);
 
-    if (bunchIndex === 0) {
-      setBunchIndex(1); setGamePhase('selection');
+  // If both bunches in this tray are broken, advance. Otherwise, return to pick the other bunch.
+  if (brokenBunches.length < 2) {
+    setGamePhase('selection');
+  } else {
+    if (trayIndex < 2) {
+      setTrayIndex(trayIndex + 1);
+      setBunchIndex(0);
+      setBrokenBunches([]);
+      setGamePhase('selection');
     } else {
-      if (trayIndex < 2) {
-        setTrayIndex(trayIndex + 1); setBunchIndex(0); setBrokenBunch(null); setGamePhase('selection');
-      } else {
-        setStep(9); // Move to instructions after game ends
-      }
+      setStep(9);
     }
-  };
+  }
+};
 
   const userData = { designation, age, region, interests };
   const fortunesPool = [
@@ -122,10 +184,23 @@ function App() {
 
       {/* TRAY GAME */}
       {step === 8 && (
-        <>
-          {gamePhase === 'selection' && <TraySelectionScreen trayNumber={trayIndex} brokenBunch={brokenBunch} onSelectBunch={handleSelectBunch} />}
-          {gamePhase === 'fortune' && <FortuneSelectionScreen trayNumber={trayIndex} bunchNumber={bunchIndex} fortunes={fortunesPool[trayIndex]} onSubmit={handleSubmitFortunes} />}
-        </>
+     <>
+     {gamePhase === 'selection' && (
+      <TraySelectionScreen 
+        trayNumber={trayIndex} 
+        brokenBunches={brokenBunches}      // <-- Pass array
+        onSelectBunch={handleSelectBunch} 
+      />
+      )}
+     {gamePhase === 'fortune' && (
+      <FortuneSelectionScreen
+        trayNumber={trayIndex}
+        bunchNumber={bunchIndex}
+        fortunes={fortunesPool[trayIndex]}
+        onSubmit={handleSubmitFortunes}
+       />
+      )}
+      </>
       )}
 
       {/* INSTRUCTIONS */}
@@ -154,31 +229,164 @@ function App() {
       {/* LEVEL 1 GAME */}
       {step === 24 && <Level1Game onComplete={(items) => { setGameFaultyItems(items); setStep(25); }} />}
 
-      {/* LEVEL 2 INSTRUCTIONS */}
+            {/* LEVEL 2 INSTRUCTIONS */}
       {step === 25 && <ThirtySecondsScreen onNext={() => setStep(26)} onBack={() => setStep(24)} />}
       {step === 26 && <InspectionIntroScreen onNext={() => setStep(27)} onBack={() => setStep(25)} />}
-      {step === 27 && <TorchInspectScreen onNext={() => setStep(28)} />}
+      
+      {/* TUTORIAL TORCH - Uses sample data */}
+      {step === 27 && <TorchInspectScreen 
+        markedFortunes={[
+          { fullText: "Your favorite artist has uploaded their new album on http://www.youtube.com/ 🎵", markedText: "http://" }
+        ]} 
+        onNext={() => setStep(28)} 
+      />}
+      
       {step === 28 && <PaymentInspectionScreen onNext={() => setStep(29)} />}
       {step === 29 && <StartMarkingScreen onNext={() => setStep(30)} />}
 
-      {/* MARKING SCREEN */}
-            {/* MARKING SCREEN */}
-      {step === 30 && <MarkingScreen faultyItems={gameFaultyItems} onNext={() => setStep(31)} />}
+      {/* MARKING SCREEN - User highlights fortunes */}
+      {step === 30 && <MarkingScreen faultyItems={gameFaultyItems} onNext={(data) => { setMarkedFortunes(data); setStep(31); }} />}
 
-      {/* LOADER SCREEN */}
+      {/* LOADER */}
       {step === 31 && <LoaderScreen faultyItems={gameFaultyItems} onComplete={() => setStep(32)} />}
 
-      {/* INSPECTION ROOM INTRO (Press Red Button) */}
-      {step === 32 && <InspectionIntroScreen markedFortunes={gameFaultyItems} onNext={() => setStep(33)} onBack={() => setStep(30)} />}
+       
+      {/* ACTUAL INSPECTION - Uses real marked fortunes */}
+      {step === 32 && <InspectionIntroScreen onNext={() => setStep(33)} onBack={() => setStep(30)} />}
+      {step === 33 && <TorchInspectScreen markedFortunes={markedFortunes} onNext={() => setStep(34)} />}
+
+      {/* CHECK DELIVERED SAMPLES */}
+      {step === 34 && <CheckSamplesScreen onNext={() => setStep(35)} />}
+
+      {/* RESULTS SCREEN (Fortunes with +₹1000 each) */}
+      {step === 35 && <ResultsScreen markedFortunes={markedFortunes} onNext={() => setStep(36)} />}
+
       
-      {/* TORCH SCREEN */}
-      {step === 33 && <TorchInspectScreen onNext={() => setStep(34)} />}
-      
-      {/* PAYMENT SCREEN */}
-      {step === 34 && <PaymentInspectionScreen onNext={() => setStep(35)} />}
-      
-      {/* START MARKING SCREEN (Final button) */}
-      {step === 35 && <StartMarkingScreen onNext={() => alert("Level 2 Started!")} />}
+      {/* WHOSHH CELEBRATION */}
+      {step === 36 && <WhoshhScreen onNext={() => setStep(37)} />}
+
+      {/* LEVEL 2 GAME INSTRUCTIONS */}
+      {step === 37 && <EventTwoScreen onNext={() => setStep(38)} stepIndex={0} totalSteps={8} />}
+      {step === 38 && <FortuneElementsScreen onBack={() => setStep(37)} onNext={() => setStep(39)} stepIndex={1} totalSteps={8} />}
+      {step === 39 && <ContextValidFaultyScreen onBack={() => setStep(38)} onNext={() => setStep(40)} stepIndex={2} totalSteps={8} />}
+      {step === 40 && <InvalidURLIntroScreen onBack={() => setStep(39)} onNext={() => setStep(41)} stepIndex={3} totalSteps={8} />}
+      {step === 41 && <InvalidURLSplitScreen onBack={() => setStep(40)} onNext={() => setStep(42)} stepIndex={4} totalSteps={8} />}
+      {step === 42 && <InvalidURLFullScreen onBack={() => setStep(41)} onNext={() => setStep(43)} stepIndex={5} totalSteps={8} />}
+      {step === 43 && <ContextUnrelatedScreen onBack={() => setStep(42)} onNext={() => setStep(44)} stepIndex={6} totalSteps={8} />}
+      {step === 44 && <BalloonsTwoScreen onReplay={() => setStep(37)} onNext={() => setStep(45)} />}
+
+      {/* LEVEL 2 PAYMENT (After balloons) */}
+            {/* LEVEL 2 PAYMENT */}
+      {step === 45 && <PaymentScreen onBack={() => setStep(44)} onNext={() => setStep(46)} />}
+
+            {/* LEVEL 2 GAME - 5 Domes */}
+      {step === 46 && (
+        <Level2Game
+          onComplete={(items) => { setLevel2FaultyItems(items); setStep(47); }}
+          onSkip={(items) => { setLevel2FaultyItems(items); setStep(48); }}
+        />
+      )}
+
+      {/* STEP 47: START MARKING (after Next on the instruction) */}
+      {step === 47 && <StartMarkingScreen onNext={() => setStep(48)} />}
+
+      {/* STEP 48: LEVEL 2 MARKING SCREEN */}
+      {step === 48 && (
+        <MarkingScreen
+          faultyItems={level2FaultyItems}
+          onNext={(data) => { setMarkedFortunes(data); setStep(49); }}
+        />
+      )}
+
+      {/* STEP 49: LOADER */}
+      {step === 49 && <LoaderScreen faultyItems={level2FaultyItems} onComplete={() => setStep(50)} />}
+
+      {/* STEP 50: INSPECTION INTRO */}
+      {step === 50 && <InspectionIntroScreen onNext={() => setStep(51)} onBack={() => setStep(48)} />}
+
+      {/* STEP 51: TORCH */}
+      {step === 51 && <TorchInspectScreen markedFortunes={markedFortunes} onNext={() => setStep(52)} />}
+
+      {/* STEP 52: CHECK SAMPLES */}
+      {step === 52 && <CheckSamplesScreen onNext={() => setStep(53)} />}
+
+            {/* STEP 53: RESULTS */}
+      {step === 53 && <ResultsScreen markedFortunes={markedFortunes} onNext={() => setStep(54)} />}
+
+      {/* STEP 54: WHOSHH - LEVEL 2 VERSION */}
+      {step === 54 && <WhoshhTwoScreen onNext={() => setStep(55)} />}
+
+            {/* LEVEL 3 INSTRUCTIONS */}
+      {step === 55 && <EventThreeScreen onNext={() => setStep(56)} stepIndex={0} totalSteps={8} />}
+      {step === 56 && <FortuneElementsThreeScreen onBack={() => setStep(55)} onNext={() => setStep(57)} stepIndex={1} totalSteps={8} />}
+      {step === 57 && <ValidFaultyThreeScreen onBack={() => setStep(56)} onNext={() => setStep(58)} stepIndex={2} totalSteps={8} />}
+      {step === 58 && <ContextMatchesInvalidScreen onBack={() => setStep(57)} onNext={() => setStep(59)} stepIndex={3} totalSteps={8} />}
+      {step === 59 && <InvalidURLThreeIntroScreen onBack={() => setStep(58)} onNext={() => setStep(60)} stepIndex={4} totalSteps={8} />}
+      {step === 60 && <InvalidURLThreeSplitScreen onBack={() => setStep(59)} onNext={() => setStep(61)} stepIndex={5} totalSteps={8} />}
+      {step === 61 && <InvalidURLThreeFullScreen onBack={() => setStep(60)} onNext={() => setStep(62)} stepIndex={6} totalSteps={8} />}
+      {step === 62 && <BalloonsThreeScreen onReplay={() => setStep(55)} onNext={() => setStep(63)} />}
+
+            {/* LEVEL 3 PAYMENT */}
+      {step === 63 && <PaymentScreen onBack={() => setStep(62)} onNext={() => setStep(64)} />}
+
+      {/* LEVEL 3 GAME - 6 Domes */}
+      {step === 64 && (
+        <Level3Game
+          onComplete={(items) => { setLevel2FaultyItems(items); setStep(65); }}
+          onSkip={(items) => { setLevel2FaultyItems(items); setStep(66); }}
+        />
+      )}
+
+      {/* STEP 65: START MARKING */}
+      {step === 65 && <StartMarkingScreen onNext={() => setStep(66)} />}
+
+      {/* STEP 66: MARKING SCREEN */}
+      {step === 66 && (
+        <MarkingScreen
+          faultyItems={level2FaultyItems}
+          onNext={(data) => { setMarkedFortunes(data); setStep(67); }}
+        />
+      )}
+
+      {/* STEP 67: LOADER */}
+      {step === 67 && <LoaderScreen faultyItems={level2FaultyItems} onComplete={() => setStep(68)} />}
+
+      {/* STEP 68: INSPECTION INTRO */}
+      {step === 68 && <InspectionIntroScreen onNext={() => setStep(69)} onBack={() => setStep(66)} />}
+
+      {/* STEP 69: TORCH */}
+      {step === 69 && <TorchInspectScreen markedFortunes={markedFortunes} onNext={() => setStep(70)} />}
+
+      {/* STEP 70: CHECK SAMPLES */}
+      {step === 70 && <CheckSamplesScreen onNext={() => setStep(71)} />}
+
+      {/* STEP 71: RESULTS */}
+      {step === 71 && <ResultsScreen markedFortunes={markedFortunes} onNext={() => setStep(72)} />}
+
+            {/* STEP 72: WHOSHH - LEVEL 3 VERSION */}
+      {step === 72 && <WhoshhThreeScreen onNext={() => setStep(73)} />}
+
+      {/* SUPERVISION PHASE */}
+      {step === 73 && <SupervisionIntroScreen onNext={() => setStep(74)} />}
+      {step === 74 && <SupervisionInstructionsScreen onNext={() => setStep(75)} />}
+      {step === 75 && (
+      <SupervisionChecklistScreen 
+       onNext={(data) => { 
+        console.log('Decisions:', data.decisions); 
+        console.log('Revoke reasons:', data.revokeReasons);
+       setStep(76); 
+       }} 
+      />
+       )}
+
+      {step === 76 && (
+        <div className="screen thank-you">
+          <div className="card">
+            <h1>All Phases Complete!</h1>
+            <p>Final results coming soon...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

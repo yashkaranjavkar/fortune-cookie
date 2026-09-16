@@ -37,11 +37,16 @@ export default function FortuneSelectionScreen({ trayNumber, bunchNumber, fortun
   return (
     <div className="fortune-selection-screen">
       <div className="fortune-header">
-        <div className="tray-label">TRAY NO.<br/><span className="tray-num">one</span></div>
-        <div className="instruction">
-          Identify which is(are) the Faulty Fortune(s) among the following. There can be multiple correct answers
-        </div>
+       <div className="tray-label">
+         TRAY NO.<br/>
+         <span className="tray-num">
+           {trayNumber === 0 ? 'one' : trayNumber === 1 ? 'two' : 'three'}
+         </span>
       </div>
+      <div className="instruction">
+          Identify which is(are) the Faulty Fortune(s) among the following. There can be multiple correct answers
+      </div>
+    </div>
 
       <div className="fortune-list">
         {fortunes.map((fortune, index) => (

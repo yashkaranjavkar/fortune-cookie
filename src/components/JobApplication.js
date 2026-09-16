@@ -28,9 +28,9 @@ export default function JobApplication({ age, setAge, region, setRegion, interes
   const isValid = age && region && interests.length > 0;
 
   return (
-    <div className="screen">
-      <div className="card">
-        <div className="title">Job Application</div>
+  <div className="job-screen">
+    <div className="card">
+      <div className="title">Job Application</div>
         <p className="subtitle">Kindly fill your details to proceed with the application</p>
 
         <div className="two-col">
