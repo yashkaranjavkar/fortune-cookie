@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useCurrency } from '../utils/currency';
 import faultyBox from '../assets/demo/faulty-box.png';
 import faultyCookie from '../assets/demo/faulty-cookie.png';
 
@@ -173,6 +174,7 @@ export function TorchInspectScreen({ markedFortunes, onNext }) {
 }
 
 export function PaymentInspectionScreen({ onNext }) {
+  const currency = useCurrency();
   return (
     <div className="payment-dark-screen">
       <div className="payment-title">Payment as per inspection</div>
@@ -182,17 +184,17 @@ export function PaymentInspectionScreen({ onNext }) {
         
         <div className="payment-row">
           <span>1. Correct inspection</span>
-          <span className="green-incentive">......... ₹1000</span>
+          <span className="green-incentive">......... {currency}1000</span>
         </div>
         
         <div className="payment-row">
           <span>2. Partially correct inspection</span>
-          <span className="grey-incentive">......... ₹0</span>
+          <span className="grey-incentive">......... {currency}0</span>
         </div>
         
         <div className="payment-row">
           <span>3. Wrong inspection</span>
-          <span className="red-incentive">......... - ₹800</span>
+          <span className="red-incentive">......... - {currency}800</span>
         </div>
       </div>
 
@@ -241,6 +243,7 @@ export function CheckSamplesScreen({ onNext }) {
 }
 
 export function ResultsScreen({ markedFortunes, onNext }) {
+  const currency = useCurrency();
   const fortunes = (markedFortunes && markedFortunes.length > 0)
     ? markedFortunes
     : [
@@ -258,7 +261,7 @@ export function ResultsScreen({ markedFortunes, onNext }) {
       <div className="results-container">
         {fortunes.map((fortune, index) => (
           <div key={index} className="result-row">
-            <div className="result-incentive">+ ₹1000</div>
+            <div className="result-incentive">+ {currency}1000</div>
             <div className="result-fortune">{fortune.fullText}</div>
           </div>
         ))}

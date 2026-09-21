@@ -1,9 +1,42 @@
+// Designations commonly found in an IT services company (e.g. TCS)
 export const designations = [
-  "Software Engineer", "Senior Software Engineer", "Project Manager",
-  "Program Manager", "System Analyst", "Business Analyst",
-  "Data Analyst", "Data Scientist", "DevOps Engineer",
-  "Cloud Architect", "UI/UX Designer", "QA Analyst",
-  "Network Engineer", "Security Analyst", "Scrum Master"
+  // Engineering
+  "Assistant System Engineer", "Systems Engineer", "IT Analyst", "IT Consultant",
+  "Software Engineer", "Senior Software Engineer", "Lead Software Engineer",
+  "Software Developer", "Full Stack Developer", "Frontend Developer", "Backend Developer",
+  "Mobile App Developer", "Java Developer", "Python Developer", ".NET Developer",
+  "Mainframe Developer", "SAP Consultant", "Salesforce Developer", "ETL Developer",
+  "Embedded Software Engineer", "Technical Lead", "Technology Architect", "Solution Architect",
+  "Enterprise Architect", "Principal Engineer", "Associate Consultant",
+  // Cloud / Infra / DevOps
+  "DevOps Engineer", "Site Reliability Engineer", "Cloud Engineer", "Cloud Architect",
+  "Infrastructure Engineer", "Systems Administrator", "Database Administrator",
+  "Network Engineer", "Network Architect", "Platform Engineer",
+  // Data / AI
+  "Data Analyst", "Data Engineer", "Data Scientist", "Machine Learning Engineer",
+  "AI Engineer", "BI Developer", "Big Data Engineer",
+  // Quality
+  "QA Analyst", "Test Engineer", "Automation Test Engineer", "Performance Test Engineer",
+  "Quality Assurance Lead",
+  // Security
+  "Security Analyst", "Information Security Engineer", "Cybersecurity Consultant",
+  "SOC Analyst", "Compliance Analyst",
+  // Design
+  "UI/UX Designer", "UX Researcher", "Product Designer", "Graphic Designer",
+  // Management / Delivery
+  "Project Manager", "Program Manager", "Delivery Manager", "Scrum Master", "Product Manager",
+  "Product Owner", "Engagement Manager", "Account Manager", "Portfolio Manager",
+  "Release Manager", "Service Delivery Manager", "Business Analyst", "System Analyst",
+  "Functional Consultant", "Process Analyst", "Change Manager",
+  // Support / Ops
+  "Technical Support Engineer", "Service Desk Analyst", "Application Support Engineer",
+  "IT Operations Manager", "Business Process Associate",
+  // Business / Corporate functions
+  "HR Executive", "Talent Acquisition Specialist", "HR Business Partner", "Recruiter",
+  "Finance Analyst", "Accountant", "Sales Executive", "Pre-Sales Consultant",
+  "Marketing Specialist", "Legal Counsel", "Administrative Executive",
+  // Senior leadership
+  "Director", "Vice President", "Chief Technology Officer"
 ];
 
 export const regions = ["India", "Europe", "Africa", "Lat-Am", "Ctl-Am"];
@@ -11,59 +44,90 @@ export const regions = ["India", "Europe", "Africa", "Lat-Am", "Ctl-Am"];
 export const ageGroups = ["18-30 years", "31-40 years", "41-50 years", "50+ years"];
 
 export const baseInterests = [
-  "Dance", "Music", "Tech", "News", "Cooking", "Travel", "Photography",
-  "Gaming", "Fitness", "Fashion", "Sports", "Yoga", "Coding", "Movies",
-  "Gardening", "Shopping", "Anime", "Food", "Science", "Art", "Book reading", "Cycling"
+  // Entertainment
+  "Music", "Dance", "Singing", "Concerts", "Instruments", "Podcasts",
+  "Movies", "TV Series", "Anime", "Streaming", "Stand-up Comedy", "Theatre",
+  // Games
+  "Gaming", "Esports", "Board Games", "Puzzles",
+  // Tech
+  "Tech", "Coding", "AI", "Gadgets", "Cybersecurity", "Data Science", "Startups", "Robotics", "Space",
+  // Food
+  "Cooking", "Baking", "Food", "Coffee", "Healthy Eating",
+  // Travel & outdoors
+  "Travel", "Adventure", "Hiking", "Photography", "Environment", "Gardening",
+  // Style & home
+  "Fashion", "Shopping", "Home Decor", "DIY", "Pets", "Parenting",
+  // Health & sports
+  "Fitness", "Gym", "Yoga", "Meditation", "Running", "Cycling", "Sports",
+  "Cricket", "Football", "Badminton", "Tennis", "Basketball", "Swimming",
+  // Learning & culture
+  "Book reading", "Writing", "Poetry", "Science", "History", "Education", "Languages",
+  "Art", "Painting", "Spirituality", "Volunteering",
+  // Money & world
+  "Finance", "Investing", "Stock Market", "Cryptocurrency", "Business", "News", "Politics",
+  // Vehicles
+  "Cars", "Bikes"
 ];
 
+// Each interest lists the interests genuinely close to it. The relation is made
+// symmetric in utils/relatedInterests.js, so it only needs to be written once.
 export const relatedInterestsMap = {
-  "Dance": ["Music", "Fitness", "Gym", "Choreography", "Entertainment"],
-  "Music": ["Dance", "Concerts", "Singing", "Instruments", "Events"],
-  "Tech": ["Coding", "Gadgets", "AI", "Software", "Gaming"],
-  "Travel": ["Adventure", "Photography", "Hotels", "Food"],
-  "Cooking": ["Food", "Recipe", "Baking", "Kitchen"],
-  "Fitness": ["Gym", "Yoga", "Sports", "Healthy Eating"],
-  "Gaming": ["Tech", "Anime", "Movies", "Streaming"],
-  "Photography": ["Travel", "Art", "Nature", "Cameras"],
-  "Coding": ["Tech", "Software", "AI", "Data Science"],
-  "Movies": ["Anime", "Entertainment", "Streaming", "Music"],
-  "Book reading": ["Literature", "Art", "Writing", "Poetry"],
-  "Cycling": ["Fitness", "Outdoor", "Sports"],
-  // ... add more as needed
-};
-
-export const websiteMappings = {
-  designation: {
-    "Software Engineer": ["stackoverflow.com", "github.com", "leetcode.com", "medium.com"],
-    "Project Manager": ["jira.com", "asana.com", "linkedin.com", "notion.so"],
-    "Data Analyst": ["kaggle.com", "tableau.com", "analyticsvidhya.com"],
-    "DevOps Engineer": ["aws.amazon.com", "docker.com", "kubernetes.io"],
-    "UI/UX Designer": ["behance.net", "dribbble.com", "figma.com"],
-    "QA Analyst": ["jira.com", "selenium.dev", "stackoverflow.com"]
-  },
-  age: {
-    "18-30 years": ["instagram.com", "tiktok.com", "snapchat.com", "spotify.com"],
-    "31-40 years": ["linkedin.com", "facebook.com", "twitter.com", "amazon.com"],
-    "41-50 years": ["news.google.com", "cnn.com", "bbc.com", "nytimes.com"],
-    "50+ years": ["aarp.org", "weather.com", "yahoo.com", "foxnews.com"]
-  },
-  region: {
-    "India": ["flipkart.com", "paytm.com", "irctc.co.in", "hotstar.com"],
-    "Europe": ["booking.com", "zalando.de", "asos.com", "theguardian.com"],
-    "Africa": ["jumia.com", "news24.com", "mtn.com", "showmax.com"],
-    "Lat-Am": ["mercadolibre.com", "globo.com", "clarin.com", "netflix.com"],
-    "Ctl-Am": ["amazon.com", "ebay.com", "costco.com", "walmart.com"]
-  },
-  interests: {
-    "Dance": ["youtube.com", "vimeo.com", "tiktok.com"],
-    "Music": ["spotify.com", "soundcloud.com", "apple.com/music"],
-    "Tech": ["techcrunch.com", "theverge.com", "wired.com"],
-    "News": ["reuters.com", "bbc.com", "google.com/news"],
-    "Travel": ["tripadvisor.com", "expedia.com", "airbnb.com"],
-    "Cooking": ["allrecipes.com", "foodnetwork.com"],
-    "Fitness": ["myfitnesspal.com", "fitbit.com"],
-    "Gaming": ["steam.com", "twitch.tv", "ign.com"],
-    "Photography": ["flickr.com", "500px.com"],
-    "Coding": ["github.com", "stackoverflow.com", "codecademy.com"]
-  }
+  "Music": ["Singing", "Concerts", "Instruments", "Dance", "Podcasts"],
+  "Dance": ["Music", "Fitness", "Concerts", "Theatre"],
+  "Singing": ["Music", "Instruments", "Concerts"],
+  "Podcasts": ["News", "Education"],
+  "Movies": ["TV Series", "Streaming", "Anime", "Theatre", "Stand-up Comedy"],
+  "TV Series": ["Streaming", "Movies"],
+  "Anime": ["Gaming", "Streaming", "Art"],
+  "Stand-up Comedy": ["Streaming", "Theatre", "Podcasts"],
+  "Gaming": ["Esports", "Anime", "Tech", "Streaming", "Board Games"],
+  "Esports": ["Streaming"],
+  "Board Games": ["Puzzles"],
+  "Puzzles": ["Coding"],
+  "Tech": ["Coding", "AI", "Gadgets", "Cybersecurity", "Startups", "Robotics", "Data Science"],
+  "Coding": ["AI", "Data Science", "Cybersecurity", "Startups"],
+  "AI": ["Data Science", "Robotics", "Science"],
+  "Gadgets": ["Photography", "Shopping", "Cars"],
+  "Data Science": ["Science", "Finance"],
+  "Startups": ["Business", "Investing", "Finance"],
+  "Robotics": ["Science", "DIY", "Space"],
+  "Space": ["Science", "Education"],
+  "Cooking": ["Food", "Baking", "Healthy Eating", "Coffee"],
+  "Baking": ["Food", "Coffee"],
+  "Food": ["Travel", "Coffee", "Healthy Eating"],
+  "Travel": ["Adventure", "Hiking", "Photography", "History", "Languages"],
+  "Adventure": ["Hiking", "Cycling", "Swimming", "Bikes"],
+  "Hiking": ["Environment", "Fitness", "Photography"],
+  "Photography": ["Art", "Environment"],
+  "Environment": ["Gardening", "Science", "Volunteering"],
+  "Gardening": ["Home Decor", "DIY", "Healthy Eating"],
+  "Fashion": ["Shopping", "Art", "Home Decor"],
+  "Shopping": ["Home Decor"],
+  "Home Decor": ["DIY", "Art"],
+  "DIY": ["Art"],
+  "Pets": ["Environment", "Volunteering"],
+  "Parenting": ["Education", "Healthy Eating"],
+  "Fitness": ["Gym", "Yoga", "Running", "Healthy Eating", "Sports", "Swimming", "Cycling"],
+  "Gym": ["Healthy Eating"],
+  "Yoga": ["Meditation", "Spirituality", "Healthy Eating"],
+  "Meditation": ["Spirituality"],
+  "Running": ["Sports", "Healthy Eating"],
+  "Cycling": ["Bikes", "Environment"],
+  "Sports": ["Cricket", "Football", "Badminton", "Tennis", "Basketball", "Swimming"],
+  "Book reading": ["Writing", "Poetry", "History", "Education", "Languages"],
+  "Writing": ["Poetry"],
+  "Science": ["Education", "History"],
+  "History": ["Politics"],
+  "Education": ["Languages"],
+  "Art": ["Painting"],
+  "Spirituality": ["Book reading"],
+  "Volunteering": ["Education"],
+  "Finance": ["Investing", "Stock Market", "Business", "Cryptocurrency"],
+  "Investing": ["Stock Market", "Cryptocurrency", "Business"],
+  "Stock Market": ["News"],
+  "Cryptocurrency": ["Tech"],
+  "Business": ["News"],
+  "News": ["Politics", "Environment"],
+  "Cars": ["Bikes", "Travel"],
+  "Bikes": ["Adventure"]
 };

@@ -1,23 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import MultiSelect from './MultiSelect';
 import SearchableDropdown from './SearchableDropdown';
-import { regions, ageGroups, baseInterests, relatedInterestsMap } from '../data/constants';
+import { regions, ageGroups, baseInterests } from '../data/constants';
+import { getRelatedInterests } from '../utils/relatedInterests';
 
 // ADD THIS LINE! It looks for the image inside your src/assets folder
 import fciLogo from '../assets/fci-logo.png'; 
 
 export default function JobApplication({ age, setAge, region, setRegion, interests, setInterests, onNext }) {
-  const [related, setRelated] = useState([]);
-
-  useEffect(() => {
-    const relatedSet = new Set();
-    interests.forEach(interest => {
-      if (relatedInterestsMap[interest]) {
-        relatedInterestsMap[interest].forEach(r => relatedSet.add(r));
-      }
-    });
-    setRelated(Array.from(relatedSet).filter(r => !interests.includes(r)));
-  }, [interests]);
+  const related = useMemo(() => getRelatedInterests(interests), [interests]);
 
   const addRelated = (r) => {
     if (!interests.includes(r)) {
@@ -28,8 +19,8 @@ export default function JobApplication({ age, setAge, region, setRegion, interes
   const isValid = age && region && interests.length > 0;
 
   return (
-  <div className="job-screen">
-    <div className="card">
+  <div className="flow-screen job-screen">
+    <div className="flow-card">
       <div className="title">Job Application</div>
         <p className="subtitle">Kindly fill your details to proceed with the application</p>
 
@@ -77,8 +68,12 @@ export default function JobApplication({ age, setAge, region, setRegion, interes
                 }}
                 placeholder="Choose from options"
                 allowAdd={true}
+                storageKey="interests"
+                related={related}
+                onAddRelated={addRelated}
               />
             </div>
+
 
             {related.length > 0 && (
               <div className="related-section">
@@ -95,7 +90,6 @@ export default function JobApplication({ age, setAge, region, setRegion, interes
           </div>
 
           <div className="right-col">
-            {/* CHANGE THIS LINE: Use the imported variable instead of the string path */}
             <img src={fciLogo} alt="FCI Logo" className="fci-logo" />
           </div>
         </div>

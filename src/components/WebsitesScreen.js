@@ -5,7 +5,9 @@ import fciLogo from '../assets/fci-logo.png';
 export default function WebsitesScreen({ userData, onNext }) {
   const [selected, setSelected] = useState([]);
 
-  const websites = useMemo(() => generateWebsites(userData), [userData]);
+  // Keyed on the answers themselves so the list stays stable while the screen is open
+  const answers = JSON.stringify(userData);
+  const websites = useMemo(() => generateWebsites(JSON.parse(answers)), [answers]);
 
   const toggleWebsite = (site) => {
     if (selected.includes(site)) {
@@ -18,9 +20,9 @@ export default function WebsitesScreen({ userData, onNext }) {
   const canProceed = selected.length >= 5;
 
   return (
-    <div className="websites-screen">
-      <div className="websites-card">
-        <div className="websites-title">Choose familiar websites</div>
+    <div className="flow-screen">
+      <div className="flow-card">
+        <div className="title">Choose familiar websites</div>
 
         <div className="websites-content">
           {/* LEFT: Instructions + Website Buttons */}

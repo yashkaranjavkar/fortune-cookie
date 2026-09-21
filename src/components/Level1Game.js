@@ -1,16 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import SortTray from './SortTray';
+import { pickFortune } from '../utils/fortunePool';
 
 // Existing Demo assets
 import domeClosed from '../assets/demo/dome-closed.png';
 import domeLifted from '../assets/demo/dome-lifted.png';
-import fortune from '../assets/demo/fortune.png';
-import approvedBox from '../assets/demo/approved-box.png';
-import faultyBox from '../assets/demo/faulty-box.png';
 import brokenCookie from '../assets/demo/broken-cookie.png';
 
-// NEW ASSETS FOR THE TRAYS
-import faultyCookie from '../assets/demo/faulty-cookie.png';
-import approvedCookie from '../assets/demo/approved-cookie.png';
 
 export default function Level1Game({ onComplete }) {
   const [domes, setDomes] = useState([
@@ -20,6 +16,7 @@ export default function Level1Game({ onComplete }) {
     { status: 'closed' },
   ]);
   const [activeDome, setActiveDome] = useState(null);
+  const [dragging, setDragging] = useState(false);
   const [timer, setTimer] = useState(10);
   const [sortedCount, setSortedCount] = useState(0);
   const [phase, setPhase] = useState('sorting'); // sorting, transition, instruction
@@ -51,7 +48,7 @@ export default function Level1Game({ onComplete }) {
   const handleMouseEnter = (index) => {
     if (domes[index].status === 'closed') {
       hoverTimeout.current = setTimeout(() => {
-        setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'open' } : d));
+        setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'open', text: pickFortune(prev.map(x => x.text)) } : d));
         setActiveDome(index);
       }, 300);
     }
@@ -62,10 +59,12 @@ export default function Level1Game({ onComplete }) {
   const handleDragStart = (e) => {
     e.dataTransfer.setData('domeIndex', activeDome);
     e.dataTransfer.effectAllowed = 'move';
+    setDragging(true);
   };
 
   const handleDrop = (e, trayType) => {
     e.preventDefault();
+    setDragging(false);
     const index = Number(e.dataTransfer.getData('domeIndex'));
     clearInterval(intervalRef.current);
 
@@ -90,6 +89,7 @@ export default function Level1Game({ onComplete }) {
 
   const handleWaste = (index) => {
     clearInterval(intervalRef.current);
+    setDragging(false);
     setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'wasted' } : d));
     setActiveDome(null);
     
@@ -106,6 +106,7 @@ export default function Level1Game({ onComplete }) {
   const handleDragOver = (e) => e.preventDefault();
 
   const handleDragEnd = () => {
+    setDragging(false);
     if (activeDome !== null && domes[activeDome].status === 'open') {
        handleWaste(activeDome);
     }
@@ -128,15 +129,8 @@ export default function Level1Game({ onComplete }) {
       {phase === 'sorting' && (
         <div className="level1-game-layout">
           {/* Faulty Tray (Left) */}
-          <div className="drop-zone faulty-zone" onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'faulty')}>
-            <img src={faultyBox} alt="Faulty Tray" className="tray-bg" />
-            <div className="tray-contents">
-              {faultyItems.map((_, i) => (
-                <img key={i} src={faultyCookie} alt="Faulty Cookie" className="tray-cookie-img" />
-              ))}
-            </div>
-            <div className="tray-label faulty-label">Faulty Tray</div>
-          </div>
+          <SortTray type="faulty" items={faultyItems} dragging={dragging}
+              onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'faulty')} />
 
           <div className="domes-tray">
             {domes.map((dome, index) => (
@@ -151,14 +145,14 @@ export default function Level1Game({ onComplete }) {
                   <>
                     <div className="timer-display">{timer < 10 ? `0${timer}` : timer}</div>
                     <img src={domeLifted} alt="Dome Lifted" className="dome-img" />
-                    <img 
-                      src={fortune} 
-                      alt="Fortune" 
-                      className="fortune-drag"
-                      draggable={true}
-                      onDragStart={handleDragStart}
-                      onDragEnd={handleDragEnd}
-                    />
+                    <div
+                        className={`fortune-drag fortune-slip${dragging ? ' dragging' : ''}`}
+                        draggable={true}
+                        onDragStart={handleDragStart}
+                        onDragEnd={handleDragEnd}
+                      >
+                        {dome.text}
+                      </div>
                   </>
                 )}
                 {dome.status === 'faulty' && <img src={domeLifted} alt="Emptied" className="dome-img emptied" />}
@@ -175,15 +169,8 @@ export default function Level1Game({ onComplete }) {
           </div>
 
           {/* Approved Tray (Right) */}
-          <div className="drop-zone approved-zone" onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'approved')}>
-            <img src={approvedBox} alt="Approved Tray" className="tray-bg" />
-            <div className="tray-contents">
-              {approvedItems.map((_, i) => (
-                <img key={i} src={approvedCookie} alt="Approved Cookie" className="tray-cookie-img" />
-              ))}
-            </div>
-            <div className="tray-label approved-label">Approved Tray</div>
-          </div>
+          <SortTray type="approved" items={approvedItems} dragging={dragging}
+              onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'approved')} />
         </div>
       )}
 
@@ -191,15 +178,7 @@ export default function Level1Game({ onComplete }) {
       {phase === 'transition' && (
         <div className="level1-transition-layout">
           {/* Faulty Tray moves to center, Approved becomes truck */}
-          <div className="drop-zone faulty-zone moving-center">
-            <img src={faultyBox} alt="Faulty Tray" className="tray-bg" />
-            <div className="tray-contents">
-              {faultyItems.map((_, i) => (
-                <img key={i} src={faultyCookie} alt="Faulty Cookie" className="tray-cookie-img" />
-              ))}
-            </div>
-            <div className="tray-label faulty-label">Faulty Tray</div>
-          </div>
+          <SortTray type="faulty" items={faultyItems} className="moving-center" />
 
           {/* CSS Truck Placeholder (Remove this and use <img src={truck} className="truck-img" /> if you have the truck.png) */}
           <div className="truck-shipping">
@@ -219,15 +198,7 @@ export default function Level1Game({ onComplete }) {
           {/* Faulty tray now perfectly centered INSIDE the golden box */}
           <div className="instruction-card">
             
-            <div className="drop-zone faulty-zone centered">
-              <img src={faultyBox} alt="Faulty Tray" className="tray-bg" />
-              <div className="tray-contents">
-                {faultyItems.map((_, i) => (
-                  <img key={i} src={faultyCookie} alt="Faulty Cookie" className="tray-cookie-img" />
-                ))}
-              </div>
-              <div className="tray-label faulty-label">Faulty Tray</div>
-            </div>
+            <SortTray type="faulty" items={faultyItems} className="centered" />
             
             <p className="instruction-text">
               You have to mark the invalid part in the URL of the fortune before sending for inspection

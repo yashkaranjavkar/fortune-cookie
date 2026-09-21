@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import SortTray from './SortTray';
+import { pickFortune } from '../utils/fortunePool';
 
 import domeClosed from '../assets/demo/dome-closed.png';
 import domeLifted from '../assets/demo/dome-lifted.png';
-import fortune from '../assets/demo/fortune.png';
-import approvedBox from '../assets/demo/approved-box.png';
-import faultyBox from '../assets/demo/faulty-box.png';
 import brokenCookie from '../assets/demo/broken-cookie.png';
-import faultyCookie from '../assets/demo/faulty-cookie.png';
-import approvedCookie from '../assets/demo/approved-cookie.png';
 
 export default function Level3Game({ onComplete, onSkip }) {
   const TOTAL = 6;
@@ -16,6 +13,7 @@ export default function Level3Game({ onComplete, onSkip }) {
     Array.from({ length: TOTAL }, () => ({ status: 'closed' }))
   );
   const [activeDome, setActiveDome] = useState(null);
+  const [dragging, setDragging] = useState(false);
   const [timer, setTimer] = useState(10);
   const [sortedCount, setSortedCount] = useState(0);
   const [faultyItems, setFaultyItems] = useState([]);
@@ -45,7 +43,7 @@ export default function Level3Game({ onComplete, onSkip }) {
   const handleMouseEnter = (index) => {
     if (domes[index].status === 'closed') {
       hoverTimeout.current = setTimeout(() => {
-        setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'open' } : d));
+        setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'open', text: pickFortune(prev.map(x => x.text)) } : d));
         setActiveDome(index);
       }, 300);
     }
@@ -56,10 +54,12 @@ export default function Level3Game({ onComplete, onSkip }) {
   const handleDragStart = (e) => {
     e.dataTransfer.setData('domeIndex', activeDome);
     e.dataTransfer.effectAllowed = 'move';
+    setDragging(true);
   };
 
   const handleDrop = (e, trayType) => {
     e.preventDefault();
+    setDragging(false);
     const index = Number(e.dataTransfer.getData('domeIndex'));
     clearInterval(intervalRef.current);
 
@@ -84,6 +84,7 @@ export default function Level3Game({ onComplete, onSkip }) {
 
   const handleWaste = (index) => {
     clearInterval(intervalRef.current);
+    setDragging(false);
     setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'wasted' } : d));
     setActiveDome(null);
 
@@ -100,6 +101,7 @@ export default function Level3Game({ onComplete, onSkip }) {
   const handleDragOver = (e) => e.preventDefault();
 
   const handleDragEnd = () => {
+    setDragging(false);
     if (activeDome !== null && domes[activeDome].status === 'open') {
       handleWaste(activeDome);
     }
@@ -121,15 +123,8 @@ export default function Level3Game({ onComplete, onSkip }) {
         <>
           <div className="level1-game-layout">
             {/* Faulty Tray */}
-            <div className="drop-zone faulty-zone" onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'faulty')}>
-              <img src={faultyBox} alt="Faulty Tray" className="tray-bg" />
-              <div className="tray-contents">
-                {faultyItems.map((_, i) => (
-                  <img key={i} src={faultyCookie} alt="Faulty Cookie" className="tray-cookie-img" />
-                ))}
-              </div>
-              <div className="tray-label faulty-label">Faulty Tray</div>
-            </div>
+            <SortTray type="faulty" items={faultyItems} dragging={dragging}
+              onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'faulty')} />
 
             {/* 6 Domes Tray */}
             <div className="domes-tray domes-tray-6">
@@ -146,14 +141,14 @@ export default function Level3Game({ onComplete, onSkip }) {
                     <>
                       <div className="timer-display">{timer < 10 ? `0${timer}` : timer}</div>
                       <img src={domeLifted} alt="Dome Lifted" className="dome-img" />
-                      <img
-                        src={fortune}
-                        alt="Fortune"
-                        className="fortune-drag"
+                      <div
+                        className={`fortune-drag fortune-slip${dragging ? ' dragging' : ''}`}
                         draggable={true}
                         onDragStart={handleDragStart}
                         onDragEnd={handleDragEnd}
-                      />
+                      >
+                        {dome.text}
+                      </div>
                     </>
                   )}
 
@@ -174,15 +169,8 @@ export default function Level3Game({ onComplete, onSkip }) {
             </div>
 
             {/* Approved Tray */}
-            <div className="drop-zone approved-zone" onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'approved')}>
-              <img src={approvedBox} alt="Approved Tray" className="tray-bg" />
-              <div className="tray-contents">
-                {approvedItems.map((_, i) => (
-                  <img key={i} src={approvedCookie} alt="Approved Cookie" className="tray-cookie-img" />
-                ))}
-              </div>
-              <div className="tray-label approved-label">Approved Tray</div>
-            </div>
+            <SortTray type="approved" items={approvedItems} dragging={dragging}
+              onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'approved')} />
           </div>
 
           <div className="level1-footer">
@@ -195,15 +183,7 @@ export default function Level3Game({ onComplete, onSkip }) {
       {/* PHASE 2: TRANSITION (Truck drives off, faulty tray centers) */}
       {phase === 'transition' && (
         <div className="level1-transition-layout">
-          <div className="drop-zone faulty-zone moving-center">
-            <img src={faultyBox} alt="Faulty Tray" className="tray-bg" />
-            <div className="tray-contents">
-              {faultyItems.map((_, i) => (
-                <img key={i} src={faultyCookie} alt="Faulty Cookie" className="tray-cookie-img" />
-              ))}
-            </div>
-            <div className="tray-label faulty-label">Faulty Tray</div>
-          </div>
+          <SortTray type="faulty" items={faultyItems} className="moving-center" />
 
           <div className="truck-shipping">
             <div className="truck-box">Out for Delivery</div>
@@ -220,15 +200,7 @@ export default function Level3Game({ onComplete, onSkip }) {
       {phase === 'instruction' && (
         <div className="level1-instruction-layout">
           <div className="instruction-card">
-            <div className="drop-zone faulty-zone centered">
-              <img src={faultyBox} alt="Faulty Tray" className="tray-bg" />
-              <div className="tray-contents">
-                {faultyItems.map((_, i) => (
-                  <img key={i} src={faultyCookie} alt="Faulty Cookie" className="tray-cookie-img" />
-                ))}
-              </div>
-              <div className="tray-label faulty-label">Faulty Tray</div>
-            </div>
+            <SortTray type="faulty" items={faultyItems} className="centered" />
 
             <p className="instruction-text">
               You have to mark the invalid part in the URL of the fortune before sending for inspection

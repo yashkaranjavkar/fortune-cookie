@@ -1,4 +1,5 @@
 import React from 'react';
+import { useCurrency } from '../utils/currency';
 
 // How-to Interact Assets
 import step1 from '../assets/instructions/1.png';
@@ -44,7 +45,7 @@ export function ObjectiveScreen({ onNext, onBack, stepIndex, totalSteps }) {
   return (
     <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext}>
       <div className="title">Objective</div>
-      <p>Your factory of <span style={{ color: '#e6a817', fontWeight: 'bold' }}>fortune cookies</span> has been sabotaged. The fortunes in the fortune cookies have been compromised and doped with malicious text. It may affect in the reputation of your factory if the batches with these malicious fortune are sent out for delivery.</p>
+      <p>Your factory of <span style={{ color: 'var(--yellow-base)', fontWeight: 'bold' }}>fortune cookies</span> has been sabotaged. The fortunes in the fortune cookies have been compromised and doped with malicious text. It may affect in the reputation of your factory if the batches with these malicious fortune are sent out for delivery.</p>
       <p>So, for today's orders, you have to identity these dopped batches from the samples provided and then give an approval for delivery of those batches.</p>
     </InstructionLayout>
   );
@@ -153,6 +154,7 @@ export function TimerQuestionScreen({ onNext, onBack, stepIndex, totalSteps }) {
 
 /* NEW: Final Timer Screen (with Green Bar and Replay) */
 export function TimerEndScreen({ onNext, onReplay, onBack, stepIndex, totalSteps }) {
+  const currency = useCurrency();
   return (
     <InstructionLayout 
       stepIndex={stepIndex} 
@@ -168,7 +170,7 @@ export function TimerEndScreen({ onNext, onReplay, onBack, stepIndex, totalSteps
         <img src={timerEnd} alt="Timer ends with broken cookie" className="dome-timer-img" />
         <p>
           If you did not sort before the timer ends, that sample is spoilt and the batch won't go out for delivery. 
-          <span style={{ color: 'red' }}> This will cost in loss of ₹800 per fortune cookie left without sorting.</span>
+          <span style={{ color: 'red' }}> This will cost in loss of {currency}800 per fortune cookie left without sorting.</span>
         </p>
       </div>
     </InstructionLayout>

@@ -1,0 +1,82 @@
+/* ============================================================
+   Sorting trays + fortune strip for the Level 1-3 games
+   (own file so it can't be lost from App.css)
+   ============================================================ */
+
+/* ---- Tray ---- */
+.drop-zone.sort-tray {
+  --tone: var(--grey-base);
+  position: relative;
+  box-sizing: border-box;
+  width: 250px;
+  height: 190px;
+  flex-shrink: 0;
+  border: 6px solid var(--tone);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.08), 0 8px 14px -8px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+.sort-tray-faulty   { --tone: var(--error);      background: color-mix(in srgb, var(--pink-light) 35%, var(--beige-elevated)); }
+.sort-tray-approved { --tone: var(--green-base); background: color-mix(in srgb, var(--green-light) 35%, var(--beige-elevated)); }
+
+/* label tab sitting on the top edge */
+.sort-tray-tab {
+  position: absolute; top: -19px; left: 50%; transform: translateX(-50%);
+  padding: 5px 22px;
+  border-radius: var(--radius-full);
+  background: var(--tone); color: var(--ink-inverse);
+  font-family: var(--font-sans); font-weight: 600; font-size: 15px; line-height: 20px;
+  white-space: nowrap;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* the well where sorted cookies collect */
+.sort-tray-well {
+  box-sizing: border-box; width: 100%; height: 100%;
+  padding: 22px 14px 12px;
+  display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 8px;
+  border-radius: 8px;
+}
+.sort-chip { width: 46px; height: auto; animation: sort-chip-in 0.3s ease-out both; }
+.sort-chip-cookie { fill: var(--yellow-base); }
+.sort-chip-shade { fill: var(--yellow-deep); opacity: 0.55; }
+.sort-tray-hint { font-family: var(--font-sans); font-weight: 600; font-size: 16px; color: var(--tone); opacity: 0.85; }
+
+/* a strip is being dragged: tray lifts and shows the drop area */
+.drop-zone.sort-tray.ready {
+  transform: scale(1.04);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--tone) 30%, transparent), 0 12px 18px -8px rgba(0, 0, 0, 0.4);
+}
+.sort-tray.ready .sort-tray-well { outline: 3px dashed var(--tone); outline-offset: -8px; }
+
+/* trays keep their own footprint in the truck / instruction phases */
+.drop-zone.sort-tray.centered { margin: 0 auto; position: relative; }
+
+@keyframes sort-chip-in { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+
+/* ---- Fortune strip that comes out of the opened cookie ---- */
+.fortune-drag.fortune-slip {
+  box-sizing: border-box;
+  width: 210px;
+  top: 64%;
+  padding: 10px 14px;
+  background: #fff;
+  color: var(--ink-primary);
+  border: 1px solid var(--grey-light);
+  border-radius: 1px;
+  font-family: var(--font-sans);
+  font-size: 12px; line-height: 17px; text-align: center;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 8px 12px -5px rgba(60, 40, 10, 0.4);
+  user-select: none;
+  transition: opacity 0.15s ease-out;
+}
+.fortune-drag.fortune-slip:active { cursor: grabbing; }
+.fortune-drag.fortune-slip.dragging { opacity: 0.45; }
+
+/* timer above the opened dome */
+.timer-display { font-family: var(--font-sans); font-variant-numeric: tabular-nums; color: var(--error); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sort-chip { animation: none; }
+  .drop-zone.sort-tray { transition: none; }
+}

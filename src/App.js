@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import './design-system/tokens.css';
 import './App.css';
+import { CurrencyContext, currencyFor } from './utils/currency';
 
 import {
   SupervisionIntroScreen,
@@ -172,6 +174,7 @@ function App() {
   ];
 
   return (
+    <CurrencyContext.Provider value={currencyFor(region)}>
     <div className="app">
       {/* ONBOARDING FLOW */}
       {step === 1 && <StartScreen employeeId={employeeId} setEmployeeId={setEmployeeId} designation={designation} setDesignation={setDesignation} onConfirm={handleConfirm} />}
@@ -219,7 +222,7 @@ function App() {
       {/* LEVEL 1 INSTRUCTIONS */}
       {step === 18 && <URLsPartScreen onNext={() => setStep(19)} />}
       {step === 19 && <ValidRuleScreen onBack={() => setStep(18)} onNext={() => setStep(20)} />}
-      {step === 20 && <InvalidURLSequence onNext={() => setStep(21)} />}
+      {step === 20 && <InvalidURLSequence onBack={() => setStep(19)} onNext={() => setStep(21)} />}
       {step === 21 && <ValidVsFaultyScreen onBack={() => setStep(20)} onNext={() => setStep(22)} />}
       {step === 22 && <BalloonScreen onReplay={() => setStep(18)} onNext={() => setStep(23)} />}
       
@@ -388,6 +391,7 @@ function App() {
         </div>
       )}
     </div>
+    </CurrencyContext.Provider>
   );
 }
 

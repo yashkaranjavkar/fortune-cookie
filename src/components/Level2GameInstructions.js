@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import InvalidURLExplainer from './InvalidURLExplainer';
 
 const L2Layout = ({ stepIndex, totalSteps, onBack, onNext, title, children }) => (
   <div className="instruction-screen">
@@ -106,25 +107,7 @@ export function InvalidURLSplitScreen({ onBack, onNext, stepIndex, totalSteps })
 export function InvalidURLFullScreen({ onBack, onNext, stepIndex, totalSteps }) {
   return (
     <L2Layout stepIndex={stepIndex} totalSteps={totalSteps} title="Identifying invalid URL" onBack={onBack} onNext={onNext}>
-      <div className="l2-url-parts">
-        <div className="l2-url-part l2-part-blue"><span>https://</span><small>Protocol</small></div>
-        <div className="l2-url-part l2-part-yellow"><span>gtms</span><small>Sub-domain</small></div>
-        <div className="l2-url-part l2-part-grey"><span>.</span><small>Dot</small></div>
-        <div className="l2-url-part l2-part-green"><span>ultimatix.net</span><small>Domain</small></div>
-      </div>
-      <p className="l2-para-center">Sub-domains does not necessarily need to have "www". Here, "gtms" is a valid sub-domain.</p>
-
-      <div className="l2-domain-info">
-        <div className="l2-info-title">🔴 Pay attention to the domain</div>
-        <div className="l2-domain-row"><span>🔒 https://www.tcs.com</span><span className="l2-icon-check">✅</span><span>This site belongs to TCS</span></div>
-        <div className="l2-domain-row"><span>🔒 https://www.tcs.random.com</span><span className="l2-icon-warn">❗</span><span>This belongs to "random" and not TCS</span></div>
-        <div className="l2-domain-row"><span>🔒 https://www.tcs-login.com</span><span className="l2-icon-cross">❌</span><span>This belongs to "tcs-login", Which is a fake.</span></div>
-      </div>
-
-      <div className="l2-ip-row">
-        <span>🔒 https://<span className="l2-red-box">102.345.524.23</span>login.com</span>
-        <span className="l2-ip-note">Generally, URLs with IP addresses are invalid</span>
-      </div>
+      <InvalidURLExplainer />
     </L2Layout>
   );
 }

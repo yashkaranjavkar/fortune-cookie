@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import InvalidURLExplainer from './InvalidURLExplainer';
+import { useCurrency } from '../utils/currency';
+import cookieIntact from '../assets/cookies/cookie-intact.png';
+import cookieBroken from '../assets/cookies/broken-cookie.png';
 
 // Shared Level 1 Layout
 const LevelOneLayout = ({ title, onBack, onNext, children }) => (
@@ -16,17 +20,56 @@ const LevelOneLayout = ({ title, onBack, onNext, children }) => (
   </div>
 );
 
-// Screen 1: Payment for sorting
+// Screen 1: Payment for sorting - rewards explainer
+const REWARD_CASES = [
+  {
+    key: 'correct', kind: 'earn', amount: '+', value: 1000,
+    title: 'Sorting out one faulty or valid fortune',
+    note: 'Right tray, right call',
+    icons: [cookieIntact, cookieBroken]
+  },
+  {
+    key: 'faulty-as-valid', kind: 'lose', amount: '−', value: 800,
+    title: 'Sorting out one faulty fortune as valid',
+    note: 'A faulty one slipped through',
+    icons: [cookieBroken]
+  },
+  {
+    key: 'valid-as-faulty', kind: 'lose', amount: '−', value: 500,
+    title: 'Sorting out one valid fortune as faulty',
+    note: 'A good one was turned away',
+    icons: [cookieIntact]
+  }
+];
+
 export function PaymentScreen({ onBack, onNext }) {
+  const currency = useCurrency();
   return (
     <LevelOneLayout title="Payment for sorting" onBack={onBack} onNext={onNext}>
-      <div className="payment-table">
-        <div className="payment-header"><span>Cases</span><span>Incentive</span></div>
-        <div className="payment-row"><span>Sorting out one<br/>faulty or valid fortune</span><span className="green-incentive">......... + ₹1000</span></div>
-        <div className="payment-row"><span>Sorting out one faulty fortune<br/>as valid</span><span className="red-incentive">......... - ₹800</span></div>
-        <div className="payment-row"><span>Sorting out one valid fortune<br/>as faulty</span><span className="red-incentive">......... - ₹500</span></div>
+      <div className="reward-screen">
+        <div className="reward-hero">
+          <div className={`reward-coin${currency.length > 1 ? ' wide' : ''}`} aria-hidden="true">{currency}</div>
+          <div className="reward-hero-text">
+            <div className="reward-headline">Every sort counts towards your incentive</div>
+            <div className="reward-sub">Your running total changes with each fortune you place.</div>
+          </div>
+        </div>
+
+        <div className="reward-list">
+          {REWARD_CASES.map((c, i) => (
+            <div key={c.key} className={`reward-card reward-${c.kind}`} style={{ animationDelay: `${0.12 + i * 0.1}s` }}>
+              <div className="reward-icons">
+                {c.icons.map((src, n) => <img key={n} src={src} alt="" />)}
+              </div>
+              <div className="reward-info">
+                <div className="reward-title">{c.title}</div>
+                <div className="reward-note">{c.note}</div>
+              </div>
+              <div className="reward-amount">{c.amount} {currency}{c.value}</div>
+            </div>
+          ))}
+        </div>
       </div>
-      {/* Removed the middle 'Next' button */}
     </LevelOneLayout>
   );
 }
@@ -38,7 +81,7 @@ export function URLsPartScreen({ onBack, onNext }) {
       <div className="center-content">
         <div className="black-label">URLs are part of the fortunes</div>
         <div className="fortune-box">
-          The brand new trailer of your favorite movie is soon going to stream on <span className="highlight-grey">https://www.youtube.com/</span>
+          The brand new trailer of your favorite movie is soon going to stream on <span className="url-highlight">https://www.youtube.com/</span>
           <span className="url-arrow">← URL</span>
         </div>
       </div>
@@ -74,12 +117,12 @@ export function InvalidInitialScreen({ onBack, onNext }) {
   );
 }
 
-export function InvalidURLSequence({ onNext }) {
+export function InvalidURLSequence({ onBack, onNext }) {
   const [stage, setStage] = useState(0); // 0: Initial, 1: Split, 2: Logic
 
   useEffect(() => {
-    const timer1 = setTimeout(() => setStage(1), 1500); // 1.5s on Initial
-    const timer2 = setTimeout(() => setStage(2), 3500); // 2s on Split
+    const timer1 = setTimeout(() => setStage(1), 700); // plain URL
+    const timer2 = setTimeout(() => setStage(2), 1200); // split apart, then tiles
 
     return () => {
       clearTimeout(timer1);
@@ -91,52 +134,13 @@ export function InvalidURLSequence({ onNext }) {
     <LevelOneLayout
       title="Identifying invalid URL"
       // Hide buttons until the last stage
-      onBack={undefined}
-      onNext={stage === 2 ? onNext : undefined} 
+      onBack={stage === 2 ? onBack : undefined}
+      onNext={stage === 2 ? onNext : undefined}
     >
-      {/* STAGE 0: Initial URL */}
-      {stage === 0 && (
-        <div className="center-content">
-          <p className="large-url">https://gtms.ultimatix.net</p>
-        </div>
-      )}
-
-      {/* STAGE 1: Split URL */}
-      {stage === 1 && (
-        <div className="center-content">
-          <div className="split-url">
-            <span>https://</span>
-            <span>gtms</span>
-            <span>.</span>
-            <span>ultimatix.net</span>
-          </div>
-        </div>
-      )}
-
-      {/* STAGE 2: Full Logic */}
-      {stage === 2 && (
-        <div className="center-content">
-          <div className="color-coded-url">
-            <div className="url-part blue"><span>https://</span><small>Protocol</small></div>
-            <div className="url-part yellow"><span>gtms</span><small>Sub-domain</small></div>
-            <div className="url-part grey"><span>.</span><small>Dot</small></div>
-            <div className="url-part green"><span>ultimatix.net</span><small>Domain</small></div>
-          </div>
-          <p>Sub-domains does not necessarily need to have "www". Here, "gtms" is a valid sub-domain.</p>
-          
-          <div className="domain-info-box">
-            <div className="info-title">🔴 Pay attention to the domain</div>
-            <div className="domain-row"><span>🔒 https://www.tcs.com</span> <span className="check-icon">✅</span> <span>This site belongs to TCS</span></div>
-            <div className="domain-row"><span>🔒 https://www.tcs.random.com</span> <span className="warn-icon">❗</span> <span>This belongs to "random" and not TCS</span></div>
-            <div className="domain-row"><span>🔒 https://www.tcs-login.com</span> <span className="cross-icon">❌</span> <span>This belongs to "tcs-login", Which is a fake.</span></div>
-          </div>
-
-          <div className="ip-address-row">
-            <span>🔒 https://<span className="red-box">102.345.524.23</span>login.com</span>
-            <span>Generally, URLs with IP addresses are invalid</span>
-          </div>
-        </div>
-      )}
+      {/* One persistent scene: the URL splits into its parts, which become the tiles below */}
+      <div className="center-content ue-scene">
+        <InvalidURLExplainer stage={stage} />
+      </div>
     </LevelOneLayout>
   );
 }
