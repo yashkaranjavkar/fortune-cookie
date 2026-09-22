@@ -1,0 +1,77 @@
+/* Sorting Fortunes: both trays shown side by side, one short line each - no duplicate sentences. */
+
+.sf-lead {
+  margin: 16px 0 0;
+  font-size: 15px;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.sf-trays {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 28px;
+  margin-top: 20px;
+}
+
+.sf-tray-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 220px;
+}
+
+.sf-tray-label {
+  margin-bottom: 10px;
+  padding: 6px 18px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink-inverse);
+}
+.sf-tray-label.faulty { background: var(--maroon-deep); }
+.sf-tray-label.approved { background: var(--green-deep); }
+
+.sf-tray-box {
+  width: 100%;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.sf-tray-box.faulty { background: var(--pink-light); border-color: var(--error); }
+.sf-tray-box.approved { background: var(--green-light); border-color: var(--green-base); }
+
+.sf-tray-caption {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--ink-primary);
+}
+
+.sf-tray-dropzone {
+  width: 100%;
+  background: rgba(255,255,255,0.6);
+  border: 1px dashed rgba(0,0,0,0.25);
+  border-radius: 8px;
+  padding: 14px 0;
+  text-align: center;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.sf-or {
+  align-self: center;
+  font-family: var(--font-title);
+  font-style: italic;
+  font-size: 18px;
+  color: var(--ink-soft);
+  margin-top: 46px;
+}

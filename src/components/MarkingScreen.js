@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import faultyCookie from '../assets/demo/faulty-cookie.png';
+import TimerDial from './TimerDial';
+import './MarkingScreen.css';
+
+// Hand-drawn highlighter icon, matching the line-icon style used elsewhere in the app
+const HighlighterIcon = () => (
+  <svg className="marking-instruction-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M13.5 3.5 L20.5 10.5 L11 20 L4 20 L4 13 Z" />
+    <path d="M11 20 L4 13" />
+    <path d="M9 6 L18 15" />
+  </svg>
+);
 
 const HighlightedText = ({ text, selectedText }) => {
   if (!selectedText || !text.includes(selectedText)) return text;
@@ -74,15 +84,19 @@ export default function MarkingScreen({ faultyItems, onNext }) {
     <div className="marking-screen">
       <div className="marking-header">
         <div className="tray-label faulty-label">Faulty Tray</div>
-        <div className="timer-circle">{timer}</div>
+        <TimerDial value={timer} />
+      </div>
+
+      <div className="marking-instruction">
+        <HighlighterIcon />
+        Select the part of each fortune that looks suspicious to mark it
       </div>
 
       <div className="marking-list">
         {Array.from({ length: itemCount }).map((_, index) => (
           <div key={index} className="marking-row">
-            <img src={faultyCookie} alt="Broken Cookie" className="marking-cookie" />
-            <div 
-              className="fortune-paper" 
+            <div
+              className="fortune-paper"
               ref={el => cardRefs.current[index] = el}
               onMouseUp={() => handleMouseUp(index)}
             >

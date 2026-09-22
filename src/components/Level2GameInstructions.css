@@ -1,0 +1,45 @@
+/* The Next button is absolutely positioned over the card (unlike Level 1's card,
+   where it sits in normal flow), so tall content like the full URL explainer needs
+   reserved space at the bottom or the last row gets covered instead of pushing it down. */
+.l2-content-area { padding-bottom: 60px; box-sizing: border-box; }
+
+/* Level 2 instruction screens, brought in line with Level 1's look:
+   the .title/.fortune-box/.valid-box/.faulty-box/.rule-text classes are reused
+   directly from App.css so both levels render identically; these are just the
+   pieces unique to Level 2 (the context/URL breakdown, the shared closing note). */
+
+.context-highlight {
+  background: color-mix(in srgb, var(--yellow-light) 55%, #fff);
+  color: var(--ink-primary);
+  border-bottom: 2px solid var(--yellow-deep);
+  border-radius: 2px;
+  padding: 1px 6px;
+  font-weight: 600;
+}
+
+.l2-legend {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  margin-top: 22px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.l2-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.l2-legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
+.l2-legend-swatch.context { background: color-mix(in srgb, var(--yellow-light) 55%, #fff); border: 1px solid var(--yellow-deep); }
+.l2-legend-swatch.url { background: var(--pink-light); border: 1px solid var(--error); }
+
+/* ContextUnrelatedScreen stacks two .faulty-box examples; give them breathing room
+   (the shared rule only adds bottom margin to .valid-box, since elsewhere there's
+   only ever one faulty-box and nothing needs to follow it). */
+.l2-content-area .faulty-box { margin-bottom: 16px; }
+
+.l2-shared-note {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--ink-soft);
+  text-align: center;
+}

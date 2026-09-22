@@ -1,0 +1,42 @@
+/* Balloon cluster, top-left corner of a sorting game screen - click one to review the rules. */
+
+.l1-balloons-wrap {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 128px;
+  z-index: 5;
+}
+.l1-balloons { width: 100%; height: auto; display: block; overflow: visible; }
+
+.l1-balloon-string { fill: none; stroke: var(--grey-base); stroke-width: 1.5; }
+.l1-balloon-shine { fill: none; stroke: rgba(255,255,255,0.55); stroke-width: 2.5; stroke-linecap: round; }
+
+.l1-balloon-body { stroke: rgba(0,0,0,0.12); stroke-width: 1.5; }
+
+.l1-balloon {
+  cursor: pointer;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.15s ease;
+  animation: l1-bob 3.6s ease-in-out infinite;
+}
+.l1-balloon:hover { transform: scale(1.05); }
+.l1-balloon:active { transform: scale(0.94); }
+
+.l1-balloons-count {
+  margin-top: 4px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+@keyframes l1-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .l1-balloon { animation: none; }
+}

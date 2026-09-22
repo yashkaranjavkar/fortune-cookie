@@ -1,10 +1,47 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SortTray from './SortTray';
+import BalloonCluster from './BalloonCluster';
+import RulesOverlay from './RulesOverlay';
+import InvalidURLExplainer from './InvalidURLExplainer';
 import { pickFortune } from '../utils/fortunePool';
+import './DomeFocus.css';
+import './SampleFortune.css';
+import './Level2GameInstructions.css';
 
 import domeClosed from '../assets/demo/dome-closed.png';
 import domeLifted from '../assets/demo/dome-lifted.png';
 import brokenCookie from '../assets/demo/broken-cookie.png';
+
+// The rules taught in this level's own instructions, revisitable mid-game.
+const RULE_SLIDES = [
+  {
+    title: 'Identifying Faulty Fortune',
+    content: (
+      <>
+        <p className="l1-rules-text">1. Valid URL + context that matches it = valid fortune.</p>
+        <p className="l1-rules-text">2. Context unrelated to the URL &mdash; even a real one &mdash; is still faulty.</p>
+
+        <div className="l1-rules-box valid">
+          <span className="l1-rules-box-label valid">Valid</span>
+          <div className="l1-rules-fortune-box">
+            <span className="context-highlight">The brand new trailer of your favorite movie is soon going to stream on</span> https://www.youtube.com/
+          </div>
+        </div>
+
+        <div className="l1-rules-box faulty">
+          <span className="l1-rules-box-label faulty">Faulty</span>
+          <div className="l1-rules-fortune-box">
+            <span className="context-highlight">You will make your payments safer with the help of</span> <span className="l1-rules-highlight">https://www.youttube.com/</span>
+          </div>
+        </div>
+      </>
+    )
+  },
+  {
+    title: 'Identifying invalid URL',
+    content: <InvalidURLExplainer stage={2} />
+  }
+];
 
 export default function Level2Game({ onComplete, onSkip }) {
   const TOTAL = 5;
@@ -20,13 +57,16 @@ export default function Level2Game({ onComplete, onSkip }) {
   const [approvedItems, setApprovedItems] = useState([]);
   const [phase, setPhase] = useState('sorting'); // sorting | transition | instruction
 
+  const [poppedBalloons, setPoppedBalloons] = useState({ orange: false, pink: false, green: false });
+  const [rulesOpen, setRulesOpen] = useState(false);
+  const [ruleSlide, setRuleSlide] = useState(0);
+
   const hoverTimeout = useRef(null);
   const intervalRef = useRef(null);
 
-  // Countdown timer
+  // Countdown timer - paused (not reset) while the rules overlay is open
   useEffect(() => {
-    if (activeDome !== null && domes[activeDome].status === 'open') {
-      setTimer(10);
+    if (activeDome !== null && domes[activeDome].status === 'open' && !rulesOpen) {
       intervalRef.current = setInterval(() => {
         setTimer((prev) => {
           if (prev <= 1) {
@@ -39,15 +79,22 @@ export default function Level2Game({ onComplete, onSkip }) {
       }, 1000);
     }
     return () => clearInterval(intervalRef.current);
-  }, [activeDome]);
+  }, [activeDome, rulesOpen]);
 
   const handleMouseEnter = (index) => {
     if (domes[index].status === 'closed') {
       hoverTimeout.current = setTimeout(() => {
         setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'open', text: pickFortune(prev.map(x => x.text)) } : d));
+        setTimer(10);
         setActiveDome(index);
       }, 300);
     }
+  };
+
+  const handlePopBalloon = (key) => {
+    setPoppedBalloons(prev => ({ ...prev, [key]: true }));
+    setRuleSlide(0);
+    setRulesOpen(true);
   };
 
   const handleMouseLeave = () => clearTimeout(hoverTimeout.current);
@@ -67,7 +114,7 @@ export default function Level2Game({ onComplete, onSkip }) {
     if (trayType === 'faulty') {
       setFaultyItems(prev => [...prev, index]);
     } else {
-      setApprovedItems(prev => [...prev, index]);
+      setApprovedItems(prev => [...prev, { text: domes[index].text }]);
     }
 
     setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: trayType } : d));
@@ -116,9 +163,27 @@ export default function Level2Game({ onComplete, onSkip }) {
 
   const isComplete = sortedCount === TOTAL;
   const counterText = `${sortedCount}/${TOTAL}`;
+  const usesLeft = Object.values(poppedBalloons).filter(Boolean).length < 3
+    ? 3 - Object.values(poppedBalloons).filter(Boolean).length
+    : 0;
 
   return (
     <div className="level1-game-screen">
+      {activeDome !== null && <div className="dome-focus-backdrop" />}
+
+      {!isComplete && (
+        <BalloonCluster popped={poppedBalloons} onPop={handlePopBalloon} usesLeft={usesLeft} />
+      )}
+
+      {rulesOpen && (
+        <RulesOverlay
+          slides={RULE_SLIDES}
+          slide={ruleSlide}
+          onBack={() => setRuleSlide(s => Math.max(0, s - 1))}
+          onNext={() => setRuleSlide(s => Math.min(RULE_SLIDES.length - 1, s + 1))}
+          onClose={() => setRulesOpen(false)}
+        />
+      )}
 
       {/* ---------- PHASE 1: SORTING ---------- */}
       {phase === 'sorting' && (
@@ -215,13 +280,13 @@ export default function Level2Game({ onComplete, onSkip }) {
               <span className="invalid-url">http://www.youtube.com/</span> 🖊️
             </div>
 
-            <button className="next-btn" onClick={() => onComplete(faultyItems)}>
+            <button className="next-btn" onClick={() => onComplete(faultyItems, approvedItems)}>
               Next
             </button>
           </div>
 
           {/* Skip button in bottom-right corner */}
-          <button className="instruction-skip-btn" onClick={() => onSkip(faultyItems)}>
+          <button className="instruction-skip-btn" onClick={() => onSkip(faultyItems, approvedItems)}>
             Skip &gt;&gt;&gt;
           </button>
         </div>

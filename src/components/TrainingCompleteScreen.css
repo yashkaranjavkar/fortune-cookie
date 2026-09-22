@@ -1,0 +1,43 @@
+/* "Good job!" screen shown between the training zone and the sorting instructions. */
+
+.tc-body { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.tc-scene { width: 100%; max-width: 340px; margin: 0 auto 8px; }
+.tc-svg { width: 100%; height: auto; display: block; }
+
+.tc-glow { fill: var(--yellow-light); opacity: 0.55; }
+
+.tc-sparkle {
+  fill: var(--yellow-base);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tc-twinkle 2.6s ease-in-out infinite;
+}
+
+.tc-ribbon-band { fill: var(--pink-base); }
+.tc-ribbon-tail { fill: var(--pink-deep); }
+.tc-ribbon-text {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  fill: var(--ink-inverse);
+}
+
+.tc-bench { fill: var(--brown-base); }
+.tc-bench-leg { fill: var(--brown-light); }
+
+.tc-tray { fill: var(--grey-light); stroke: var(--grey-base); stroke-width: 2; }
+.tc-cookie { fill: var(--yellow-base); }
+.tc-cookie-shade { fill: var(--yellow-deep); opacity: 0.55; }
+
+.tc-pin-body { fill: var(--brown-light); }
+.tc-pin-handle { fill: var(--brown-base); }
+
+@keyframes tc-twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.7); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tc-sparkle { animation: none; }
+}

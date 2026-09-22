@@ -1,17 +1,18 @@
 import React from 'react';
 import { useCurrency } from '../utils/currency';
+import './ObjectiveScreen.css';
+import './EventScreen.css';
+import './TimerEndScreen.css';
+import './SortingFortunesScreen.css';
 
 // How-to Interact Assets
 import step1 from '../assets/instructions/1.png';
 import step2 from '../assets/instructions/2.png';
 import step3 from '../assets/instructions/3.png';
 
-// Sorting Assets
+// Sorting Assets - the dome/timer illustration is kept; the tray mock-images
+// are replaced below with real markup so both trays' info fits on one screen.
 import domeTimer from '../assets/instructions/dome-timer.png';
-import faultyTray from '../assets/instructions/faulty-tray.png';
-import approvedTray from '../assets/instructions/approved-tray.png';
-import faultyBox from '../assets/instructions/faulty-box.png';
-import approvedBox from '../assets/instructions/approved-box.png';
 
 // New Timer Assets
 import timerQuestion from '../assets/instructions/timer-question.png';
@@ -45,9 +46,67 @@ export function ObjectiveScreen({ onNext, onBack, stepIndex, totalSteps }) {
   return (
     <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext}>
       <div className="title">Objective</div>
-      <p>Your factory of <span style={{ color: 'var(--yellow-base)', fontWeight: 'bold' }}>fortune cookies</span> has been sabotaged. The fortunes in the fortune cookies have been compromised and doped with malicious text. It may affect in the reputation of your factory if the batches with these malicious fortune are sent out for delivery.</p>
-      <p>So, for today's orders, you have to identity these dopped batches from the samples provided and then give an approval for delivery of those batches.</p>
+      <p className="obj-lead">
+        Your factory has been sabotaged &mdash; some fortune cookies were doped with <strong>malicious fortunes</strong>.
+      </p>
+
+      <ol className="obj-steps">
+        <li className="obj-step">
+          <span className="obj-step-marker">
+            <span className="obj-step-num">1</span>
+            <span className="obj-step-line" aria-hidden="true" />
+          </span>
+          <span className="obj-step-text">
+            <span className="obj-step-title">Inspect</span>
+            <span className="obj-step-desc">Check today's samples for doped fortunes</span>
+          </span>
+        </li>
+        <li className="obj-step">
+          <span className="obj-step-marker">
+            <span className="obj-step-num">2</span>
+          </span>
+          <span className="obj-step-text">
+            <span className="obj-step-title">Approve</span>
+            <span className="obj-step-desc">Clear the clean batches for delivery</span>
+          </span>
+        </li>
+      </ol>
     </InstructionLayout>
+  );
+}
+
+const EVT_BALLOONS = [
+  { cx: 76, color: 'var(--pink-base)', delay: '0s' },
+  { cx: 180, color: 'var(--yellow-base)', delay: '0.45s' },
+  { cx: 284, color: 'var(--orange-base)', delay: '0.9s' }
+];
+const EVT_CRATES = [34, 122, 210, 298];
+
+function EventScene() {
+  return (
+    <svg className="evt-svg" viewBox="0 0 360 150" role="img"
+         aria-label="Balloons over four packed batches of fortune cookies, ready for a birthday party bulk order">
+      {EVT_BALLOONS.map(b => (
+        <g key={b.cx} className="evt-balloon" style={{ animationDelay: b.delay }}>
+          <path className="evt-balloon-string" d={`M${b.cx} 48 L${b.cx} 68`} />
+          <ellipse className="evt-balloon-body" cx={b.cx} cy="26" rx="15" ry="19" style={{ fill: b.color }} />
+          <path className="evt-balloon-shine" d={`M${b.cx - 6} 18 Q${b.cx - 8} 24 ${b.cx - 4} 28`} />
+        </g>
+      ))}
+
+      <rect className="evt-shelf" x="16" y="122" width="328" height="8" rx="3" />
+
+      {EVT_CRATES.map((x, i) => (
+        <g key={x}>
+          <rect className="evt-crate-body" x={x} y="76" width="56" height="46" rx="4" />
+          <rect className="evt-crate-lid" x={x - 3} y="76" width="62" height="10" rx="3" />
+          <rect className="evt-crate-ribbon-v" x={x + 24} y="76" width="8" height="46" />
+          <rect className="evt-crate-ribbon-h" x={x} y="95" width="56" height="8" />
+          <circle className="evt-crate-tag" cx={x + 28} cy="99" r="9" />
+          <text className="evt-crate-tag-text" x={x + 28} y="102.5" textAnchor="middle">{i + 1}</text>
+        </g>
+      ))}
+    </svg>
   );
 }
 
@@ -55,8 +114,26 @@ export function EventScreen({ onNext, onBack, stepIndex, totalSteps }) {
   return (
     <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext}>
       <div className="title">Event - Office Birthday Party</div>
-      <p>Today you have to deliver a bulk order at a Birthday Party. The order consists of 400 fortune cookies which will be packed and sent in 4 different batches.</p>
-      <p>There will be 4 samples of these batches in front of you. From which you need to identify the doped fortune(s).</p>
+
+      <div className="evt-scene">
+        <EventScene />
+      </div>
+
+      <p className="evt-lead">A bulk order just came in for a birthday party.</p>
+
+      <div className="evt-stats">
+        <div className="evt-stat">
+          <span className="evt-stat-num">400</span>
+          <span className="evt-stat-label">Fortune cookies</span>
+        </div>
+        <span className="evt-divider" aria-hidden="true" />
+        <div className="evt-stat">
+          <span className="evt-stat-num">4</span>
+          <span className="evt-stat-label">Batches</span>
+        </div>
+      </div>
+
+      <p className="evt-task">At the start, 4 samples will be placed in front of you &mdash; spot the <strong>doped fortune(s)</strong>.</p>
     </InstructionLayout>
   );
 }
@@ -89,50 +166,37 @@ export function HowToInteractScreen({ onNext, onBack, stepIndex, totalSteps }) {
   );
 }
 
+// Sorting Fortunes: what used to be spread across 3 near-identical screens
+// (plain trays, then faulty highlighted, then approved highlighted) collapsed into one -
+// both trays' rules and outcomes are shown together since they're really one idea.
 export function SortingIntroScreen({ onNext, onBack, stepIndex, totalSteps }) {
   return (
     <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext}>
       <div className="title">Sorting Fortunes</div>
-      
+
       <div className="sorting-content">
         <img src={domeTimer} alt="10 sec timer" className="dome-timer-img" />
 
-        <div className="sorting-options">
-          <img src={faultyTray} alt="Faulty Tray" className="tray-option-img" />
-          <span className="or-text">OR</span>
-          <img src={approvedTray} alt="Approved Tray" className="tray-option-img" />
-        </div>
-      </div>
-    </InstructionLayout>
-  );
-}
+        <p className="sf-lead">Drag each fortune into the tray that matches your decision.</p>
 
-export function FaultyTrayScreen({ onNext, onBack, stepIndex, totalSteps }) {
-  return (
-    <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext}>
-      <div className="title">Sorting Fortunes</div>
-      
-      <div className="sorting-content">
-        <img src={domeTimer} alt="10 sec timer" className="dome-timer-img" />
-        <div className="sorting-options">
-          <img src={faultyBox} alt="Faulty Box" className="tray-option-img" />
-          <img src={approvedTray} alt="Approved Tray" className="tray-option-img" />
-        </div>
-      </div>
-    </InstructionLayout>
-  );
-}
+        <div className="sf-trays">
+          <div className="sf-tray-col">
+            <div className="sf-tray-label faulty">Faulty Tray</div>
+            <div className="sf-tray-box faulty">
+              <div className="sf-tray-caption">Sent for inspection</div>
+              <div className="sf-tray-dropzone">Drag &amp; Drop</div>
+            </div>
+          </div>
 
-export function ApprovedTrayScreen({ onNext, onBack, stepIndex, totalSteps }) {
-  return (
-    <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext}>
-      <div className="title">Sorting Fortunes</div>
-      
-      <div className="sorting-content">
-        <img src={domeTimer} alt="10 sec timer" className="dome-timer-img" />
-        <div className="sorting-options">
-          <img src={faultyTray} alt="Faulty Tray" className="tray-option-img" />
-          <img src={approvedBox} alt="Approved Box" className="tray-option-img" />
+          <span className="sf-or">OR</span>
+
+          <div className="sf-tray-col">
+            <div className="sf-tray-label approved">Approved Tray</div>
+            <div className="sf-tray-box approved">
+              <div className="sf-tray-caption">Dispatched for delivery</div>
+              <div className="sf-tray-dropzone">Drag &amp; Drop</div>
+            </div>
+          </div>
         </div>
       </div>
     </InstructionLayout>
@@ -168,10 +232,15 @@ export function TimerEndScreen({ onNext, onReplay, onBack, stepIndex, totalSteps
       
       <div className="sorting-content">
         <img src={timerEnd} alt="Timer ends with broken cookie" className="dome-timer-img" />
-        <p>
-          If you did not sort before the timer ends, that sample is spoilt and the batch won't go out for delivery. 
-          <span style={{ color: 'red' }}> This will cost in loss of {currency}800 per fortune cookie left without sorting.</span>
+
+        <p className="tme-lead">
+          If a sample isn&rsquo;t sorted before the timer runs out, it&rsquo;s spoilt &mdash; that batch won&rsquo;t go out for delivery.
         </p>
+
+        <div className="tme-cost">
+          <span className="tme-cost-num">{currency}800</span>
+          <span className="tme-cost-label">Lost per unsorted cookie</span>
+        </div>
       </div>
     </InstructionLayout>
   );

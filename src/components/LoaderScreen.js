@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import faultyBox from '../assets/demo/faulty-box.png';
-import faultyCookie from '../assets/demo/faulty-cookie.png';
+import SortTray from './SortTray';
+import './LoaderScreen.css';
 
 export default function LoaderScreen({ faultyItems, onComplete }) {
   const count = faultyItems.length > 0 ? faultyItems.length : 2;
+  const items = Array.from({ length: count });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -14,16 +15,7 @@ export default function LoaderScreen({ faultyItems, onComplete }) {
 
   return (
     <div className="loader-screen">
-      <div className="tray-label faulty-label">Marked Tray</div>
-      
-      <div className="marking-tray-box">
-        <img src={faultyBox} alt="Faulty Tray" className="tray-bg" />
-        <div className="tray-contents">
-          {Array.from({ length: count }).map((_, i) => (
-            <img key={i} src={faultyCookie} alt="Faulty Cookie" className="tray-cookie-img" />
-          ))}
-        </div>
-      </div>
+      <SortTray type="faulty" items={items} label="Marked Tray" className="loader-tray" />
 
       <div className="loader-text">Going for inspection...</div>
     </div>

@@ -1,0 +1,33 @@
+/* Lighter background, readable "Faulty Tray" label, no cookie icon beside each strip,
+   and a proper stopwatch dial instead of a plain red circle. */
+
+.marking-screen { background: color-mix(in srgb, var(--pink-light) 28%, #fff); }
+
+/* .tray-label and .faulty-label fight over color/background elsewhere in App.css via
+   !important; this scoped, higher-specificity rule settles it for this screen only. */
+.marking-screen .tray-label.faulty-label {
+  background: transparent !important;
+  color: var(--maroon-deep) !important;
+  text-shadow: none !important;
+}
+
+/* Prominent instruction: what the player is actually supposed to do on this screen */
+.marking-instruction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 80%;
+  max-width: 800px;
+  margin: 0 auto 24px;
+  padding: 12px 22px;
+  background: color-mix(in srgb, var(--yellow-light) 45%, #fff);
+  border: 1px solid var(--yellow-base);
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink-primary);
+  text-align: center;
+}
+.marking-instruction-icon { flex-shrink: 0; color: var(--orange-deep); }

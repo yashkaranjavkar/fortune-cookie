@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import InvalidURLExplainer from './InvalidURLExplainer';
+import './EventScreen.css';
+import './Level2GameInstructions.css';
 
 const L2Layout = ({ stepIndex, totalSteps, onBack, onNext, title, children }) => (
   <div className="instruction-screen">
     {onBack && stepIndex > 0 && <button className="back-btn" onClick={onBack}>←</button>}
     <div className="instruction-card">
-      {title && <div className="job-title" style={{ marginBottom: '30px' }}>{title}</div>}
+      {title && <div className="title">{title}</div>}
       <div className="l2-content-area">
         {children}
       </div>
@@ -17,15 +19,65 @@ const L2Layout = ({ stepIndex, totalSteps, onBack, onNext, title, children }) =>
   </div>
 );
 
+// Same balloons-over-crates scene as Level 1's Event screen, just with 5 crates for
+// the 5-batch farewell order instead of 4.
+const EVT2_BALLOONS = [
+  { cx: 60, color: 'var(--pink-base)', delay: '0s' },
+  { cx: 200, color: 'var(--yellow-base)', delay: '0.45s' },
+  { cx: 340, color: 'var(--orange-base)', delay: '0.9s' }
+];
+const EVT2_CRATES = [20, 88, 156, 224, 292];
+
+function EventTwoScene() {
+  return (
+    <svg className="evt-svg" viewBox="0 0 400 150" role="img"
+         aria-label="Balloons over five packed batches of fortune cookies, ready for a farewell party bulk order">
+      {EVT2_BALLOONS.map(b => (
+        <g key={b.cx} className="evt-balloon" style={{ animationDelay: b.delay }}>
+          <path className="evt-balloon-string" d={`M${b.cx} 48 L${b.cx} 68`} />
+          <ellipse className="evt-balloon-body" cx={b.cx} cy="26" rx="14" ry="18" style={{ fill: b.color }} />
+          <path className="evt-balloon-shine" d={`M${b.cx - 6} 18 Q${b.cx - 8} 24 ${b.cx - 4} 28`} />
+        </g>
+      ))}
+
+      <rect className="evt-shelf" x="14" y="122" width="372" height="8" rx="3" />
+
+      {EVT2_CRATES.map((x, i) => (
+        <g key={x}>
+          <rect className="evt-crate-body" x={x} y="78" width="48" height="44" rx="4" />
+          <rect className="evt-crate-lid" x={x - 3} y="78" width="54" height="9" rx="3" />
+          <rect className="evt-crate-ribbon-v" x={x + 20} y="78" width="8" height="44" />
+          <rect className="evt-crate-ribbon-h" x={x} y="96" width="48" height="8" />
+          <circle className="evt-crate-tag" cx={x + 24} cy="100" r="8" />
+          <text className="evt-crate-tag-text" x={x + 24} y="103" textAnchor="middle">{i + 1}</text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
 export function EventTwoScreen({ onNext, stepIndex, totalSteps }) {
   return (
     <L2Layout stepIndex={stepIndex} totalSteps={totalSteps} title="Event 2 - Farewell Party" onNext={onNext}>
-      <p className="l2-para">
-        Today you have to deliver a bulk order at a Farewell Party. The order consists of 500 fortune cookies which will be packed and sent in 5 different batches.
-      </p>
-      <p className="l2-para">
-        There will be 5 samples of these batches in front of you. From which you need to identify the doped fortune(s).
-      </p>
+      <div className="evt-scene">
+        <EventTwoScene />
+      </div>
+
+      <p className="evt-lead">A bulk order just came in for a farewell party.</p>
+
+      <div className="evt-stats">
+        <div className="evt-stat">
+          <span className="evt-stat-num">500</span>
+          <span className="evt-stat-label">Fortune cookies</span>
+        </div>
+        <span className="evt-divider" aria-hidden="true" />
+        <div className="evt-stat">
+          <span className="evt-stat-num">5</span>
+          <span className="evt-stat-label">Batches</span>
+        </div>
+      </div>
+
+      <p className="evt-task">At the start, 5 samples will be placed in front of you &mdash; spot the <strong>doped fortune(s)</strong>.</p>
     </L2Layout>
   );
 }
@@ -33,22 +85,16 @@ export function EventTwoScreen({ onNext, stepIndex, totalSteps }) {
 export function FortuneElementsScreen({ onBack, onNext, stepIndex, totalSteps }) {
   return (
     <L2Layout stepIndex={stepIndex} totalSteps={totalSteps} title="Identifying Faulty Fortune" onBack={onBack} onNext={onNext}>
-      <div className="l2-black-banner">Fortune is made up of 2 elements - Context and URL</div>
-      
-      <div className="l2-context-url-row">
-        <div className="l2-tag-with-arrow">
-          <span className="l2-tag l2-context-tag">Context</span>
-          <span className="l2-arrow">→</span>
+      <div className="center-content">
+        <div className="black-label">A fortune has 2 parts: context and URL</div>
+        <div className="fortune-box">
+          <span className="context-highlight">The brand new trailer of your favorite movie is soon going to stream on</span>
+          {' '}
+          <span className="url-highlight">https://www.youtube.com/</span>
         </div>
-        
-        <div className="l2-fortune-box">
-          <span className="l2-context-highlight">The brand new trailer of your favorite movie is soon going to stream on</span>{' '}
-          <span className="l2-url-highlight-orange">https://www.youtube.com/</span>
-        </div>
-        
-        <div className="l2-tag-with-arrow">
-          <span className="l2-arrow">←</span>
-          <span className="l2-tag l2-url-tag">URL</span>
+        <div className="l2-legend">
+          <span className="l2-legend-item"><span className="l2-legend-swatch context" /> Context</span>
+          <span className="l2-legend-item"><span className="l2-legend-swatch url" /> URL</span>
         </div>
       </div>
     </L2Layout>
@@ -58,56 +104,52 @@ export function FortuneElementsScreen({ onBack, onNext, stepIndex, totalSteps })
 export function ContextValidFaultyScreen({ onBack, onNext, stepIndex, totalSteps }) {
   return (
     <L2Layout stepIndex={stepIndex} totalSteps={totalSteps} title="Identifying Faulty Fortune" onBack={onBack} onNext={onNext}>
-      <p className="l2-rule">1. If the URL is correct and the context is related to the category of the URL, then the fortune is valid.</p>
+      <div className="center-content">
+        <p className="rule-text">1. Valid URL + context that matches it = valid fortune.</p>
 
-      <div className="l2-example-row">
-        <div className="l2-example-label l2-valid-label">Valid</div>
-        <div className="l2-example-box l2-valid-border">
-          The brand new trailer of your favorite movie is soon going to stream on <span className="l2-url-highlight">https://www.youtube.com/</span>
+        <div className="valid-box">
+          <span className="valid-label">Valid</span>
+          <div className="fortune-box">
+            The brand new trailer of your favorite movie is soon going to stream on https://www.youtube.com/
+          </div>
         </div>
-        <div className="l2-note">
-          <b>Note:</b> Here, the valid URL belongs to Youtube, which is a media streaming platform. And the context of the Fortune is related to media streaming
-        </div>
-      </div>
 
-      <div className="l2-example-row">
-        <div className="l2-example-label l2-faulty-label">Faulty</div>
-        <div className="l2-example-box l2-faulty-border">
-          Your favorite artist has uploaded their new album on <span className="l2-url-invalid-highlight">http://www.youtude.com/</span>
-        </div>
-        <div className="l2-note">
-          <b>Note:</b> Here, the context of the Fortune is related to media streaming but the URL is invalid.
+        <div className="faulty-box">
+          <span className="faulty-label">Faulty</span>
+          <div className="fortune-box">
+            Your favorite artist has uploaded their new album on <span className="red-highlight">http://www.youtude.com/</span>
+          </div>
         </div>
       </div>
     </L2Layout>
   );
 }
 
-export function InvalidURLIntroScreen({ onBack, onNext, stepIndex, totalSteps }) {
-  return (
-    <L2Layout stepIndex={stepIndex} totalSteps={totalSteps} title="Identifying invalid URL" onBack={onBack} onNext={onNext}>
-      <div className="l2-center-url">https://gtms.ultimatix.net</div>
-    </L2Layout>
-  );
-}
+// One continuous morph (URL -> split -> tiles), same as Level 1's InvalidURLSequence,
+// instead of three separate screens the player has to click through.
+export function InvalidURLSequenceTwo({ onBack, onNext, stepIndex, totalSteps }) {
+  const [stage, setStage] = useState(0);
 
-export function InvalidURLSplitScreen({ onBack, onNext, stepIndex, totalSteps }) {
+  useEffect(() => {
+    const timer1 = setTimeout(() => setStage(1), 700);
+    const timer2 = setTimeout(() => setStage(2), 1200);
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, []);
+
   return (
-    <L2Layout stepIndex={stepIndex} totalSteps={totalSteps} title="Identifying invalid URL" onBack={onBack} onNext={onNext}>
-      <div className="l2-split-url">
-        <span>https://</span>
-        <span>gtms</span>
-        <span>.</span>
-        <span>ultimatix.net</span>
+    <L2Layout
+      stepIndex={stepIndex}
+      totalSteps={totalSteps}
+      title="Identifying invalid URL"
+      onBack={stage === 2 ? onBack : undefined}
+      onNext={stage === 2 ? onNext : undefined}
+    >
+      <div className="center-content ue-scene">
+        <InvalidURLExplainer stage={stage} />
       </div>
-    </L2Layout>
-  );
-}
-
-export function InvalidURLFullScreen({ onBack, onNext, stepIndex, totalSteps }) {
-  return (
-    <L2Layout stepIndex={stepIndex} totalSteps={totalSteps} title="Identifying invalid URL" onBack={onBack} onNext={onNext}>
-      <InvalidURLExplainer />
     </L2Layout>
   );
 }
@@ -115,24 +157,24 @@ export function InvalidURLFullScreen({ onBack, onNext, stepIndex, totalSteps }) 
 export function ContextUnrelatedScreen({ onBack, onNext, stepIndex, totalSteps }) {
   return (
     <L2Layout stepIndex={stepIndex} totalSteps={totalSteps} title="Identifying Faulty Fortune" onBack={onBack} onNext={onNext}>
-      <p className="l2-rule">1. If the URL is correct and the context is related to the category of the URL, then the fortune is valid.</p>
-      <p className="l2-rule">2. If the context of the fortune is unrelated to the category of the URL, then it is faulty fortune</p>
+      <div className="center-content">
+        <p className="rule-text">2. Context unrelated to the URL &mdash; even a real one &mdash; is still faulty.</p>
 
-      <div className="l2-example-row">
-        <div className="l2-example-label l2-faulty-label">Faulty</div>
-        <div className="l2-example-box l2-faulty-border">
-          You will make your payments safer with the help of <span className="l2-url-highlight-blue">https://www.youttube.com/</span>
+        <div className="faulty-box">
+          <span className="faulty-label">Faulty</span>
+          <div className="fortune-box">
+            You will make your payments safer with the help of <span className="red-highlight">https://www.youttube.com/</span>
+          </div>
         </div>
-        <div className="l2-note">
-          Here, the URLs, either valid or invalid belong to Youtube, which is a media streaming platform. And the context of both Fortunes is <b>unrelated</b> to media streaming
-        </div>
-      </div>
 
-      <div className="l2-example-row">
-        <div className="l2-example-label l2-faulty-label">Faulty</div>
-        <div className="l2-example-box l2-faulty-border">
-          You have saved enough money to buy your shoes from <span className="l2-url-invalid-highlight">http://www.youttube.com/</span>
+        <div className="faulty-box">
+          <span className="faulty-label">Faulty</span>
+          <div className="fortune-box">
+            You have saved enough money to buy your shoes from <span className="red-highlight">http://www.youttube.com/</span>
+          </div>
         </div>
+
+        <p className="l2-shared-note">Both URLs belong to a real streaming site &mdash; but neither fortune is actually about streaming.</p>
       </div>
     </L2Layout>
   );

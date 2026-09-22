@@ -1,15 +1,19 @@
 import React from 'react';
 
-// Phosphor-style line icons, drawn inline so no extra dependency is needed
-const BookIcon = () => (
+// Bakery-themed line icons (in place of the generic office book/monitor icons),
+// drawn inline so no extra dependency is needed
+const ChefHatIcon = () => (
   <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5z" />
+    <path d="M6 15 Q6 10 9 9 Q9 5.5 12 5.5 Q15 5.5 15 9 Q18 10 18 15" />
+    <rect x="5" y="15" width="14" height="5" rx="1.5" />
   </svg>
 );
-const MonitorIcon = () => (
+// A food dome, matching the domes used throughout the game (the workstation's own equipment)
+const DomeIcon = () => (
   <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <rect x="3" y="4" width="18" height="12" rx="2" />
-    <path d="M8 20h8M12 16v4" />
+    <circle cx="12" cy="6.3" r="1.3" />
+    <path d="M5.5 18.5 Q5.5 8.5 12 8.5 Q18.5 8.5 18.5 18.5" />
+    <path d="M4 18.5h16" />
   </svg>
 );
 
@@ -92,12 +96,12 @@ export default function WelcomeScreen({ onReady }) {
 
           <div className="welcome-path" aria-hidden="true">
             <div className="welcome-node active">
-              <span className="welcome-node-icon"><BookIcon /></span>
+              <span className="welcome-node-icon"><ChefHatIcon /></span>
               <span className="welcome-node-label">Training</span>
             </div>
             <span className="welcome-path-line" />
             <div className="welcome-node">
-              <span className="welcome-node-icon"><MonitorIcon /></span>
+              <span className="welcome-node-icon"><DomeIcon /></span>
               <span className="welcome-node-label">Workstation</span>
             </div>
           </div>

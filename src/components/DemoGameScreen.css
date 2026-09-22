@@ -1,0 +1,42 @@
+/* Fit the dropped fortune strip inside a SortTray's well (same tray look as Level 1-3). */
+.sort-tray-well .demo-fortune-strip {
+  width: 100%;
+  max-width: 200px;
+  font-size: 10px;
+  line-height: 13px;
+  padding: 8px 10px;
+  pointer-events: none;
+}
+.sort-tray-well .demo-fortune-strip::before,
+.sort-tray-well .demo-fortune-strip::after { left: 6px; right: 6px; }
+.sort-tray-well .demo-fortune-strip::before { top: 3px; }
+.sort-tray-well .demo-fortune-strip::after { bottom: 3px; }
+
+/* Skip + attempt counter for the demo round. */
+
+.demo-attempts {
+  position: absolute;
+  top: 66px;
+  left: 50px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+}
+
+.demo-skip-btn {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  background: transparent;
+  border: none;
+  color: var(--orange-base);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  z-index: 200;
+}
+.demo-skip-btn:hover { color: var(--orange-deep); }

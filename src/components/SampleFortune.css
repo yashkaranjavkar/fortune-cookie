@@ -1,0 +1,32 @@
+/* Give the "sample fortune" boxes (shown across the Level 1-3 instruction/marking
+   screens) the same paper-slip look used everywhere else a fortune is shown -
+   off-white paper with a printed double rule top and bottom, not a plain white card.
+   Selector is doubled to reliably outrank the plain .sample-fortune rule in App.css
+   regardless of CSS import order. */
+.sample-fortune.sample-fortune {
+  position: relative;
+  box-sizing: border-box;
+  background:
+    linear-gradient(90deg, rgba(120, 90, 40, 0.10) 0, rgba(120, 90, 40, 0) 3%, rgba(120, 90, 40, 0) 97%, rgba(120, 90, 40, 0.10) 100%),
+    #FFFEFA;
+  border: none;
+  border-radius: 1px;
+  padding: 18px 34px;
+  font-size: 16px;
+  color: var(--ink-primary);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 6px 12px -5px rgba(60, 40, 10, 0.35);
+}
+.sample-fortune.sample-fortune::before,
+.sample-fortune.sample-fortune::after {
+  content: '';
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  border-top: 1px solid var(--orange-light);
+  border-bottom: 1px solid var(--orange-light);
+  opacity: 0.75;
+  pointer-events: none;
+}
+.sample-fortune.sample-fortune::before { top: 6px; }
+.sample-fortune.sample-fortune::after { bottom: 6px; }

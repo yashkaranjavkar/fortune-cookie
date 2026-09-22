@@ -1,0 +1,72 @@
+/* Objective screen: one short lead line + a plain vertical step timeline (not buttons). */
+
+.obj-lead {
+  font-size: 17px;
+  line-height: 26px;
+  text-align: center;
+  max-width: 520px;
+  margin: 0 auto 32px;
+}
+.obj-lead strong { color: var(--orange-deep); }
+
+.obj-steps {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  width: 100%;
+  max-width: 340px;
+}
+
+.obj-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.obj-step-marker {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.obj-step-num {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--orange-base);
+  color: var(--ink-inverse);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.obj-step-line {
+  width: 2px;
+  flex: 1;
+  min-height: 30px;
+  margin: 4px 0;
+  background: var(--grey-light);
+}
+
+.obj-step-text {
+  padding-top: 3px;
+  padding-bottom: 26px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.obj-step:last-child .obj-step-text { padding-bottom: 0; }
+
+.obj-step-title {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--ink-primary);
+}
+.obj-step-desc {
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}

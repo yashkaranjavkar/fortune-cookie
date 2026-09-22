@@ -33,10 +33,24 @@ const PARTS = [
   { key: 'domain', value: 'ultimatix.net', label: 'Domain' }
 ];
 
+// Same prefix, three different actual domains (the highlighted part) - the eye
+// catches the difference directly, so the caption only needs one or two words.
 const ROWS = [
-  { url: 'https://www.tcs.com', secure: true, kind: 'ok', text: <>This site belongs to TCS</> },
-  { url: 'https://www.tcs.random.com', kind: 'warn', text: <>This belongs to <b><i>"random"</i></b> and not TCS</> },
-  { url: 'https://www.tcs-login.com', kind: 'bad', text: <>This belongs to <b><i>"tcs-login"</i></b>, Which is a fake.</> }
+  {
+    key: 'genuine', secure: true, kind: 'ok', verdict: 'Genuine',
+    prefix: 'https://www.', domain: 'tcs.com',
+    full: 'This site belongs to TCS'
+  },
+  {
+    key: 'lookalike', kind: 'warn', verdict: 'Not TCS',
+    prefix: 'https://www.tcs.', domain: 'random.com',
+    full: 'This belongs to "random", not TCS'
+  },
+  {
+    key: 'fake', kind: 'bad', verdict: 'Fake',
+    prefix: 'https://www.', domain: 'tcs-login.com',
+    full: 'This belongs to "tcs-login" - a fake'
+  }
 ];
 
 // stage 0: plain URL, 1: URL split into its parts, 2: coloured tiles + explanation.
@@ -71,19 +85,17 @@ export default function InvalidURLExplainer({ stage = 2 }) {
 
             <div className="ue-rows">
               {ROWS.map(row => (
-                <div className="ue-row" key={row.url}>
-                  <div className="ue-row-left">
-                    <span className="ue-chip">
-                      {row.secure ? <LockIcon /> : <PageIcon />}
-                      {row.url}
-                    </span>
-                    <span className="ue-dots" />
-                  </div>
-                  <StatusIcon kind={row.kind} />
-                  <div className="ue-row-right">
-                    <span className="ue-dots" />
-                    <span className="ue-row-text">{row.text}</span>
-                  </div>
+                <div className="ue-row" key={row.key}>
+                  <span className="ue-chip">
+                    {row.secure ? <LockIcon /> : <PageIcon />}
+                    {row.prefix}
+                    <span className={`ue-domain-hl ue-domain-${row.kind}`}>{row.domain}</span>
+                  </span>
+                  <span className="ue-dots" />
+                  <span className={`ue-verdict ue-verdict-${row.kind}`} title={row.full}>
+                    <StatusIcon kind={row.kind} />
+                    {row.verdict}
+                  </span>
                 </div>
               ))}
             </div>
@@ -94,7 +106,7 @@ export default function InvalidURLExplainer({ stage = 2 }) {
               <PageIcon />
               https://<span className="ue-ip-mark">102.345.524.23</span>-login.com
             </span>
-            <span className="ue-ip-note">Generally, URLs with IP addresses are invalid</span>
+            <span className="ue-ip-note">URLs with IP addresses are invalid</span>
           </div>
         </div>
       </div>

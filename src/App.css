@@ -3011,17 +3011,10 @@ body {
   background: var(--error); color: var(--ink-inverse);
 }
 
-/* Rows share one grid so every status badge lines up in the same column */
-.ue-rows {
-  display: grid;
-  grid-template-columns: minmax(0, max-content) auto minmax(0, 1fr);
-  row-gap: var(--space-3);
-  align-items: center;
-}
-.ue-row { display: contents; }
-.ue-row-left, .ue-row-right { display: flex; align-items: center; min-width: 0; }
-.ue-row-right { gap: var(--space-2); }
-.ue-row-text { font-size: 15px; line-height: 21px; }
+/* One line per URL: chip (with the real domain highlighted) -- dots -- a short verdict pill.
+   The colour on the domain and the pill is the explanation now, so no sentence is needed. */
+.ue-rows { display: flex; flex-direction: column; gap: var(--space-3); }
+.ue-row { display: flex; align-items: center; gap: var(--space-2); }
 
 .ue-chip {
   display: inline-flex; align-items: center; gap: var(--space-2);
@@ -3031,20 +3024,43 @@ body {
   border-radius: 4px;
   font-size: 15px; line-height: 20px;
   white-space: nowrap;
+  min-width: 0;
 }
 .ue-chip-icon { flex-shrink: 0; color: var(--ink-soft); }
 
-/* Dotted connectors between chip, status badge and explanation */
-.ue-dots { flex: 1; min-width: 20px; height: 0; border-top: 2px dotted var(--grey-base); margin: 0 var(--space-2); }
-.ue-row-right .ue-dots { flex: 0 0 28px; margin: 0; }
+/* The part of the URL that actually decides who it belongs to */
+.ue-domain-hl { padding: 0 3px; border-radius: 2px; font-weight: 700; }
+.ue-domain-ok   { background: color-mix(in srgb, var(--green-light) 55%, #fff); color: var(--green-deep); }
+.ue-domain-warn { background: color-mix(in srgb, var(--yellow-light) 65%, #fff); color: var(--orange-deep); }
+.ue-domain-bad  { background: color-mix(in srgb, var(--pink-light) 55%, #fff); color: var(--maroon-deep); }
+
+/* Dotted connector between the chip and the verdict */
+.ue-dots { flex: 1; min-width: 16px; height: 0; border-top: 2px dotted var(--grey-light); }
+
+/* Short verdict pill - hover/long-press the row for the fuller wording (title attr) */
+.ue-verdict {
+  --tone: var(--grey-base);
+  display: inline-flex; align-items: center; gap: 6px;
+  flex-shrink: 0;
+  padding: 4px 12px 4px 4px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--tone) 16%, #fff);
+  border: 1px solid color-mix(in srgb, var(--tone) 45%, transparent);
+  font-family: var(--font-sans); font-weight: 700; font-size: 13px; line-height: 17px;
+  color: var(--ink-primary);
+  white-space: nowrap;
+}
+.ue-verdict-ok   { --tone: var(--green-base); }
+.ue-verdict-warn { --tone: var(--warning); }
+.ue-verdict-bad  { --tone: var(--error); }
 
 .ue-status {
   --tone: var(--grey-base);
   display: inline-flex; align-items: center; justify-content: center;
-  width: 28px; height: 28px; border-radius: 50%;
+  width: 18px; height: 18px; border-radius: 50%;
   background: var(--tone);
   color: var(--ink-inverse);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tone) 30%, transparent);
+  flex-shrink: 0;
 }
 .ue-status-ok   { --tone: var(--green-base); }
 .ue-status-warn { --tone: var(--warning); color: var(--ink-primary); }

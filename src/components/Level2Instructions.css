@@ -1,0 +1,232 @@
+/* "30 seconds to mark" screen: real SortTray + an actual stopwatch-style timer dial. */
+
+.timer-thirty-layout {
+  display: flex;
+  gap: 60px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+/* Final results: both trays, side by side, with the faulty tray's fortunes showing
+   the exact part revealed under the torch. */
+.sr-trays {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  align-items: flex-start;
+  width: 85%;
+  max-width: 880px;
+  margin: 28px auto;
+}
+.sr-tray-col { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+
+.sr-tray-label {
+  padding: 6px 20px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink-inverse);
+}
+.sr-tray-label.faulty { background: var(--maroon-deep); }
+.sr-tray-label.approved { background: var(--green-deep); }
+
+.sr-strip-list { display: flex; flex-direction: column; gap: 14px; width: 100%; }
+
+.sr-strip.fortune-paper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  text-align: left;
+  font-size: 14px;
+  line-height: 20px;
+}
+.sr-strip .fortune-text-content { flex: 1; }
+.sr-strip-amount {
+  flex-shrink: 0;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--green-base);
+}
+
+/* Level-end "Whoshh" screens: a celebratory medal + falling confetti behind the copy,
+   so finishing a level actually feels like an achievement, not just a plain card. */
+.whoshh-card { position: relative; overflow: hidden; }
+.whoshh-title, .whoshh-text, .whoshh-btn { position: relative; z-index: 1; }
+
+.whoshh-medal-svg { position: relative; z-index: 1; width: 150px; height: auto; display: block; margin: 0 auto 8px; }
+
+.whoshh-rays { transform-box: fill-box; transform-origin: center; animation: whoshh-spin 18s linear infinite; }
+.whoshh-rays line { stroke: var(--yellow-light); stroke-width: 3; stroke-linecap: round; opacity: 0.6; }
+
+.whoshh-ribbon { fill: var(--maroon-base); }
+
+.whoshh-medal-ring { fill: var(--yellow-deep); stroke: var(--yellow-light); stroke-width: 2; }
+.whoshh-medal-face { fill: var(--yellow-base); }
+.whoshh-star { fill: var(--ink-inverse); }
+
+@keyframes whoshh-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+.whoshh-confetti {
+  position: absolute; inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.whoshh-confetti-piece {
+  position: absolute;
+  top: -24px;
+  width: 8px; height: 12px;
+  border-radius: 2px;
+  opacity: 0;
+  animation-name: whoshh-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.whoshh-confetti-piece.round { border-radius: 50%; }
+.whoshh-confetti-pink { background: var(--pink-base); }
+.whoshh-confetti-yellow { background: var(--yellow-base); }
+.whoshh-confetti-orange { background: var(--orange-base); }
+.whoshh-confetti-green { background: var(--green-base); }
+
+@keyframes whoshh-fall {
+  0% { opacity: 0; transform: translateY(0) rotate(0deg); }
+  8% { opacity: 1; }
+  100% { opacity: 0.9; transform: translateY(340px) rotate(340deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .whoshh-rays, .whoshh-confetti-piece { animation: none; }
+  .whoshh-confetti { display: none; }
+}
+
+/* Payment as per inspection - dark-room reward cards (light cards would inherit
+   white text from .payment-dark-screen and go illegible, so these are self-contained). */
+.ti-reward-hero { display: flex; align-items: center; gap: 20px; justify-content: center; margin-bottom: 36px; padding: 0 20px; }
+.ti-reward-screen .reward-sub { color: #b8b0a0; }
+
+.ti-reward-list { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 640px; padding: 0 20px; box-sizing: border-box; }
+
+.ti-reward-card {
+  --tone: var(--grey-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 26px;
+  background: #211c15;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 6px solid var(--tone);
+  border-radius: 12px;
+  box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  animation: ti-reward-in 0.35s ease-out forwards;
+}
+.ti-reward-earn { --tone: var(--green-base); }
+.ti-reward-neutral { --tone: var(--grey-light); }
+.ti-reward-lose { --tone: var(--error); }
+
+.ti-reward-title { font-size: 17px; font-weight: 600; color: #fff; }
+.ti-reward-note { margin-top: 3px; font-size: 13px; color: #a39a86; }
+
+.ti-reward-amount {
+  flex-shrink: 0;
+  min-width: 110px;
+  text-align: center;
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+  background: color-mix(in srgb, var(--tone) 22%, #211c15);
+  color: var(--tone);
+}
+.ti-reward-earn .ti-reward-amount { color: var(--green-light); }
+.ti-reward-neutral .ti-reward-amount { color: #d8d2c4; }
+.ti-reward-lose .ti-reward-amount { color: var(--pink-light); }
+
+@keyframes ti-reward-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ti-reward-card { animation: none; opacity: 1; }
+}
+
+/* Torch/flashlight button - "Press this RED button" */
+.torch-button { width: 70px; }
+.torch-asset-img { width: 100%; height: auto; display: block; transition: filter 0.15s ease; }
+.machine-button:hover .torch-asset-img { filter: drop-shadow(0 0 8px var(--error)); }
+
+/* Inspection Room: a dark room where the torch is the only light source */
+.ti-room {
+  background: radial-gradient(ellipse 900px 520px at 50% 58%, #221d13 0%, #0c0a08 55%, #000 100%);
+}
+
+/* One fixed-width column so the slider (torch position) and the strip (lit position)
+   share the same x-axis - a 50% torch position lines up with the 50% point of the strip. */
+.ti-scene {
+  width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+/* Shrink the slider wrapper and move the rail down, so the torch handle rides on top
+   of the rail like a real slider thumb, instead of floating separately above it. */
+.ti-scene .torch-slider-wrapper { width: 100%; height: 74px; margin-bottom: 0; }
+.ti-scene .torch-slider { top: 48px; height: 26px; border-radius: 13px; }
+
+/* The image layer must paint above the rail (z-index 20) or its base gets clipped by it. */
+.ti-scene .torch-handle-container { z-index: 25; }
+
+.ti-torch-img {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 46px;
+  height: 62px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 26px rgba(255, 214, 140, 0.55));
+}
+
+.ti-main-content { justify-content: center; margin-top: 16px; }
+
+/* The strip stays dimly visible as a paper shape in the dark; the lit layer (below) is
+   masked on top of it so only the torch-swept portion is bright and legible. */
+.ti-strip {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.ti-strip-dim {
+  box-sizing: border-box;
+  padding: 22px 46px;
+  font-size: 20px;
+  line-height: 1.6;
+  background:
+    linear-gradient(90deg, rgba(255, 210, 150, 0.05) 0%, rgba(255, 210, 150, 0.02) 50%, rgba(255, 210, 150, 0.05) 100%),
+    #1a140c;
+  border: 1px solid rgba(255, 214, 140, 0.1);
+}
+
+.ti-strip-lit.fortune-paper {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  box-sizing: border-box;
+  padding: 22px 46px;
+  font-size: 20px;
+  line-height: 1.6;
+}
+.ti-strip-lit .fortune-text-content { font-size: 20px; line-height: 1.6; }
+

@@ -1,12 +1,48 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SortTray from './SortTray';
+import InvalidURLExplainer from './InvalidURLExplainer';
+import BalloonCluster from './BalloonCluster';
+import RulesOverlay from './RulesOverlay';
 import { pickFortune } from '../utils/fortunePool';
+import './DomeFocus.css';
+import './SampleFortune.css';
 
 // Existing Demo assets
 import domeClosed from '../assets/demo/dome-closed.png';
 import domeLifted from '../assets/demo/dome-lifted.png';
 import brokenCookie from '../assets/demo/broken-cookie.png';
 
+// The same "Identifying Faulty Fortune" / "Identifying invalid URL" rules shown during
+// onboarding, revisitable mid-game without leaving the sorting screen.
+const RULE_SLIDES = [
+  {
+    title: 'Identifying Faulty Fortune',
+    content: (
+      <>
+        <p className="l1-rules-text">1. If the URL mentioned in the fortune is correct then the fortune is valid.</p>
+        <p className="l1-rules-text">2. And if the URL is invalid then the fortune is faulty.</p>
+
+        <div className="l1-rules-box valid">
+          <span className="l1-rules-box-label valid">Valid</span>
+          <div className="l1-rules-fortune-box">
+            The brand new trailer of your favorite movie is soon going to stream on https://www.youtube.com/
+          </div>
+        </div>
+
+        <div className="l1-rules-box faulty">
+          <span className="l1-rules-box-label faulty">Faulty</span>
+          <div className="l1-rules-fortune-box">
+            The brand new trailer of your favorite movie is soon going to stream on <span className="l1-rules-highlight">http://www.yourtube.com/</span>
+          </div>
+        </div>
+      </>
+    )
+  },
+  {
+    title: 'Identifying invalid URL',
+    content: <InvalidURLExplainer stage={2} />
+  }
+];
 
 export default function Level1Game({ onComplete }) {
   const [domes, setDomes] = useState([
@@ -24,13 +60,16 @@ export default function Level1Game({ onComplete }) {
   const [faultyItems, setFaultyItems] = useState([]);
   const [approvedItems, setApprovedItems] = useState([]);
 
+  const [poppedBalloons, setPoppedBalloons] = useState({ orange: false, pink: false, green: false });
+  const [rulesOpen, setRulesOpen] = useState(false);
+  const [ruleSlide, setRuleSlide] = useState(0);
+
   const hoverTimeout = useRef(null);
   const intervalRef = useRef(null);
 
-  // Timer Logic
+  // Timer Logic - paused (not reset) while the rules overlay is open
   useEffect(() => {
-    if (activeDome !== null && domes[activeDome].status === 'open') {
-      setTimer(10);
+    if (activeDome !== null && domes[activeDome].status === 'open' && !rulesOpen) {
       intervalRef.current = setInterval(() => {
         setTimer((prev) => {
           if (prev <= 1) {
@@ -43,15 +82,22 @@ export default function Level1Game({ onComplete }) {
       }, 1000);
     }
     return () => clearInterval(intervalRef.current);
-  }, [activeDome]);
+  }, [activeDome, rulesOpen]);
 
   const handleMouseEnter = (index) => {
     if (domes[index].status === 'closed') {
       hoverTimeout.current = setTimeout(() => {
         setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'open', text: pickFortune(prev.map(x => x.text)) } : d));
+        setTimer(10);
         setActiveDome(index);
       }, 300);
     }
+  };
+
+  const handlePopBalloon = (key) => {
+    setPoppedBalloons(prev => ({ ...prev, [key]: true }));
+    setRuleSlide(0);
+    setRulesOpen(true);
   };
 
   const handleMouseLeave = () => clearTimeout(hoverTimeout.current);
@@ -71,7 +117,7 @@ export default function Level1Game({ onComplete }) {
     if (trayType === 'faulty') {
       setFaultyItems(prev => [...prev, index]);
     } else {
-      setApprovedItems(prev => [...prev, index]);
+      setApprovedItems(prev => [...prev, { text: domes[index].text }]);
     }
 
     setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: trayType } : d));
@@ -120,10 +166,27 @@ export default function Level1Game({ onComplete }) {
 
   const isComplete = sortedCount === 4;
   const counterText = `${sortedCount}/4`;
+  const usesLeft = Object.values(poppedBalloons).filter(Boolean).length < 3
+    ? 3 - Object.values(poppedBalloons).filter(Boolean).length
+    : 0;
 
   return (
     <div className="level1-game-screen">
-      {/* REMOVED: <div className="balloon-cluster">🎈🎈🎈</div> */}
+      {activeDome !== null && <div className="dome-focus-backdrop" />}
+
+      {!isComplete && (
+        <BalloonCluster popped={poppedBalloons} onPop={handlePopBalloon} usesLeft={usesLeft} />
+      )}
+
+      {rulesOpen && (
+        <RulesOverlay
+          slides={RULE_SLIDES}
+          slide={ruleSlide}
+          onBack={() => setRuleSlide(s => Math.max(0, s - 1))}
+          onNext={() => setRuleSlide(s => Math.min(RULE_SLIDES.length - 1, s + 1))}
+          onClose={() => setRulesOpen(false)}
+        />
+      )}
 
       {/* 1. SORTING PHASE */}
       {phase === 'sorting' && (
@@ -206,7 +269,7 @@ export default function Level1Game({ onComplete }) {
             <div className="sample-fortune">
               Your favorite artist has uploaded their new album on <span className="invalid-url">https://www.youttube.com/</span> 🔒
             </div>
-            <button className="next-btn" onClick={() => onComplete(faultyItems)}>Next</button>
+            <button className="next-btn" onClick={() => onComplete(faultyItems, approvedItems)}>Next</button>
 
           </div>
         </div>

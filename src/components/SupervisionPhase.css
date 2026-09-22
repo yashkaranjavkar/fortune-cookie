@@ -1,0 +1,194 @@
+/* Supervision intro/instructions now use the shared .instruction-card shell and the
+   Objective screen's numbered-step timeline (.obj-steps, imported alongside this file),
+   instead of a disconnected off-center card / bare bulleted text on black. */
+
+/* "Great work Supervisor!" - a short praise line with a star, not a paragraph. */
+.sc-praise {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+.sc-praise-text {
+  max-width: 460px;
+  font-size: 17px;
+  line-height: 26px;
+  color: var(--ink-primary);
+  margin: 0;
+}
+
+/* "Oh no!" - an urgent notice, not a calm numbered list (this is a plot complication,
+   not an instruction sequence like the Objective/Supervision-intro screens). */
+.sc-urgent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 480px;
+  margin: 0 auto 20px;
+  padding: 14px 20px;
+  background: color-mix(in srgb, var(--pink-light) 35%, #fff);
+  border: 1px solid var(--error);
+  border-radius: 12px;
+}
+.sc-urgent-icon { flex-shrink: 0; }
+.sc-urgent-lead {
+  margin: 0;
+  font-size: 16px;
+  line-height: 22px;
+  color: var(--maroon-deep);
+  text-align: left;
+}
+
+.sc-urgent-punch {
+  max-width: 480px;
+  margin: 0 auto;
+  font-size: 17px;
+  line-height: 26px;
+  text-align: center;
+  color: var(--ink-primary);
+}
+.sc-urgent-punch strong { color: var(--orange-deep); }
+
+/* Checklist screen: a wooden clipboard with the checklist paper pinned under its clip
+   and each suspect fortune taped on like an evidence note. */
+.sc-board {
+  position: relative;
+  width: 95%;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 26px;
+  background: linear-gradient(160deg, var(--brown-light), var(--brown-base));
+  border-radius: 22px;
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.55);
+  transform: rotate(-0.6deg);
+}
+
+.sc-card { position: relative; padding-top: 46px; transform: rotate(0.5deg); }
+
+.sc-clip {
+  position: absolute;
+  top: -14px; left: 50%;
+  transform: translateX(-50%);
+  width: 90px; height: 26px;
+  background: var(--brown-light);
+  border: 2px solid var(--brown-base);
+  border-radius: 8px;
+  z-index: 3;
+}
+
+.sc-title {
+  font-family: var(--font-title);
+  font-style: italic;
+  font-weight: bold;
+  font-size: 30px;
+  color: var(--ink-primary);
+  text-align: center;
+  margin-bottom: 6px;
+}
+.sc-subtitle {
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 15px;
+  margin: 0 0 26px;
+}
+
+.sc-header {
+  display: grid;
+  grid-template-columns: 4fr 1.1fr 1.4fr;
+  gap: 14px;
+  padding: 0 4px 10px;
+  border-bottom: 2px solid var(--beige-deep);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.sc-header-decision, .sc-header-action { text-align: center; }
+
+.sc-row {
+  display: grid;
+  grid-template-columns: 4fr 1.1fr 1.4fr;
+  gap: 14px;
+  align-items: center;
+  padding: 16px 4px;
+  border-bottom: 1px dashed var(--beige-deep);
+}
+.sc-row:last-of-type { border-bottom: none; }
+
+.sc-row-revoked { background: color-mix(in srgb, var(--pink-light) 20%, transparent); }
+
+.sc-fortune.fortune-paper {
+  position: relative;
+  padding: 14px 20px;
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: left;
+}
+.sc-fortune.fortune-paper::before, .sc-fortune.fortune-paper::after { left: 10px; right: 10px; }
+
+.sc-tilt-a { transform: rotate(-1.6deg); }
+.sc-tilt-b { transform: rotate(1.3deg); }
+
+/* Small pieces of tape pinning each suspect fortune to the board, like an evidence note */
+.sc-tape {
+  position: absolute;
+  top: -10px;
+  width: 42px; height: 18px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+.sc-tape-left { left: 8px; transform: rotate(-16deg); }
+.sc-tape-right { right: 8px; transform: rotate(13deg); }
+
+.sc-decision-pill {
+  justify-self: center;
+  padding: 5px 16px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 13px;
+}
+.sc-decision-pill.valid { background: color-mix(in srgb, var(--green-light) 45%, #fff); color: var(--green-deep); }
+.sc-decision-pill.faulty { background: color-mix(in srgb, var(--pink-light) 55%, #fff); color: var(--maroon-deep); }
+
+.sc-actions { display: flex; gap: 18px; justify-content: center; }
+
+.sc-check { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+.sc-check-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+.sc-check-box {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  border: 2px solid var(--grey-base);
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.sc-check-stay .sc-check-input:checked + .sc-check-box {
+  border-color: var(--green-base);
+  background: color-mix(in srgb, var(--green-base) 16%, #fff);
+  color: var(--green-deep);
+}
+.sc-check-revoke .sc-check-input:checked + .sc-check-box {
+  border-color: var(--error);
+  background: color-mix(in srgb, var(--error) 16%, #fff);
+  color: var(--maroon-deep);
+}
+.sc-check-input:focus-visible + .sc-check-box { outline: 2px solid var(--yellow-deep); outline-offset: 2px; }
+
+.sc-check-label {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.sc-submit { margin-top: 28px !important; }

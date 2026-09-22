@@ -1,0 +1,19 @@
+/* Stopwatch-style countdown dial, shared by every timed screen. */
+
+.timer-dial { position: relative; width: 92px; height: 92px; flex-shrink: 0; }
+.timer-dial-svg { width: 100%; height: 100%; overflow: visible; }
+
+/* Near-white face so the number stays readable - pure pink-light behind dark-red text fails contrast. */
+.timer-dial-ring { fill: color-mix(in srgb, var(--pink-light) 18%, #fff); stroke: var(--error); stroke-width: 4; }
+.timer-dial-tick { stroke: var(--error); stroke-width: 1.5; opacity: 0.6; }
+.timer-dial-tick.big { stroke-width: 2.5; opacity: 0.95; }
+.timer-dial-knob { fill: var(--error); }
+
+.timer-dial-value {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-sans);
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--maroon-deep);
+}

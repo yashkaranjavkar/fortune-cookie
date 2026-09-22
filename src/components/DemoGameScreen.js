@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
+import SortTray from './SortTray';
+import './DemoGameScreen.css';
 
 import domeClosed from '../assets/demo/dome-closed.png';
 import domeLifted from '../assets/demo/dome-lifted.png';
-import approvedBox from '../assets/demo/approved-box.png';
-import faultyBox from '../assets/demo/faulty-box.png';
 import brokenCookie from '../assets/demo/broken-cookie.png';
 
 const DEMO_SECONDS = 10;
+const MAX_ATTEMPTS = 3;
 
 // Practice fortunes - a mix of good and faulty links. One is picked at random each round.
 const DEMO_FORTUNES = [
@@ -36,6 +37,7 @@ export default function DemoGameScreen({ onComplete }) {
   const [fortuneText, setFortuneText] = useState('');
   const [placedIn, setPlacedIn] = useState(null); // 'approved' | 'faulty'
   const [dragging, setDragging] = useState(false);
+  const [attempts, setAttempts] = useState(1);
   const hoverTimeout = useRef(null);
   const intervalRef = useRef(null);
 
@@ -93,6 +95,7 @@ export default function DemoGameScreen({ onComplete }) {
     setTimer(DEMO_SECONDS);
     setPlacedIn(null);
     setDragging(false);
+    setAttempts(prev => prev + 1);
     setPhase('idle');
   };
 
@@ -104,6 +107,8 @@ export default function DemoGameScreen({ onComplete }) {
   return (
     <div className="demo-fullscreen">
       <div className="demo-title">Demonstration</div>
+      <div className="demo-attempts">Attempt {attempts} of {MAX_ATTEMPTS}</div>
+      <button className="demo-skip-btn" onClick={onComplete}>Skip &gt;&gt;&gt;</button>
 
       <div
         className="demo-stage"
@@ -152,24 +157,21 @@ export default function DemoGameScreen({ onComplete }) {
 
       {showTrays && (
         <div className="demo-drop-zones">
-          {[
-            { key: 'approved', img: approvedBox, label: 'Approved Tray' },
-            { key: 'faulty', img: faultyBox, label: 'Faulty Tray' }
-          ].map(tray => (
-            <div
-              key={tray.key}
-              className={`demo-drop-zone${dragging ? ' ready' : ''}`}
+          {['approved', 'faulty'].map(type => (
+            <SortTray
+              key={type}
+              type={type}
+              dragging={dragging}
               onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => handleDrop(e, tray.key)}
+              onDrop={(e) => handleDrop(e, type)}
             >
-              <img src={tray.img} alt={tray.label} />
-              {placedIn === tray.key && <div className="demo-placed-strip">{strip}</div>}
-            </div>
+              {placedIn === type && strip}
+            </SortTray>
           ))}
         </div>
       )}
 
-      {(phase === 'placed' || phase === 'wasted') && (
+      {(phase === 'placed' || phase === 'wasted') && attempts < MAX_ATTEMPTS && (
         <button className="demo-replay-btn" onClick={resetDemo}>Replay</button>
       )}
       {phase === 'placed' && (
