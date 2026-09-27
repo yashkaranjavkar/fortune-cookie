@@ -4,13 +4,15 @@ import BalloonCluster from './BalloonCluster';
 import RulesOverlay from './RulesOverlay';
 import InvalidURLExplainer from './InvalidURLExplainer';
 import { pickFortune } from '../utils/fortunePool';
+import { playSound } from '../sounds';
 import './DomeFocus.css';
 import './SampleFortune.css';
 import './Level2GameInstructions.css';
 
-import domeClosed from '../assets/demo/dome-closed.png';
-import domeLifted from '../assets/demo/dome-lifted.png';
-import brokenCookie from '../assets/demo/broken-cookie.png';
+import domeClosed from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-covered.svg';
+import domeLifted from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-lifted.svg';
+import domeSpent from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-spent.svg';
+import brokenCookie from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-broken.svg';
 
 // The rules taught in this level's own instructions, revisitable mid-game.
 const RULE_SLIDES = [
@@ -74,6 +76,7 @@ export default function Level2Game({ onComplete, onSkip }) {
             handleWaste(activeDome);
             return 0;
           }
+          if (prev - 1 <= 3) playSound('timer-tick');
           return prev - 1;
         });
       }, 1000);
@@ -87,6 +90,7 @@ export default function Level2Game({ onComplete, onSkip }) {
         setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'open', text: pickFortune(prev.map(x => x.text)) } : d));
         setTimer(10);
         setActiveDome(index);
+        playSound('dome-lift');
       }, 300);
     }
   };
@@ -95,6 +99,8 @@ export default function Level2Game({ onComplete, onSkip }) {
     setPoppedBalloons(prev => ({ ...prev, [key]: true }));
     setRuleSlide(0);
     setRulesOpen(true);
+    playSound('balloon-pop');
+    playSound('popup-open');
   };
 
   const handleMouseLeave = () => clearTimeout(hoverTimeout.current);
@@ -103,6 +109,7 @@ export default function Level2Game({ onComplete, onSkip }) {
     e.dataTransfer.setData('domeIndex', activeDome);
     e.dataTransfer.effectAllowed = 'move';
     setDragging(true);
+    playSound('slip-pickup');
   };
 
   const handleDrop = (e, trayType) => {
@@ -119,6 +126,7 @@ export default function Level2Game({ onComplete, onSkip }) {
 
     setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: trayType } : d));
     setActiveDome(null);
+    playSound(trayType === 'faulty' ? 'drop-faulty' : 'drop-approved');
 
     const newCount = sortedCount + 1;
     setSortedCount(newCount);
@@ -135,6 +143,8 @@ export default function Level2Game({ onComplete, onSkip }) {
     setDragging(false);
     setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'wasted' } : d));
     setActiveDome(null);
+    playSound('time-up');
+    playSound('cookie-break');
 
     const newCount = sortedCount + 1;
     setSortedCount(newCount);
@@ -181,7 +191,7 @@ export default function Level2Game({ onComplete, onSkip }) {
           slide={ruleSlide}
           onBack={() => setRuleSlide(s => Math.max(0, s - 1))}
           onNext={() => setRuleSlide(s => Math.min(RULE_SLIDES.length - 1, s + 1))}
-          onClose={() => setRulesOpen(false)}
+          onClose={() => { setRulesOpen(false); playSound('popup-close'); }}
         />
       )}
 
@@ -220,7 +230,7 @@ export default function Level2Game({ onComplete, onSkip }) {
                   )}
 
                   {(dome.status === 'faulty' || dome.status === 'approved') && (
-                    <img src={domeLifted} alt="Emptied" className="dome-img emptied" />
+                    <img src={domeSpent} alt="Emptied" className="dome-img emptied" />
                   )}
 
                   {dome.status === 'wasted' && (

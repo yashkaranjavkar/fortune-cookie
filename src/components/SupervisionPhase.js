@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { playSound } from '../sounds';
 import './SupervisionPhase.css';
 import './ObjectiveScreen.css';
 
@@ -135,6 +136,7 @@ export function SupervisionChecklistScreen({ onNext }) {
       setModalRowIndex(index);
       setModalChoice(null);
       setModalOpen(true);
+      playSound('popup-open');
     } else {
       // Stay with original decision — no modal needed
       setDecisions(prev => {
@@ -148,6 +150,7 @@ export function SupervisionChecklistScreen({ onNext }) {
         updated[index] = null;
         return updated;
       });
+      playSound('select');
     }
   };
 
@@ -166,12 +169,14 @@ export function SupervisionChecklistScreen({ onNext }) {
     setModalOpen(false);
     setModalRowIndex(null);
     setModalChoice(null);
+    playSound('popup-close');
   };
 
   const handleModalCancel = () => {
     setModalOpen(false);
     setModalRowIndex(null);
     setModalChoice(null);
+    playSound('popup-close');
   };
 
   const allDecided = decisions.every(d => d !== null);
@@ -277,7 +282,7 @@ export function SupervisionChecklistScreen({ onNext }) {
                     type="radio"
                     name="modal-reason"
                     checked={modalChoice === option}
-                    onChange={() => setModalChoice(option)}
+                    onChange={() => { setModalChoice(option); playSound('select'); }}
                   />
                   <span>{option}</span>
                 </label>

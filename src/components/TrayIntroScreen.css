@@ -1,0 +1,8 @@
+.intro-cookies {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin: 24px 0;
+}
+
+.intro-cookie-icon { width: 56px; height: auto; }

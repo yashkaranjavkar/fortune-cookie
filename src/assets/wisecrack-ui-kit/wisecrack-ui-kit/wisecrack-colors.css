@@ -1,0 +1,44 @@
+/* Wisecrack UI kit — the colours used across Buttons, Panels, HUD and Game objects.
+   Fonts: Fredoka (labels, headings) and Mulish (body), both from Google Fonts. */
+
+:root {
+  /* Golden biscuit (main buttons, panel frames, progress trail) */
+  --biscuit-light: #F8CF86;
+  --biscuit: #EDAA52;
+  --biscuit-dark: #DE8F33;
+  --biscuit-rim: #7A3E12;
+  --biscuit-lip: #5A2C0C;
+
+  /* Cream (secondary buttons, panel boards, fortune slips) */
+  --cream-light: #FFF8EA;
+  --cream: #F3DEB6;
+  --cream-rim: #9C7350;
+  --cream-lip: #7A5534;
+
+  /* Plum (exit, close, faulty, name plaques) */
+  --plum-light: #B8475A;
+  --plum: #8E2A37;
+  --plum-dark: #6E1A26;
+  --plum-rim: #3E0A12;
+
+  /* Matcha (approve, yes, stay, completed bar) */
+  --matcha-light: #6E9F52;
+  --matcha: #4F7A3F;
+  --matcha-dark: #3F6632;
+  --matcha-rim: #23401F;
+
+  /* Background and text */
+  --cocoa-bg: #2B1B12;
+  --groove: #24170F;
+  --text-dark: #3A1A08;
+  --text-brown: #4A2E14;
+  --text-cream: #F6E3BE;
+  --text-muted: #C9B28E;
+
+  /* Stars */
+  --star-gold: #F7C948;
+  --star-empty: #E8D4AE;
+
+  --font-display: 'Fredoka', sans-serif;
+  --font-body: 'Mulish', sans-serif;
+}

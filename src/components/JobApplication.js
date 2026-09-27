@@ -3,6 +3,7 @@ import MultiSelect from './MultiSelect';
 import SearchableDropdown from './SearchableDropdown';
 import { regions, ageGroups, baseInterests } from '../data/constants';
 import { getRelatedInterests } from '../utils/relatedInterests';
+import { playSound } from '../sounds';
 
 // ADD THIS LINE! It looks for the image inside your src/assets folder
 import fciLogo from '../assets/fci-logo.png'; 
@@ -36,7 +37,7 @@ export default function JobApplication({ age, setAge, region, setRegion, interes
                       name="age"
                       value={g}
                       checked={age === g}
-                      onChange={() => setAge(g)}
+                      onChange={() => { setAge(g); playSound('select'); }}
                     />
                     {g}
                   </label>

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useCurrency } from '../utils/currency';
+import { playSound } from '../sounds';
 import SortTray from './SortTray';
 import TimerDial from './TimerDial';
 import torch from '../assets/instructions/torch.png';
@@ -77,6 +78,7 @@ export function TorchInspectScreen({ markedFortunes, onNext }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [torchValue, setTorchValue] = useState(0);
   const isRevealed = torchValue >= 95;
+  const torchStarted = useRef(false);
 
   const fortunes = (markedFortunes && markedFortunes.length > 0)
     ? markedFortunes
@@ -89,6 +91,7 @@ export function TorchInspectScreen({ markedFortunes, onNext }) {
 
   useEffect(() => {
     setTorchValue(0);
+    torchStarted.current = false;
   }, [currentIndex]);
 
   const currentFortune = fortunes[currentIndex];
@@ -132,7 +135,14 @@ export function TorchInspectScreen({ markedFortunes, onNext }) {
             min="0"
             max="100"
             value={torchValue}
-            onChange={(e) => setTorchValue(Number(e.target.value))}
+            onChange={(e) => {
+              const value = Number(e.target.value);
+              if (value > 0 && !torchStarted.current) {
+                torchStarted.current = true;
+                playSound('torch-on');
+              }
+              setTorchValue(value);
+            }}
             className="torch-slider"
           />
           <div className="torch-handle-container" style={{ left: `${torchValue}%` }}>
@@ -267,6 +277,10 @@ export function ResultsScreen({ markedFortunes, approvedItems, onNext }) {
   const faulty = (markedFortunes && markedFortunes.length > 0) ? markedFortunes : FALLBACK_FAULTY;
   const approved = (approvedItems && approvedItems.length > 0) ? approvedItems : FALLBACK_APPROVED;
 
+  useEffect(() => {
+    playSound('coin-gain');
+  }, []);
+
   return (
     <div className="inspection-room-screen sr-screen">
       <div className="inspection-title">INSPECTION ROOM</div>
@@ -349,17 +363,24 @@ function WhoshhConfetti() {
   );
 }
 
-const WhoshhLayout = ({ title, children, onNext, btnLabel }) => (
-  <div className="whoshh-screen">
-    <div className="whoshh-card">
-      <WhoshhConfetti />
-      <WhoshhMedal />
-      <div className="whoshh-title">{title}</div>
-      <p className="whoshh-text">{children}</p>
-      <button className="whoshh-btn" onClick={onNext}>{btnLabel}</button>
+const WhoshhLayout = ({ title, children, onNext, btnLabel }) => {
+  useEffect(() => {
+    playSound('star-earn');
+    playSound('level-done');
+  }, []);
+
+  return (
+    <div className="whoshh-screen">
+      <div className="whoshh-card">
+        <WhoshhConfetti />
+        <WhoshhMedal />
+        <div className="whoshh-title">{title}</div>
+        <p className="whoshh-text">{children}</p>
+        <button className="whoshh-btn" onClick={onNext}>{btnLabel}</button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // LEVEL 1 ENDING (Great Job Inspector)
 export function WhoshhScreen({ onNext }) {

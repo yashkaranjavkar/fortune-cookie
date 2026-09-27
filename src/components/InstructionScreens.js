@@ -5,18 +5,47 @@ import './EventScreen.css';
 import './TimerEndScreen.css';
 import './SortingFortunesScreen.css';
 
-// How-to Interact Assets
-import step1 from '../assets/instructions/1.png';
-import step2 from '../assets/instructions/2.png';
-import step3 from '../assets/instructions/3.png';
+// How-to Interact Assets - the same covered/hover/lifted dome states used in the games
+import step1 from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-covered.svg';
+import step2 from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-hover.svg';
+import step3 from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-lifted.svg';
+import domeSpent from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-spent.svg';
+import cookieBroken from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-broken.svg';
 
-// Sorting Assets - the dome/timer illustration is kept; the tray mock-images
-// are replaced below with real markup so both trays' info fits on one screen.
-import domeTimer from '../assets/instructions/dome-timer.png';
+// Countdown illustration shared by the three timer-explainer screens below: the same
+// dome art used everywhere else in the game, with a live LED-style readout and a curved
+// arrow pointing from the caption to it, instead of one flat baked-together image per screen.
+function TimerDomeScene({ label, value, wasted }) {
+  return (
+    <div className="tds-scene">
+      <div className="tds-caption">
+        {wasted && (
+          <svg className="tds-hand" viewBox="0 0 20 20" aria-hidden="true">
+            <circle cx="10" cy="10" r="9" fill="var(--pink-light)" stroke="var(--error)" strokeWidth="1.2" />
+            <path d="M10 5.5v6M7 9l3 3 3-3" fill="none" stroke="var(--maroon-deep)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+        <span className="tds-caption-text">{label}</span>
+      </div>
 
-// New Timer Assets
-import timerQuestion from '../assets/instructions/timer-question.png';
-import timerEnd from '../assets/instructions/timer-end.png';
+      <svg className="tds-arrow" viewBox="0 0 70 46" aria-hidden="true">
+        <path d="M2 8 Q46 4 64 34" fill="none" stroke="var(--ink-soft)" strokeWidth="2" strokeLinecap="round" strokeDasharray="1 7" />
+        <path d="M56 27 L65 35 L55 39" fill="none" stroke="var(--ink-soft)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+
+      <div className="tds-dome-col">
+        <img src={wasted ? domeSpent : step1} alt="" className="tds-dome-img" />
+        <div className="tds-led">{value}</div>
+        {wasted && (
+          <div className="tds-shelf">
+            <img src={cookieBroken} alt="" className="tds-shelf-cookie" />
+            <img src={cookieBroken} alt="" className="tds-shelf-cookie" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 // Shared Layout Component (Supports Green Bar & Left Replay Button)
 const InstructionLayout = ({ stepIndex, totalSteps, onBack, onNext, onReplay, children, isFinal }) => (
@@ -28,7 +57,7 @@ const InstructionLayout = ({ stepIndex, totalSteps, onBack, onNext, onReplay, ch
     </div>
 
     {/* Next Button (Bottom Right) */}
-    <button className="instruction-next-btn" onClick={onNext}>Next</button>
+    <button className="instruction-next-btn" onClick={onNext} data-sound="progress-munch">Next</button>
 
     {/* Replay Button (Bottom Left - Outside the card) */}
     {onReplay && (
@@ -175,7 +204,7 @@ export function SortingIntroScreen({ onNext, onBack, stepIndex, totalSteps }) {
       <div className="title">Sorting Fortunes</div>
 
       <div className="sorting-content">
-        <img src={domeTimer} alt="10 sec timer" className="dome-timer-img" />
+        <TimerDomeScene label={<>10 sec timer<br />to verify and sort</>} value="10" />
 
         <p className="sf-lead">Drag each fortune into the tray that matches your decision.</p>
 
@@ -210,7 +239,7 @@ export function TimerQuestionScreen({ onNext, onBack, stepIndex, totalSteps }) {
       <div className="title">Timer Ends</div>
       
       <div className="sorting-content">
-        <img src={timerQuestion} alt="Timer ends before sorting" className="dome-timer-img" />
+        <TimerDomeScene label={<>What if the timer<br />ends before sorting?</>} value="00" />
       </div>
     </InstructionLayout>
   );
@@ -231,7 +260,7 @@ export function TimerEndScreen({ onNext, onReplay, onBack, stepIndex, totalSteps
       <div className="title">Timer Ends</div>
       
       <div className="sorting-content">
-        <img src={timerEnd} alt="Timer ends with broken cookie" className="dome-timer-img" />
+        <TimerDomeScene label="Timer ends" value="00" wasted />
 
         <p className="tme-lead">
           If a sample isn&rsquo;t sorted before the timer runs out, it&rsquo;s spoilt &mdash; that batch won&rsquo;t go out for delivery.

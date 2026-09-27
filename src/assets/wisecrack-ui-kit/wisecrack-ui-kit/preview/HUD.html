@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wisecrack · Bars, timers & score</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=Mulish:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#2B1B12;font-family:'Mulish',sans-serif}
+a{color:#F6E3BE}a:hover{color:#FFFFFF}
+</style>
+</head>
+<body>
+<div style="width: 1440px; height: 1480px; box-sizing: border-box; padding: 64px; display: flex; flex-direction: column; gap: 56px; background: #2B1B12; font-family: 'Mulish', sans-serif; color: #F6E3BE;">
+
+<div style="display: flex; flex-direction: column; gap: 8px;">
+<h1 style="margin: 0; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 44px; color: #F8CF86;">Wisecrack bars, timers &amp; score</h1>
+<p style="margin: 0; font-size: 16px; color: #C9B28E;">Everything the player glances at while sorting: how far along they are, how long is left, and what they've earned.</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 22px;">
+<div style="display: flex; align-items: baseline; gap: 14px;">
+<h2 style="margin: 0; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 24px; color: #F6E3BE;">Progress bars</h2>
+<p style="margin: 0; font-size: 14px; color: #C9B28E;">A fortune cookie munches through a baked groove, leaving a golden trail and a few crumbs behind it.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 72px; row-gap: 36px;">
+
+<div style="display: flex; flex-direction: column; gap: 12px;">
+<div style="display: flex; justify-content: space-between; align-items: baseline; width: 580px;">
+<span style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 18px; color: #F6E3BE;">Start of tray</span>
+<span style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 18px; color: #F8CF86; font-variant-numeric: tabular-nums;">0 / 4</span>
+</div>
+<div style="position: relative; width: 580px; height: 64px;">
+<div style="position: absolute; left: 0; top: 18px; width: 580px; height: 28px; box-sizing: border-box; border-radius: 14px; border: 3px solid #7A3E12; background: #24170F; box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.55), 0 4px 0 #5A2C0C;"></div>
+<svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true" style="position: absolute; left: 0; top: 0; filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.4));"><defs><radialGradient id="ckA" cx="38%" cy="34%" r="70%"><stop offset="0%" stop-color="#FDE6B0"></stop><stop offset="50%" stop-color="#F0B25C"></stop><stop offset="100%" stop-color="#CF7F27"></stop></radialGradient></defs><path d="M33 32 L54.9 17.7 A27 27 0 1 0 54.9 46.3 Z" fill="url(#ckA)" stroke="#7A3E12" stroke-width="2.5" stroke-linejoin="round"></path><path d="M13 24 A21 21 0 0 1 27 10" fill="none" stroke="#FFF4DC" stroke-width="3" stroke-linecap="round" opacity="0.85"></path></svg>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 12px;">
+<div style="display: flex; justify-content: space-between; align-items: baseline; width: 580px;">
+<span style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 18px; color: #F6E3BE;">Level progress</span>
+<span style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 18px; color: #F8CF86; font-variant-numeric: tabular-nums;">2 / 4 domes</span>
+</div>
+<div style="position: relative; width: 580px; height: 64px;">
+<div style="position: absolute; left: 0; top: 18px; width: 580px; height: 28px; box-sizing: border-box; border-radius: 14px; border: 3px solid #7A3E12; background: #24170F; box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.55), 0 4px 0 #5A2C0C;"></div>
+<div style="position: absolute; left: 5px; top: 23px; width: 285px; height: 18px; border-radius: 9px; background: linear-gradient(180deg, #FBD894 0%, #EDAA52 55%, #D98A2E 100%); box-shadow: inset 0 2px 0 rgba(255, 245, 224, 0.75);"></div>
+<div style="position: absolute; left: 244px; top: 9px; width: 6px; height: 6px; border-radius: 50%; background: #F8CF86;"></div>
+<div style="position: absolute; left: 232px; top: 3px; width: 4px; height: 4px; border-radius: 50%; background: #EDAA52;"></div>
+<svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true" style="position: absolute; left: 258px; top: 0; filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.4));"><defs><radialGradient id="ckB" cx="38%" cy="34%" r="70%"><stop offset="0%" stop-color="#FDE6B0"></stop><stop offset="50%" stop-color="#F0B25C"></stop><stop offset="100%" stop-color="#CF7F27"></stop></radialGradient></defs><path d="M33 32 L54.9 17.7 A27 27 0 1 0 54.9 46.3 Z" fill="url(#ckB)" stroke="#7A3E12" stroke-width="2.5" stroke-linejoin="round"></path><path d="M13 24 A21 21 0 0 1 27 10" fill="none" stroke="#FFF4DC" stroke-width="3" stroke-linecap="round" opacity="0.85"></path></svg>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 12px;">
+<div style="display: flex; justify-content: space-between; align-items: baseline; width: 580px;">
+<span style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 18px; color: #F6E3BE;">Samples in this tray</span>
+<span style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 18px; color: #F8CF86; font-variant-numeric: tabular-nums;">3 / 4</span>
+</div>
+<div style="position: relative; width: 580px; height: 64px;">
+<div style="position: absolute; left: 0; top: 18px; width: 580px; height: 28px; box-sizing: border-box; border-radius: 14px; border: 3px solid #7A3E12; background: #24170F; box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.55), 0 4px 0 #5A2C0C;"></div>
+<div style="position: absolute; left: 5px; top: 23px; width: 415px; height: 18px; border-radius: 9px; background: linear-gradient(180deg, #FBD894 0%, #EDAA52 55%, #D98A2E 100%); box-shadow: inset 0 2px 0 rgba(255, 245, 224, 0.75);"></div>
+<div style="position: absolute; left: 374px; top: 9px; width: 6px; height: 6px; border-radius: 50%; background: #F8CF86;"></div>
+<div style="position: absolute; left: 362px; top: 3px; width: 4px; height: 4px; border-radius: 50%; background: #EDAA52;"></div>
+<svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true" style="position: absolute; left: 388px; top: 0; filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.4));"><defs><radialGradient id="ckC" cx="38%" cy="34%" r="70%"><stop offset="0%" stop-color="#FDE6B0"></stop><stop offset="50%" stop-color="#F0B25C"></stop><stop offset="100%" stop-color="#CF7F27"></stop></radialGradient></defs><path d="M33 32 L54.9 17.7 A27 27 0 1 0 54.9 46.3 Z" fill="url(#ckC)" stroke="#7A3E12" stroke-width="2.5" stroke-linejoin="round"></path><path d="M13 24 A21 21 0 0 1 27 10" fill="none" stroke="#FFF4DC" stroke-width="3" stroke-linecap="round" opacity="0.85"></path></svg>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 12px;">
+<div style="display: flex; justify-content: space-between; align-items: baseline; width: 580px;">
+<span style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 18px; color: #F6E3BE;">Tray done</span>
+<span style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 18px; color: #A9D48A; font-variant-numeric: tabular-nums;">4 / 4</span>
+</div>
+<div style="position: relative; width: 580px; height: 64px;">
+<div style="position: absolute; left: 0; top: 18px; width: 580px; height: 28px; box-sizing: border-box; border-radius: 14px; border: 3px solid #23401F; background: #1A2414; box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.55), 0 4px 0 #23401F;"></div>
+<div style="position: absolute; left: 5px; top: 23px; width: 570px; height: 18px; border-radius: 9px; background: linear-gradient(180deg, #8CC06A 0%, #5E8E4A 55%, #4A7438 100%); box-shadow: inset 0 2px 0 rgba(220, 245, 200, 0.6);"></div>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 12px;">
+<div style="display: flex; justify-content: space-between; align-items: baseline; width: 580px;">
+<span style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 18px; color: #F6E3BE;">Baking the next batch…</span>
+<span style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 18px; color: #F8CF86; font-variant-numeric: tabular-nums;">80%</span>
+</div>
+<div style="position: relative; width: 580px; height: 44px;">
+<div style="position: absolute; left: 0; top: 13px; width: 580px; height: 18px; box-sizing: border-box; border-radius: 9px; border: 2.5px solid #7A3E12; background: #24170F; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.55), 0 3px 0 #5A2C0C;"></div>
+<div style="position: absolute; left: 4px; top: 17px; width: 447px; height: 10px; border-radius: 5px; background: linear-gradient(180deg, #FBD894 0%, #EDAA52 55%, #D98A2E 100%); box-shadow: inset 0 1px 0 rgba(255, 245, 224, 0.75);"></div>
+<svg width="44" height="44" viewBox="0 0 64 64" aria-hidden="true" style="position: absolute; left: 429px; top: 0; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4));"><defs><radialGradient id="ckE" cx="38%" cy="34%" r="70%"><stop offset="0%" stop-color="#FDE6B0"></stop><stop offset="50%" stop-color="#F0B25C"></stop><stop offset="100%" stop-color="#CF7F27"></stop></radialGradient></defs><path d="M33 32 L54.9 17.7 A27 27 0 1 0 54.9 46.3 Z" fill="url(#ckE)" stroke="#7A3E12" stroke-width="3" stroke-linejoin="round"></path><path d="M13 24 A21 21 0 0 1 27 10" fill="none" stroke="#FFF4DC" stroke-width="3.5" stroke-linecap="round" opacity="0.85"></path></svg>
+</div>
+<span style="font-size: 13px; color: #C9B28E;">Thin variant, for loading between levels</span>
+</div>
+
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 22px;">
+<div style="display: flex; align-items: baseline; gap: 14px;">
+<h2 style="margin: 0; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 24px; color: #F6E3BE;">Timers</h2>
+<p style="margin: 0; font-size: 14px; color: #C9B28E;">The 10-second sort timer is a cookie dial; only its colour warns as time runs low. The 30-second marking timer is a quiet pill.</p>
+</div>
+<div style="display: flex; gap: 56px; align-items: flex-end;">
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px;">
+<div style="width: 104px; height: 104px; box-sizing: border-box; border-radius: 50%; border: 3px solid #7A3E12; padding: 9px; background: conic-gradient(#F2B862 0% 70%, #4A2A18 70% 100%); box-shadow: 0 5px 0 #5A2C0C, 0 9px 14px rgba(0, 0, 0, 0.35);">
+<div style="width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, #FFF8EA 0%, #F3DEB6 100%); box-shadow: inset 0 3px 6px rgba(160, 82, 18, 0.25); font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 34px; color: #3A1A08; font-variant-numeric: tabular-nums;">07</div>
+</div>
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #C9B28E;">Plenty of time</span>
+</div>
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px;">
+<div style="width: 104px; height: 104px; box-sizing: border-box; border-radius: 50%; border: 3px solid #7A3E12; padding: 9px; background: conic-gradient(#E07A1F 0% 30%, #4A2A18 30% 100%); box-shadow: 0 0 0 6px rgba(224, 122, 31, 0.25), 0 5px 0 #5A2C0C, 0 9px 14px rgba(0, 0, 0, 0.35);">
+<div style="width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, #FFF8EA 0%, #F3DEB6 100%); box-shadow: inset 0 3px 6px rgba(160, 82, 18, 0.25); font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 34px; color: #9A4A0C; font-variant-numeric: tabular-nums;">03</div>
+</div>
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #C9B28E;">Hurry · last 3 s</span>
+</div>
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px;">
+<div style="width: 104px; height: 104px; box-sizing: border-box; border-radius: 50%; border: 3px solid #3E0A12; padding: 9px; background: #4A2A18; box-shadow: 0 5px 0 #3E0A12, 0 9px 14px rgba(0, 0, 0, 0.35);">
+<div style="width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, #B8475A 0%, #8E2A37 55%, #6E1A26 100%); box-shadow: inset 0 3px 0 rgba(255, 200, 200, 0.35); font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 34px; color: #FFF1DC; font-variant-numeric: tabular-nums;">00</div>
+</div>
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #C9B28E;">Time's up</span>
+</div>
+
+<div style="width: 2px; height: 120px; background: #4A3324; border-radius: 1px;"></div>
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px;">
+<div style="height: 56px; box-sizing: border-box; padding: 0 22px 0 14px; display: flex; align-items: center; gap: 10px; border-radius: 28px; border: 3px solid #9C7350; background: linear-gradient(180deg, #FFFBF2 0%, #F3DEB6 55%, #E8CD9C 100%); box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.8), 0 5px 0 #7A5534;">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4A2E14" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2"></path><path d="M9.5 2.5h5"></path></svg>
+<span style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 26px; color: #3A1A08; font-variant-numeric: tabular-nums;">00:24</span>
+</div>
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #C9B28E;">Marking · 30 s</span>
+</div>
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px;">
+<div style="height: 56px; box-sizing: border-box; padding: 0 22px 0 14px; display: flex; align-items: center; gap: 10px; border-radius: 28px; border: 3px solid #B85E12; background: linear-gradient(180deg, #FFF1DC 0%, #F7D3A0 55%, #F0BF7C 100%); box-shadow: 0 0 0 5px rgba(224, 122, 31, 0.22), inset 0 3px 0 rgba(255, 255, 255, 0.7), 0 5px 0 #8A4610;">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9A4A0C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2"></path><path d="M9.5 2.5h5"></path></svg>
+<span style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 26px; color: #9A4A0C; font-variant-numeric: tabular-nums;">00:05</span>
+</div>
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #C9B28E;">Marking · running low</span>
+</div>
+
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 22px;">
+<div style="display: flex; align-items: baseline; gap: 14px;">
+<h2 style="margin: 0; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 24px; color: #F6E3BE;">Stars</h2>
+<p style="margin: 0; font-size: 14px; color: #C9B28E;">Golden stars earned, pale biscuit stars still to earn.</p>
+</div>
+<div style="display: flex; gap: 56px; align-items: center;">
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+<div style="display: flex; gap: 6px;">
+<svg width="44" height="44" viewBox="0 0 24 24" fill="#E8D4AE" stroke="#B89468" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+<svg width="44" height="44" viewBox="0 0 24 24" fill="#E8D4AE" stroke="#B89468" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+<svg width="44" height="44" viewBox="0 0 24 24" fill="#E8D4AE" stroke="#B89468" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+</div>
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #C9B28E;">0 of 3</span>
+</div>
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+<div style="display: flex; gap: 6px;">
+<svg width="44" height="44" viewBox="0 0 24 24" fill="#F7C948" stroke="#7A3E12" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+<svg width="44" height="44" viewBox="0 0 24 24" fill="#E8D4AE" stroke="#B89468" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+<svg width="44" height="44" viewBox="0 0 24 24" fill="#E8D4AE" stroke="#B89468" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+</div>
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #C9B28E;">1 of 3</span>
+</div>
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+<div style="display: flex; gap: 6px;">
+<svg width="44" height="44" viewBox="0 0 24 24" fill="#F7C948" stroke="#7A3E12" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+<svg width="44" height="44" viewBox="0 0 24 24" fill="#F7C948" stroke="#7A3E12" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+<svg width="44" height="44" viewBox="0 0 24 24" fill="#E8D4AE" stroke="#B89468" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+</div>
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #C9B28E;">2 of 3</span>
+</div>
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+<div style="display: flex; gap: 6px;">
+<svg width="44" height="44" viewBox="0 0 24 24" fill="#F7C948" stroke="#7A3E12" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+<svg width="44" height="44" viewBox="0 0 24 24" fill="#F7C948" stroke="#7A3E12" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+<svg width="44" height="44" viewBox="0 0 24 24" fill="#F7C948" stroke="#7A3E12" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+</div>
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #C9B28E;">3 of 3</span>
+</div>
+
+<div style="width: 2px; height: 80px; background: #4A3324; border-radius: 1px;"></div>
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+<div style="height: 50px; box-sizing: border-box; padding: 0 20px 0 10px; display: flex; align-items: center; gap: 8px; border-radius: 25px; border: 3px solid #7A3E12; background: #4A2A18; box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.4), 0 4px 0 #5A2C0C;">
+<svg width="32" height="32" viewBox="0 0 24 24" fill="#F7C948" stroke="#7A3E12" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+<span style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 22px; color: #F8CF86; font-variant-numeric: tabular-nums;">7 / 9</span>
+</div>
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #C9B28E;">Stars across levels</span>
+</div>
+
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 22px;">
+<div style="display: flex; align-items: baseline; gap: 14px;">
+<h2 style="margin: 0; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 24px; color: #F6E3BE;">Score counters</h2>
+<p style="margin: 0; font-size: 14px; color: #C9B28E;">The running incentive, the chips that float up after each sort, and the dome counter.</p>
+</div>
+<div style="display: flex; gap: 56px; align-items: flex-end;">
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px;">
+<div style="height: 58px; box-sizing: border-box; padding: 0 24px 0 8px; display: flex; align-items: center; gap: 12px; border-radius: 29px; border: 3px solid #7A3E12; background: #4A2A18; box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.4), 0 4px 0 #5A2C0C;">
+<div style="width: 40px; height: 40px; border-radius: 50%; border: 3px solid #7A3E12; box-sizing: border-box; display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, #F8CF86 0%, #EDAA52 55%, #DE8F33 100%); box-shadow: inset 0 2px 0 rgba(255, 241, 214, 0.75); font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 20px; color: #3A1A08;">₹</div>
+<span style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 26px; color: #F8CF86; font-variant-numeric: tabular-nums;">4,200</span>
+</div>
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #C9B28E;">Incentive · HUD</span>
+</div>
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px;">
+<div style="display: flex; gap: 12px; align-items: center;">
+<span style="height: 40px; box-sizing: border-box; padding: 0 16px; display: flex; align-items: center; border-radius: 20px; border: 3px solid #23401F; background: linear-gradient(180deg, #6E9F52 0%, #4F7A3F 55%, #3F6632 100%); box-shadow: inset 0 2px 0 rgba(220, 245, 200, 0.4), 0 4px 0 #23401F; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 20px; color: #FFF7E6; font-variant-numeric: tabular-nums;">+ ₹1,000</span>
+<span style="height: 40px; box-sizing: border-box; padding: 0 16px; display: flex; align-items: center; border-radius: 20px; border: 3px solid #3E0A12; background: linear-gradient(180deg, #B8475A 0%, #8E2A37 55%, #6E1A26 100%); box-shadow: inset 0 2px 0 rgba(255, 200, 200, 0.35), 0 4px 0 #3E0A12; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 20px; color: #FFF1DC; font-variant-numeric: tabular-nums;">− ₹800</span>
+<span style="height: 40px; box-sizing: border-box; padding: 0 16px; display: flex; align-items: center; border-radius: 20px; border: 3px solid #3E0A12; background: linear-gradient(180deg, #B8475A 0%, #8E2A37 55%, #6E1A26 100%); box-shadow: inset 0 2px 0 rgba(255, 200, 200, 0.35), 0 4px 0 #3E0A12; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 20px; color: #FFF1DC; font-variant-numeric: tabular-nums;">− ₹500</span>
+</div>
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #C9B28E;">Change chips · float up, then fade</span>
+</div>
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px;">
+<div style="height: 58px; min-width: 116px; box-sizing: border-box; padding: 0 26px; display: flex; align-items: center; justify-content: center; border-radius: 29px; border: 3px solid #9C7350; background: linear-gradient(180deg, #FFFBF2 0%, #F3DEB6 55%, #E8CD9C 100%); box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.8), 0 5px 0 #7A5534; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 28px; color: #3A1A08; font-variant-numeric: tabular-nums;">2 / 4</div>
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #C9B28E;">Domes sorted</span>
+</div>
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px;">
+<div style="height: 58px; box-sizing: border-box; padding: 0 22px; display: flex; align-items: center; gap: 10px; border-radius: 29px; border: 3px solid #3E0A12; background: linear-gradient(180deg, #B8475A 0%, #8E2A37 55%, #6E1A26 100%); box-shadow: inset 0 3px 0 rgba(255, 200, 200, 0.35), 0 5px 0 #3E0A12;">
+<span style="font-size: 13px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #F8D9C4;">Level</span>
+<span style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 26px; color: #FFF1DC; font-variant-numeric: tabular-nums;">1</span>
+</div>
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #C9B28E;">Level tag</span>
+</div>
+
+</div>
+</div>
+
+</div>
+</body>
+</html>

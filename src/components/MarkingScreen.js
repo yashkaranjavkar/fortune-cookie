@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import TimerDial from './TimerDial';
+import { playSound } from '../sounds';
 import './MarkingScreen.css';
 
 // Hand-drawn highlighter icon, matching the line-icon style used elsewhere in the app
@@ -58,6 +59,7 @@ export default function MarkingScreen({ faultyItems, onNext }) {
         return newHighlights;
       });
       selection.removeAllRanges();
+      playSound('highlight-mark');
     }
   };
 
@@ -67,6 +69,7 @@ export default function MarkingScreen({ faultyItems, onNext }) {
       newHighlights[index] = null;
       return newHighlights;
     });
+    playSound('highlight-remove');
   };
 
   const allMarked = highlights.every(h => h !== null && h.length > 0);

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import InvalidURLExplainer from './InvalidURLExplainer';
 import { useCurrency } from '../utils/currency';
-import cookieIntact from '../assets/cookies/cookie-intact.png';
-import cookieBroken from '../assets/cookies/broken-cookie.png';
+import { playSound } from '../sounds';
+import cookieIntact from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-whole.svg';
+import cookieBroken from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-broken.svg';
 
 // Shared Level 1 Layout
 const LevelOneLayout = ({ title, onBack, onNext, children }) => (
@@ -176,6 +177,7 @@ export function BalloonScreen({ onReplay, onNext }) {
 
   const handlePop = (color) => {
     setPopped(prev => ({ ...prev, [color]: true }));
+    playSound('balloon-pop');
     setTimeout(() => {
       onReplay();
     }, 500);

@@ -1,5 +1,5 @@
 import React from 'react';
-import cookie from '../assets/cookies/cookie-intact.png';
+import cookie from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-whole.svg';
 
 // Storyboard: graduate -> applies to the factory -> the Inspector role
 const STORY = [

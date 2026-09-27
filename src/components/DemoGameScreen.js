@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SortTray from './SortTray';
+import { playSound } from '../sounds';
 import './DemoGameScreen.css';
 
-import domeClosed from '../assets/demo/dome-closed.png';
-import domeLifted from '../assets/demo/dome-lifted.png';
-import brokenCookie from '../assets/demo/broken-cookie.png';
+import domeClosed from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-covered.svg';
+import domeLifted from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-lifted.svg';
+import domeSpent from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-spent.svg';
+import brokenCookie from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-broken.svg';
 
 const DEMO_SECONDS = 10;
 const MAX_ATTEMPTS = 3;
@@ -48,6 +50,7 @@ export default function DemoGameScreen({ onComplete }) {
         setFortuneText(prev => pickFortune(prev));
         setTimer(DEMO_SECONDS);
         setPhase('revealed');
+        playSound('dome-lift');
       }, 300);
     }
   };
@@ -64,8 +67,11 @@ export default function DemoGameScreen({ onComplete }) {
         if (prev <= 1) {
           clearInterval(intervalRef.current);
           setPhase('wasted');
+          playSound('time-up');
+          playSound('cookie-break');
           return 0;
         }
+        if (prev - 1 <= 3) playSound('timer-tick');
         return prev - 1;
       });
     }, 1000);
@@ -78,6 +84,7 @@ export default function DemoGameScreen({ onComplete }) {
     e.dataTransfer.setData('text/plain', 'fortune');
     e.dataTransfer.effectAllowed = 'move';
     setDragging(true);
+    playSound('slip-pickup');
   };
 
   const handleDrop = (e, tray) => {
@@ -87,6 +94,7 @@ export default function DemoGameScreen({ onComplete }) {
     if (phase !== 'revealed') return;
     setPlacedIn(tray);
     setPhase('placed');
+    playSound(tray === 'faulty' ? 'drop-faulty' : 'drop-approved');
   };
 
   const resetDemo = () => {
@@ -143,7 +151,7 @@ export default function DemoGameScreen({ onComplete }) {
         {/* Strip has been sorted - the opened cookie stays on the plate */}
         {phase === 'placed' && (
           <div className="demo-lifted-stage">
-            <img src={domeLifted} alt="Lifted Dome" className="dome-img" />
+            <img src={domeSpent} alt="Emptied dome" className="dome-img" />
           </div>
         )}
 

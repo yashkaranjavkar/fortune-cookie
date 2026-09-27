@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import cookieIntact from '../assets/cookies/cookie-intact.png';
-import cookieBroken from '../assets/cookies/broken-cookie.png';
+import { playSound } from '../sounds';
+import cookieIntact from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-whole.svg';
+import cookieBroken from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-cracked.svg';
 
 export default function FortuneSelectionScreen({ trayNumber, bunchNumber, fortunes, onSubmit }) {
   const [phase, setPhase] = useState('breaking'); // breaking -> cracked -> fortunes
@@ -9,6 +10,7 @@ export default function FortuneSelectionScreen({ trayNumber, bunchNumber, fortun
   useEffect(() => {
     const timer1 = setTimeout(() => {
       setPhase('cracked');
+      playSound('cookie-crack');
     }, 800);
 
     const timer2 = setTimeout(() => {
@@ -27,11 +29,13 @@ export default function FortuneSelectionScreen({ trayNumber, bunchNumber, fortun
     } else {
       setSelected([...selected, index]);
     }
+    playSound('select');
   };
 
   const handleNext = () => {
     onSubmit(selected);
     setSelected([]);
+    playSound('toast');
   };
 
   return (

@@ -1,5 +1,62 @@
 /* Sorting Fortunes: both trays shown side by side, one short line each - no duplicate sentences. */
 
+/* Countdown illustration shared by the timer-explainer screens (dome + LED readout,
+   with a curved arrow pointing from the caption) - see TimerDomeScene in InstructionScreens.js */
+.tds-scene {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tds-caption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 190px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--ink-primary);
+  text-align: right;
+  justify-content: flex-end;
+}
+
+.tds-hand { width: 26px; height: 26px; flex-shrink: 0; }
+
+.tds-arrow { width: 64px; height: 42px; flex-shrink: 0; }
+
+.tds-dome-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.tds-dome-img { width: 110px; height: auto; }
+
+.tds-led {
+  padding: 4px 16px;
+  border-radius: 6px;
+  background: var(--ink-primary);
+  color: var(--error);
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+.tds-shelf {
+  display: flex;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--grey-light);
+  border-radius: 4px;
+}
+
+.tds-shelf-cookie { width: 34px; height: auto; }
+
 .sf-lead {
   margin: 16px 0 0;
   font-size: 15px;

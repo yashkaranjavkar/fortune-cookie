@@ -1,7 +1,17 @@
 import React from 'react';
-import trayBg from '../assets/cookies/tray.png';
-import bunch from '../assets/cookies/bunch.png';
-import bunchBroken from '../assets/cookies/bunch-broken.png';
+import { playSound } from '../sounds';
+import TrayFrame from './TrayFrame';
+import cookieWhole from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-whole.svg';
+import cookieBroken from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-broken.svg';
+
+// A "bunch" is 4 individual cookies clustered together, not one big cookie
+const CookieBunch = ({ broken, className = '' }) => (
+  <div className={`cookie-bunch ${className}`}>
+    {Array.from({ length: 4 }).map((_, i) => (
+      <img key={i} src={broken ? cookieBroken : cookieWhole} alt="" className="cookie-bunch-item" aria-hidden="true" />
+    ))}
+  </div>
+);
 
 // Small preview tray thumbnail
 // scale = size relative to the active tray; it shrinks with distance from it
@@ -9,10 +19,10 @@ const SCALE_BY_DISTANCE = { 1: 0.42, 2: 0.28 };
 
 const TrayPreview = ({ broken = false, distance = 1 }) => (
   <div className="tray-preview-thumb" style={{ '--scale': SCALE_BY_DISTANCE[distance] || 0.22 }}>
-    <img src={trayBg} alt="Tray preview" className="tray-preview-bg" />
+    <TrayFrame type="baking" className="tray-preview-bg" />
     <div className="tray-preview-bunches">
-      <img src={broken ? bunchBroken : bunch} alt="bunch" className="tray-preview-bunch" />
-      <img src={broken ? bunchBroken : bunch} alt="bunch" className="tray-preview-bunch" />
+      <CookieBunch broken={broken} className="tray-preview-bunch" />
+      <CookieBunch broken={broken} className="tray-preview-bunch" />
     </div>
   </div>
 );
@@ -49,36 +59,29 @@ export default function TraySelectionScreen({ trayNumber, brokenBunches, onSelec
             Select any bunch from this tray to break through and see the fortunes inside.
           </div>
           <div className="tray-container active-tray">
+            <TrayFrame type="baking" />
             {/* Left bunch */}
             <div
               className="bunch"
-              onClick={() => !isBunch0Broken && onSelectBunch(0)}
+              onClick={() => { if (!isBunch0Broken) { playSound('cookie-crack'); onSelectBunch(0); } }}
               style={{
                 cursor: isBunch0Broken ? 'default' : 'pointer',
                 opacity: isBunch0Broken ? 0.35 : 1
               }}
             >
-              <img
-                src={isBunch0Broken ? bunchBroken : bunch}
-                alt="Bunch Left"
-                className="bunch-img"
-              />
+              <CookieBunch broken={isBunch0Broken} />
             </div>
 
             {/* Right bunch */}
             <div
               className="bunch"
-              onClick={() => !isBunch1Broken && onSelectBunch(1)}
+              onClick={() => { if (!isBunch1Broken) { playSound('cookie-crack'); onSelectBunch(1); } }}
               style={{
                 cursor: isBunch1Broken ? 'default' : 'pointer',
                 opacity: isBunch1Broken ? 0.35 : 1
               }}
             >
-              <img
-                src={isBunch1Broken ? bunchBroken : bunch}
-                alt="Bunch Right"
-                className="bunch-img"
-              />
+              <CookieBunch broken={isBunch1Broken} />
             </div>
           </div>
           <div className="tz-plaque">TRAY {trayNumber + 1} OF {totalTrays}</div>

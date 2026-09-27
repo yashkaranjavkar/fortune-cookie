@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import './MultiSelect.css';
 import { loadCustomOptions, saveCustomOption, mergeOptions, normalizeOption } from '../utils/customOptions';
+import { playSound } from '../sounds';
 
 // Multi-select dropdown with type-to-filter.
 // allowAdd: typed text that isn't in the list can be added as a new option.
@@ -37,6 +38,7 @@ export default function MultiSelect({ options, selected, onToggle, placeholder, 
   const pick = (option) => {
     onToggle(option);
     setQuery('');
+    playSound('select');
   };
 
   const addNew = () => {
@@ -44,6 +46,7 @@ export default function MultiSelect({ options, selected, onToggle, placeholder, 
     if (storageKey) setCustom(saveCustomOption(storageKey, item));
     onToggle(item);
     setQuery('');
+    playSound('select');
   };
 
   const handleKeyDown = (e) => {
@@ -65,7 +68,7 @@ export default function MultiSelect({ options, selected, onToggle, placeholder, 
         {selected.length > 0 && (
           <div className="chips">
             {selected.map(s => (
-              <span key={s} className="chip" onClick={(e) => { e.stopPropagation(); onToggle(s); }}>
+              <span key={s} className="chip" onClick={(e) => { e.stopPropagation(); onToggle(s); playSound('select'); }}>
                 {s} ✕
               </span>
             ))}

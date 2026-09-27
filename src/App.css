@@ -632,10 +632,21 @@ body {
 /* Tray Selection */
 .tray-selection-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
 .instruction-bar { background: var(--card-cream); border: 2px solid var(--gold); border-radius: 10px; padding: 15px 30px; margin-bottom: 50px; font-size: 18px; text-align: center; max-width: 700px; }
-.tray-container { width: 700px; height: 350px; background-image: url('./assets/cookies/tray.png'); background-size: 100% 100%; background-repeat: no-repeat; display: flex; justify-content: space-around; align-items: center; padding: 0; box-sizing: border-box; }
-.bunch { cursor: pointer; width: 200px; height: 150px; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease; }
+.tray-container { position: relative; width: 700px; height: 350px; display: flex; justify-content: space-around; align-items: center; padding: 0; box-sizing: border-box; }
+.bunch { position: relative; z-index: 1; cursor: pointer; width: 200px; height: 150px; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease; }
 .bunch:hover { transform: scale(1.05); }
-.bunch-img { width: 100%; height: 100%; object-fit: contain; }
+
+/* A bunch = 4 small cookies clustered in a 2x2 grid, not one giant cookie */
+.cookie-bunch {
+  width: 82%;
+  height: 82%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 4%;
+  place-items: center;
+}
+.cookie-bunch-item { width: 85%; height: 85%; object-fit: contain; }
 
 /* ============================================
    TRAY CAROUSEL
@@ -702,9 +713,6 @@ body {
 .active-tray {
   width: var(--tray-w);
   height: calc(var(--tray-w) / 2);
-  background-image: url('./assets/cookies/tray.png');
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -736,6 +744,7 @@ body {
   position: absolute;
   top: 0; left: 0;
   width: 100%; height: 100%;
+  z-index: 1;
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -800,12 +809,29 @@ body {
   overflow: hidden; 
 }
 
-/* Back Button */
+/* Back Button - round biscuit icon button (wisecrack kit's "Back" chip) */
 .back-btn {
   position: absolute; top: 20px; left: 20px;
-  background: transparent; color: white; border: 2px solid white; border-radius: 50%;
-  width: 50px; height: 50px; font-size: 24px; cursor: pointer;
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  border: 3px solid var(--biscuit-rim);
+  background-color: var(--biscuit);
+  background-image: linear-gradient(180deg, var(--biscuit-light) 0%, var(--biscuit) 55%, var(--biscuit-dark) 100%);
+  box-shadow: inset 0 3px 0 rgba(255, 241, 214, 0.75), inset 0 -4px 0 rgba(160, 82, 18, 0.35), 0 5px 0 var(--biscuit-lip), 0 9px 14px rgba(0, 0, 0, 0.35);
+  color: var(--text-dark);
+  font-size: 22px;
+  cursor: pointer;
   display: flex; align-items: center; justify-content: center; z-index: 10;
+  transition: transform 0.08s ease-out, filter 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+.back-btn:hover {
+  filter: brightness(1.04);
+  box-shadow: 0 0 0 4px rgba(255, 196, 102, 0.35), inset 0 3px 0 rgba(255, 245, 224, 0.85), inset 0 -4px 0 rgba(160, 82, 18, 0.3), 0 5px 0 var(--biscuit-lip), 0 9px 16px rgba(0, 0, 0, 0.4);
+}
+.back-btn:active {
+  transform: translateY(3px);
+  filter: brightness(0.96);
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.35), 0 2px 0 rgba(0, 0, 0, 0.4);
 }
 
 /* Next & Replay Buttons - OUTSIDE the card (User's Custom Positions) */
@@ -830,13 +856,36 @@ body {
   border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; z-index: 200;
 }
 
-/* Progress Bar - OUTSIDE the card */
+/* Progress Bar - OUTSIDE the card. Wisecrack kit look (preview/HUD.html): a baked
+   groove track, a golden gradient trail, and cookie-progress.svg riding its leading edge. */
 .instruction-progress-bar {
   position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-  width: 400px; height: 10px; background: var(--ink-soft); border-radius: 5px; overflow: hidden; z-index: 200;
+  width: 400px; height: 34px; z-index: 200;
 }
-.progress-fill { height: 100%; background: var(--yellow-base); transition: width 0.3s ease; }
-.progress-fill.green { background-color: var(--green-base); }
+.instruction-progress-bar::before {
+  content: '';
+  position: absolute; left: 0; top: 10px; width: 100%; height: 16px;
+  box-sizing: border-box; border-radius: 8px;
+  border: 2px solid var(--biscuit-rim);
+  background: var(--groove);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.55), 0 3px 0 var(--biscuit-lip);
+}
+.progress-fill {
+  position: absolute; left: 2px; top: 13px; height: 10px;
+  border-radius: 5px;
+  background-image: linear-gradient(180deg, var(--biscuit-light) 0%, var(--biscuit) 55%, var(--biscuit-dark) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 245, 224, 0.75);
+  transition: width 0.3s ease;
+}
+.progress-fill.green {
+  background-image: linear-gradient(180deg, var(--matcha-light) 0%, var(--matcha) 55%, var(--matcha-dark) 100%);
+}
+.progress-cookie {
+  position: absolute; top: 0; width: 34px; height: 34px;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.4));
+  transition: left 0.3s ease;
+}
 
 /* How To Grid */
 .how-to-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 30px; align-items: start; text-align: center; }
@@ -847,7 +896,6 @@ body {
 
 /* Sorting Content */
 .sorting-content { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; gap: 20px; }
-.dome-timer-img { max-width: 400px; width: 100%; height: auto; object-fit: contain; }
 .sorting-options { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 750px; margin: 0 auto; }
 .tray-option-img { max-width: 280px; max-height: 200px; width: 100%; height: auto; object-fit: contain; }
 .or-text { font-size: 24px; font-weight: 800; color: var(--ink-primary); margin: 0 10px; font-style: italic; flex-shrink: 0; }
@@ -1149,8 +1197,7 @@ body {
 
 /* Empty Lifted Dome (Faded) */
 .dome-img.emptied {
-  opacity: 0.35; /* Matches the faded look from your reference */
-  filter: grayscale(100%); /* Removes any color, making it pure grey */
+  /* dome-spent.svg is already drawn dimmed/grey - no extra fade needed on top of it */
   pointer-events: none; /* Prevents the dome from being hovered again */
 }
 
@@ -2689,73 +2736,97 @@ body {
 }
 
 /* ============================================================
-   DESIGN SYSTEM BUTTONS  (design-system/README.md + tokens)
-   One grammar for every button: pill shape, Mulish 15/600,
-   orange-base fill with ink-inverse text. Hover = orange-light,
-   pressed = orange-deep, disabled = disabled token.
+   WISECRACK KIT BUTTONS (assets/wisecrack-ui-kit, preview/Buttons.html)
+   Baked-biscuit chrome: gradient glaze, a darker cooked rim, and a
+   chunky drop-shadow "lip" that sinks when pressed. Four flavours -
+   golden (forward), cream (replay/secondary), matcha (approve/confirm),
+   plum (decline/cancel) - reused from the kit's own colour tokens.
    Layout (position, width, margins) stays with each screen's own rule;
    the `.app` prefix lets this block win over per-screen colour rules.
    ============================================================ */
 
-/* Primary */
+/* Shared shape/type for every chrome button, regardless of flavour */
 .app .next-btn,
 .app .orange-btn,
 .app .let-start-btn,
 .app .whoshh-btn,
-.app .supervision-next-btn,
 .app .supervision-orange-btn,
 .app .instruction-next-btn,
 .app .demo-next-btn,
 .app .inspection-next-btn,
 .app .marking-screen .next-btn.enabled,
 .app .level-one-screen .orange-btn,
-.app .start-marking-screen .let-start-btn {
-  background: var(--orange-base);
-  color: var(--ink-inverse);
-  border: none;
+.app .start-marking-screen .let-start-btn,
+.app .check-samples-btn,
+.app .instruction-replay-btn,
+.app .demo-replay-btn,
+.app .supervision-modal-confirm,
+.app .supervision-modal-cancel {
+  appearance: none;
+  height: 52px;
+  min-width: 168px;
+  padding: 0 30px;
   border-radius: var(--radius-full);
-  padding: var(--space-3) var(--space-6);
   font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 20px;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
   cursor: pointer;
-  box-shadow: none;
-  transition: background 0.2s, transform 0.1s;
+  transition: transform 0.08s ease-out, filter 0.15s ease-out, box-shadow 0.15s ease-out;
 }
 
-/* Secondary (neutral) */
+/* Golden - the one action that moves the game forward */
+.app .next-btn,
+.app .orange-btn,
+.app .let-start-btn,
+.app .whoshh-btn,
+.app .supervision-orange-btn,
+.app .instruction-next-btn,
+.app .demo-next-btn,
+.app .inspection-next-btn,
+.app .marking-screen .next-btn.enabled,
+.app .level-one-screen .orange-btn,
+.app .start-marking-screen .let-start-btn,
+.app .check-samples-btn {
+  border: 3px solid var(--biscuit-rim);
+  background-color: var(--biscuit);
+  background-image: linear-gradient(180deg, var(--biscuit-light) 0%, var(--biscuit) 55%, var(--biscuit-dark) 100%);
+  box-shadow: inset 0 3px 0 rgba(255, 241, 214, 0.75), inset 0 -4px 0 rgba(160, 82, 18, 0.35), 0 6px 0 var(--biscuit-lip), 0 10px 16px rgba(0, 0, 0, 0.35);
+  color: var(--text-dark);
+  text-shadow: 0 1px 0 rgba(255, 236, 200, 0.7);
+}
+
+/* Cream - replay / side steps */
 .app .instruction-replay-btn,
 .app .demo-replay-btn {
-  background: var(--grey-light);
-  color: var(--ink-primary);
-  border: none;
-  border-radius: var(--radius-full);
-  padding: var(--space-3) var(--space-6);
-  font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 20px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
+  border: 3px solid var(--cream-rim);
+  background-color: var(--cream);
+  background-image: linear-gradient(180deg, var(--cream-light) 0%, var(--cream) 55%, #E8CD9C 100%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.8), inset 0 -4px 0 rgba(156, 115, 80, 0.25), 0 6px 0 var(--cream-lip), 0 10px 16px rgba(0, 0, 0, 0.35);
+  color: var(--text-brown);
 }
 
-/* Secondary CTA (yellow) - carries ink, never white */
-.app .check-samples-btn {
-  background: var(--yellow-base);
-  color: var(--ink-primary);
-  border: none;
-  border-radius: var(--radius-full);
-  padding: var(--space-3) var(--space-6);
-  font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 20px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
+/* Matcha - approve / confirm */
+.app .supervision-modal-confirm {
+  border: 3px solid var(--matcha-rim);
+  background-color: var(--matcha);
+  background-image: linear-gradient(180deg, var(--matcha-light) 0%, var(--matcha) 55%, var(--matcha-dark) 100%);
+  box-shadow: inset 0 3px 0 rgba(220, 245, 200, 0.4), inset 0 -4px 0 rgba(20, 40, 15, 0.3), 0 6px 0 var(--matcha-rim), 0 10px 16px rgba(0, 0, 0, 0.35);
+  color: #FFF7E6;
+  text-shadow: 0 1px 0 rgba(20, 40, 15, 0.5);
 }
 
-/* Text-only actions */
+/* Plum - decline / cancel / revoke */
+.app .supervision-modal-cancel {
+  border: 3px solid var(--plum-rim);
+  background-color: var(--plum);
+  background-image: linear-gradient(180deg, var(--plum-light) 0%, var(--plum) 55%, var(--plum-dark) 100%);
+  box-shadow: inset 0 3px 0 rgba(255, 200, 200, 0.35), inset 0 -4px 0 rgba(40, 5, 10, 0.35), 0 6px 0 var(--plum-rim), 0 10px 16px rgba(0, 0, 0, 0.35);
+  color: #FFF1DC;
+  text-shadow: 0 1px 0 rgba(40, 5, 10, 0.5);
+}
+
+/* Text-only actions (kept quiet - the kit's own Back/Skip nav links carry no chrome either) */
 .app .instruction-skip-btn,
 .app .results-next-btn {
   background: transparent;
@@ -2769,50 +2840,71 @@ body {
   cursor: pointer;
 }
 
-/* Hover / pressed / disabled */
+/* Hover - a soft coloured halo plus a slightly brighter glaze, per flavour */
 .app .next-btn:hover:not(:disabled),
 .app .orange-btn:hover:not(:disabled),
 .app .let-start-btn:hover:not(:disabled),
 .app .whoshh-btn:hover:not(:disabled),
-.app .supervision-next-btn:hover:not(:disabled),
 .app .supervision-orange-btn:hover:not(:disabled),
 .app .instruction-next-btn:hover:not(:disabled),
 .app .demo-next-btn:hover:not(:disabled),
 .app .inspection-next-btn:hover:not(:disabled),
-.app .marking-screen .next-btn.enabled:hover {
-  background: var(--orange-light);
-  color: var(--ink-primary);
+.app .marking-screen .next-btn.enabled:hover,
+.app .check-samples-btn:hover:not(:disabled) {
+  filter: brightness(1.04);
+  box-shadow: 0 0 0 5px rgba(255, 196, 102, 0.35), inset 0 3px 0 rgba(255, 245, 224, 0.85), inset 0 -4px 0 rgba(160, 82, 18, 0.3), 0 6px 0 var(--biscuit-lip), 0 10px 18px rgba(0, 0, 0, 0.4);
 }
+.app .instruction-replay-btn:hover,
+.app .demo-replay-btn:hover {
+  filter: brightness(1.04);
+  box-shadow: 0 0 0 5px rgba(243, 222, 182, 0.4), inset 0 3px 0 rgba(255, 255, 255, 0.85), inset 0 -4px 0 rgba(156, 115, 80, 0.25), 0 6px 0 var(--cream-lip), 0 10px 18px rgba(0, 0, 0, 0.35);
+}
+.app .supervision-modal-confirm:hover:not(:disabled) {
+  filter: brightness(1.04);
+  box-shadow: 0 0 0 5px rgba(111, 159, 82, 0.35), inset 0 3px 0 rgba(220, 245, 200, 0.5), inset 0 -4px 0 rgba(20, 40, 15, 0.3), 0 6px 0 var(--matcha-rim), 0 10px 18px rgba(0, 0, 0, 0.4);
+}
+.app .supervision-modal-cancel:hover:not(:disabled) {
+  filter: brightness(1.04);
+  box-shadow: 0 0 0 5px rgba(184, 71, 90, 0.35), inset 0 3px 0 rgba(255, 200, 200, 0.45), inset 0 -4px 0 rgba(40, 5, 10, 0.35), 0 6px 0 var(--plum-rim), 0 10px 18px rgba(0, 0, 0, 0.4);
+}
+.app .instruction-skip-btn:hover,
+.app .results-next-btn:hover { color: var(--orange-base); background: transparent; }
 
+/* Pressed - the chunky lip sinks in */
 .app .next-btn:active:not(:disabled),
 .app .orange-btn:active:not(:disabled),
 .app .let-start-btn:active:not(:disabled),
 .app .whoshh-btn:active:not(:disabled),
-.app .supervision-next-btn:active:not(:disabled),
 .app .supervision-orange-btn:active:not(:disabled),
 .app .instruction-next-btn:active:not(:disabled),
 .app .demo-next-btn:active:not(:disabled),
 .app .inspection-next-btn:active:not(:disabled),
-.app .marking-screen .next-btn.enabled:active {
-  background: var(--orange-deep);
-  color: var(--ink-inverse);
+.app .marking-screen .next-btn.enabled:active,
+.app .check-samples-btn:active:not(:disabled),
+.app .instruction-replay-btn:active,
+.app .demo-replay-btn:active,
+.app .supervision-modal-confirm:active:not(:disabled),
+.app .supervision-modal-cancel:active:not(:disabled) {
+  transform: translateY(4px);
+  filter: brightness(0.96);
+  box-shadow: inset 0 4px 7px rgba(0, 0, 0, 0.35), 0 2px 0 rgba(0, 0, 0, 0.4), 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
-.app .instruction-replay-btn:hover,
-.app .demo-replay-btn:hover { background: var(--grey-base); color: var(--ink-inverse); }
-
-.app .check-samples-btn:hover { background: var(--yellow-light); color: var(--ink-primary); }
-
-.app .instruction-skip-btn:hover,
-.app .results-next-btn:hover { color: var(--orange-base); background: transparent; }
-
+/* Disabled - flattened, cool grey glaze, no lip */
 .app .next-btn:disabled,
 .app .orange-btn:disabled,
 .app .supervision-orange-btn:disabled,
-.app .marking-screen .next-btn:not(.enabled) {
-  background: var(--disabled);
-  color: var(--ink-soft);
+.app .marking-screen .next-btn:not(.enabled),
+.app .supervision-modal-confirm:disabled {
   cursor: not-allowed;
+  border-color: var(--grey-base);
+  background-color: var(--grey-light);
+  background-image: linear-gradient(180deg, #DED5C3 0%, var(--grey-light) 55%, #C4B8A2 100%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), 0 6px 0 var(--grey-deep);
+  color: var(--grey-deep);
+  text-shadow: none;
+  transform: none;
+  filter: none;
 }
 
 /* Website choices: pill chips, selected uses the design system's "selected" tone */

@@ -59,6 +59,7 @@ export default function WebsitesScreen({ userData, onNext }) {
                           className={`website-btn ${isSelected ? 'selected' : ''}`}
                           onClick={() => toggleWebsite(key, site)}
                           disabled={disabled}
+                          data-sound="select"
                         >
                           {site}
                         </button>

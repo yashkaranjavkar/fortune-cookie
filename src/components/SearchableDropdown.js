@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import './SearchableDropdown.css';
 import { loadCustomOptions, saveCustomOption, mergeOptions, normalizeOption } from '../utils/customOptions';
+import { playSound } from '../sounds';
 
 // Single-select dropdown with type-to-filter.
 // allowAdd: typed text that isn't in the list can be added as a new option.
@@ -25,6 +26,7 @@ export default function SearchableDropdown({ options, value = '', placeholder, o
     onSelect(option);
     setQuery(option);
     setIsOpen(false);
+    playSound('select');
   };
 
   const addNew = () => {
@@ -33,6 +35,7 @@ export default function SearchableDropdown({ options, value = '', placeholder, o
     onSelect(item, true);
     setQuery(item);
     setIsOpen(false);
+    playSound('select');
   };
 
   // Clicking away commits an exact match; otherwise the field reverts to the chosen value

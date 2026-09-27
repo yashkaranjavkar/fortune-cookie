@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import InvalidURLExplainer from './InvalidURLExplainer';
+import { playSound } from '../sounds';
 import './EventScreen.css';
 import './Level2GameInstructions.css';
 
@@ -11,7 +12,7 @@ const L3Layout = ({ stepIndex, totalSteps, onBack, onNext, title, children }) =>
       <div className="l2-content-area">
         {children}
       </div>
-      {onNext && <button className="instruction-next-btn" onClick={onNext}>Next &gt;&gt;&gt;</button>}
+      {onNext && <button className="instruction-next-btn" onClick={onNext} data-sound="progress-munch">Next &gt;&gt;&gt;</button>}
     </div>
     <div className="instruction-progress-bar">
       <div className="progress-fill" style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}></div>
@@ -188,6 +189,7 @@ export function BalloonsThreeScreen({ onReplay, onNext }) {
 
   const handlePop = (color) => {
     setPopped(prev => ({ ...prev, [color]: true }));
+    playSound('balloon-pop');
     setTimeout(() => onReplay(), 500);
   };
 
