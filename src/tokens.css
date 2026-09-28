@@ -1,0 +1,140 @@
+/* Wisecrack — design tokens (replaces the old Batch No. 26 tokens.css)
+   ------------------------------------------------------------------
+   Same variable NAMES as before, so every screen that already uses
+   var(--orange-base), var(--radius-md), .text-h1 … picks up the
+   Wisecrack UI kit look automatically. New "baked" tokens (rims,
+   lips, gradients) are added at the bottom.
+
+   Fonts: add this line to index.html <head> (and remove STIX Two Text):
+   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Mulish:wght@400;600;700&display=swap" rel="stylesheet">
+*/
+
+:root {
+  /* ---------- Colour (old names → kit values) ---------- */
+  --orange-base: #EDAA52;   /* biscuit */
+  --orange-light: #F8CF86;  /* biscuit highlight */
+  --orange-deep: #DE8F33;   /* biscuit shade */
+  --yellow-base: #F7C948;   /* star gold */
+  --yellow-light: #FBDA9A;
+  --yellow-deep: #C4930A;
+  --pink-base: #E86A92;
+  --pink-light: #F4A9C0;
+  --pink-deep: #C14A70;
+  --maroon-base: #8E2A37;   /* plum */
+  --maroon-light: #B8475A;
+  --maroon-deep: #6E1A26;
+  --brown-base: #7A3E12;    /* biscuit rim */
+  --brown-light: #9C7350;   /* cream rim */
+  --green-base: #4F7A3F;    /* matcha */
+  --green-light: #6E9F52;
+  --green-deep: #3F6632;
+  --grey-base: #8C877A;
+  --grey-light: #C9C4B5;
+  --grey-deep: #58544A;
+  --accent-orange: #EDAA52;
+  --beige-base: #FFF8EA;    /* cream board */
+  --beige-elevated: #FFFBF2;
+  --beige-deep: #F6E3BE;
+  --ink-primary: #3A1A08;   /* dark cocoa text */
+  --ink-soft: #6B4A2F;
+  --ink-inverse: #FFF1DC;
+  --success: #4F7A3F;
+  --warning: #E07A1F;
+  --error: #8E2A37;
+  --information: #5C7A8A;   /* Inspection Room only */
+  --disabled: #D0C6B2;
+  --selected: #F8CF86;
+  --locked: #58544A;
+
+  /* ---------- Spacing (unchanged) ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 40px;
+  --space-7: 64px;
+
+  /* ---------- Radius (rounder, like the kit) ---------- */
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 20px;
+  --radius-xl: 30px;
+  --radius-full: 999px;
+
+  /* ---------- Fonts ---------- */
+  --font-display: 'Fredoka', 'Mulish', system-ui, sans-serif;
+  --font-serif: var(--font-display);  /* old name now points to Fredoka */
+  --font-sans: 'Mulish', system-ui, sans-serif;
+
+  /* ================= NEW: Wisecrack "baked" tokens ================= */
+
+  /* Page stage. Cream = light game; swap to var(--cocoa) for the dark kit look. */
+  --stage: #F6E3BE;
+  --cocoa: #2B1B12;
+  --groove: #24170F;
+
+  /* Biscuit (primary) */
+  --biscuit-rim: #7A3E12;
+  --biscuit-lip: #5A2C0C;
+  --biscuit-text: #3A1A08;
+  --biscuit-fill: linear-gradient(180deg, #F8CF86 0%, #EDAA52 55%, #DE8F33 100%);
+  --biscuit-fill-hover: linear-gradient(180deg, #FBDA9A 0%, #F2B862 55%, #E59C40 100%);
+
+  /* Cream (secondary) */
+  --cream-rim: #9C7350;
+  --cream-lip: #7A5534;
+  --cream-text: #4A2E14;
+  --cream-fill: linear-gradient(180deg, #FFFBF2 0%, #F3DEB6 55%, #E8CD9C 100%);
+
+  /* Plum (exit / destructive-but-warm) */
+  --plum-rim: #3E0A12;
+  --plum-lip: #3E0A12;
+  --plum-text: #FFF1DC;
+  --plum-fill: linear-gradient(180deg, #B8475A 0%, #8E2A37 55%, #6E1A26 100%);
+
+  /* Matcha (confirm / approved) */
+  --matcha-rim: #23401F;
+  --matcha-lip: #23401F;
+  --matcha-text: #FFF7E6;
+  --matcha-fill: linear-gradient(180deg, #6E9F52 0%, #4F7A3F 55%, #3F6632 100%);
+
+  /* Disabled */
+  --disabled-rim: #8C877A;
+  --disabled-text: #6E6658;
+
+  /* Panel board */
+  --board-fill: linear-gradient(180deg, #FFF8EA 0%, #F6E3BE 100%);
+  --board-rim: #C98A3E;
+
+  /* Stars */
+  --star-fill: #F7C948;
+  --star-stroke: #7A3E12;
+  --star-empty: #E8D4AE;
+
+  /* Depth */
+  --shine: inset 0 3px 0 rgba(255, 241, 214, .75);
+  --shade: inset 0 -4px 0 rgba(160, 82, 18, .35);
+  --drop: 0 10px 16px rgba(0, 0, 0, .35);
+  --glow: 0 0 0 5px rgba(255, 196, 102, .35);
+}
+
+/* ---------- Type utilities (same class names, kit style) ---------- */
+.text-display   { font-family: var(--font-display); font-weight: 700; font-size: 40px; line-height: 46px; }
+.text-h1        { font-family: var(--font-display); font-weight: 600; font-size: 30px; line-height: 36px; }
+.text-h2        { font-family: var(--font-display); font-weight: 600; font-size: 22px; line-height: 28px; }
+.text-score     { font-family: var(--font-display); font-weight: 600; font-size: 24px; line-height: 26px; font-variant-numeric: tabular-nums; }
+.text-h3        { font-family: var(--font-display); font-weight: 600; font-size: 18px; line-height: 24px; }
+.text-body      { font-family: var(--font-sans); font-weight: 400; font-size: 16px; line-height: 26px; }
+.text-caption   { font-family: var(--font-sans); font-weight: 400; font-size: 13px; line-height: 19px; }
+.text-label     { font-family: var(--font-display); font-weight: 500; font-size: 14px; line-height: 18px; }
+.text-button    { font-family: var(--font-display); font-weight: 600; font-size: 20px; line-height: 24px; }
+.text-timer     { font-family: var(--font-display); font-weight: 600; font-size: 28px; line-height: 28px; font-variant-numeric: tabular-nums; }
+.text-game-numbers { font-family: var(--font-display); font-weight: 600; font-size: 18px; line-height: 20px; font-variant-numeric: tabular-nums; }
+.text-instructions { font-family: var(--font-sans); font-weight: 400; font-size: 17px; line-height: 28px; }
+
+body {
+  background: var(--stage);
+  color: var(--ink-primary);
+  font-family: var(--font-sans);
+}

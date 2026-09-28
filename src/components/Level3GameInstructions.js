@@ -1,18 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import InvalidURLExplainer from './InvalidURLExplainer';
+import NavRoundButton from './NavRoundButton';
 import { playSound } from '../sounds';
+import balloons3Left from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/balloons-3-left.svg';
+import balloonsPopped from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/balloons-popped.svg';
 import './EventScreen.css';
 import './Level2GameInstructions.css';
 
+// Back/Forward round-icon buttons flank the card (same pattern as LevelOneInstructions.js's
+// LevelOneLayout and Level2GameInstructions.js's L2Layout) instead of a top-left back arrow
+// + a Next button inside the card - kept consistent across every level's rules flow.
 const L3Layout = ({ stepIndex, totalSteps, onBack, onNext, title, children }) => (
   <div className="instruction-screen">
-    {onBack && stepIndex > 0 && <button className="back-btn" onClick={onBack}>←</button>}
-    <div className="instruction-card">
-      {title && <div className="title">{title}</div>}
-      <div className="l2-content-area">
-        {children}
+    <div className="level-card-row">
+      {onBack && stepIndex > 0
+        ? <NavRoundButton direction="back" onClick={onBack} label="Back" />
+        : <span className="nav-round-spacer" aria-hidden="true" />}
+
+      <div className="instruction-card">
+        {title && <div className="title">{title}</div>}
+        <div className="l2-content-area">
+          {children}
+        </div>
       </div>
-      {onNext && <button className="instruction-next-btn" onClick={onNext} data-sound="progress-munch">Next &gt;&gt;&gt;</button>}
+
+      {onNext
+        ? <NavRoundButton direction="forward" onClick={onNext} label="Forward" dataSound="progress-munch" />
+        : <span className="nav-round-spacer" aria-hidden="true" />}
     </div>
     <div className="instruction-progress-bar">
       <div className="progress-fill" style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}></div>
@@ -185,21 +199,25 @@ export function InvalidURLThreeSequence({ onBack, onNext, stepIndex, totalSteps 
 
 // SCREEN 8: Balloons
 export function BalloonsThreeScreen({ onReplay, onNext }) {
-  const [popped, setPopped] = useState({ orange: false, blue: false, green: false });
+  const [popped, setPopped] = useState(false);
 
-  const handlePop = (color) => {
-    setPopped(prev => ({ ...prev, [color]: true }));
+  const handlePop = () => {
+    setPopped(true);
     playSound('balloon-pop');
     setTimeout(() => onReplay(), 500);
   };
 
   return (
     <div className="balloon-full-screen">
-      <div className="balloon-container">
-        <div className={`balloon orange ${popped.orange ? 'popped' : ''}`} onClick={() => handlePop('orange')}></div>
-        <div className={`balloon blue ${popped.blue ? 'popped' : ''}`} onClick={() => handlePop('blue')}></div>
-        <div className={`balloon green ${popped.green ? 'popped' : ''}`} onClick={() => handlePop('green')}></div>
-      </div>
+      <button
+        type="button"
+        className="balloon-container"
+        onClick={handlePop}
+        aria-label="Pop the balloons"
+        data-sound="none"
+      >
+        <img src={popped ? balloonsPopped : balloons3Left} alt="" className="balloon-cluster-img" />
+      </button>
       <p className="balloon-text">
         You will get <strong>three chances</strong> to go through these instructions<br/>
         again if you need, by popping these three balloons

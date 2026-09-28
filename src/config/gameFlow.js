@@ -25,11 +25,15 @@ export const SECTIONS = {
 // sorting round, set:
 //   export const GAME_FLOW = ['job', 'training', 'level1', 'finalTrays'];
 export const GAME_FLOW = [
-  'job',
-  'training',
+  //'job',
+  //'training',
   'level1',
   'level2',
   'level3',
   'supervisor',
   'finalTrays'
 ];
+
+// How many trays the tray-sorting minigame runs through - shared by Training's own
+// round and the standalone "final trays" round, since they're the same minigame.
+export const TRAY_COUNT = 1;

@@ -5,6 +5,7 @@ import BalloonCluster from './BalloonCluster';
 import RulesOverlay from './RulesOverlay';
 import { pickFortune } from '../utils/fortunePool';
 import { playSound } from '../sounds';
+import { useMascotTrigger } from '../config/mascotTriggers';
 import './DomeFocus.css';
 import './SampleFortune.css';
 
@@ -68,6 +69,7 @@ export default function Level1Game({ onComplete }) {
 
   const hoverTimeout = useRef(null);
   const intervalRef = useRef(null);
+  const fireMascot = useMascotTrigger();
 
   // Timer Logic - paused (not reset) while the rules overlay is open
   useEffect(() => {
@@ -88,12 +90,17 @@ export default function Level1Game({ onComplete }) {
   }, [activeDome, rulesOpen]);
 
   const handleMouseEnter = (index) => {
-    if (domes[index].status === 'closed') {
+    // Only one dome may be mid-hover or open at a time - guard both against another
+    // dome already being open (activeDome) and against a different dome's own 300ms
+    // hover timer still pending (hoverTimeout.current).
+    if (domes[index].status === 'closed' && activeDome === null && !hoverTimeout.current) {
       hoverTimeout.current = setTimeout(() => {
+        hoverTimeout.current = null;
         setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'open', text: pickFortune(prev.map(x => x.text)) } : d));
         setTimer(10);
         setActiveDome(index);
         playSound('dome-lift');
+        fireMascot('domeRevealed');
       }, 300);
     }
   };
@@ -106,7 +113,10 @@ export default function Level1Game({ onComplete }) {
     playSound('popup-open');
   };
 
-  const handleMouseLeave = () => clearTimeout(hoverTimeout.current);
+  const handleMouseLeave = () => {
+    clearTimeout(hoverTimeout.current);
+    hoverTimeout.current = null;
+  };
 
   const handleDragStart = (e) => {
     e.dataTransfer.setData('domeIndex', activeDome);
@@ -129,7 +139,8 @@ export default function Level1Game({ onComplete }) {
 
     setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: trayType } : d));
     setActiveDome(null);
-    playSound(trayType === 'faulty' ? 'drop-faulty' : 'drop-approved');
+    playSound('drop-approved');
+    fireMascot('fortuneSorted');
 
     const newCount = sortedCount + 1;
     setSortedCount(newCount);
@@ -148,7 +159,8 @@ export default function Level1Game({ onComplete }) {
     setActiveDome(null);
     playSound('time-up');
     playSound('cookie-break');
-    
+    fireMascot('fortuneWasted');
+
     const newCount = sortedCount + 1;
     setSortedCount(newCount);
 

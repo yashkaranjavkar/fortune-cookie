@@ -1,21 +1,25 @@
 {
   "files": {
-    "main.css": "/static/css/main.94b70f7e.css",
-    "main.js": "/static/js/main.224c9a38.js",
+    "main.css": "/static/css/main.41faf86d.css",
+    "main.js": "/static/js/main.f92d9890.js",
     "static/media/fci-logo.png": "/static/media/fci-logo.ce8a7b80391866f5c60a.png",
+    "static/media/balloons-3-left.svg": "/static/media/balloons-3-left.b77d49d9034c82bb9e2bb6bcd2482e92.svg",
+    "static/media/balloons-popped.svg": "/static/media/balloons-popped.0b0c2e343a30128d116876843e6f80c2.svg",
     "static/media/dome-lifted.svg": "/static/media/dome-lifted.bc49bc4941f952410ab204ab8736d785.svg",
     "static/media/dome-hover.svg": "/static/media/dome-hover.ef3314488956b60379288fbadc3fa55e.svg",
     "static/media/dome-covered.svg": "/static/media/dome-covered.186d47926f3c2ccdc3944616c6435133.svg",
     "static/media/cookie-cracked.svg": "/static/media/cookie-cracked.ed52f2bf7f0874dec8d5f1c6e0bb942b.svg",
+    "static/media/balloons-docked.svg": "/static/media/balloons-docked.6eeb025fc009c111fa37f65e4aaad8b6.svg",
     "static/media/cookie-whole.svg": "/static/media/cookie-whole.aa199c1b6dbe5ab2bf635b206b76917c.svg",
     "static/media/cookie-broken.svg": "/static/media/cookie-broken.fc0e8fa68af7ac8cc18baaa691b08959.svg",
     "static/media/dome-spent.svg": "/static/media/dome-spent.cfa4094ed7bf9257b9e481e559a2f9ce.svg",
     "index.html": "/index.html",
-    "main.94b70f7e.css.map": "/static/css/main.94b70f7e.css.map",
-    "main.224c9a38.js.map": "/static/js/main.224c9a38.js.map"
+    "static/media/balloons-none-left.svg": "/static/media/balloons-none-left.3624cca258b22dd2a28ac089be9e568a.svg",
+    "main.41faf86d.css.map": "/static/css/main.41faf86d.css.map",
+    "main.f92d9890.js.map": "/static/js/main.f92d9890.js.map"
   },
   "entrypoints": [
-    "static/css/main.94b70f7e.css",
-    "static/js/main.224c9a38.js"
+    "static/css/main.41faf86d.css",
+    "static/js/main.f92d9890.js"
   ]
 }

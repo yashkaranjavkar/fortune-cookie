@@ -24,7 +24,6 @@ export default function TrayFrame({ type, className = '' }) {
           <stop offset="100%" stopColor="#E2DFD8" />
         </linearGradient>
       </defs>
-      <ellipse cx="170" cy="198" rx="152" ry="9" fill="#000000" opacity="0.3" />
       <rect x="2" y="68" width="26" height="80" rx="11" fill={`url(#trf-rim-${type})`} stroke="#5E584F" strokeWidth="3" />
       <rect x="312" y="68" width="26" height="80" rx="11" fill={`url(#trf-rim-${type})`} stroke="#5E584F" strokeWidth="3" />
       <rect x="14" y="20" width="312" height="172" rx="16" fill={`url(#trf-rim-${type})`} stroke="#5E584F" strokeWidth="3.5" />

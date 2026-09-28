@@ -25,18 +25,23 @@
   color: var(--ink-soft);
 }
 
-.demo-skip-btn {
+/* Replay sits alone in the bottom-left corner. */
+.demo-replay-btn {
   position: absolute;
-  top: 30px;
-  right: 30px;
-  background: transparent;
-  border: none;
-  color: var(--orange-base);
-  font-family: var(--font-sans);
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  text-decoration: underline;
+  bottom: 40px;
+  left: 40px;
   z-index: 200;
 }
-.demo-skip-btn:hover { color: var(--orange-deep); }
+
+/* Footer row: Skip always sits here, with Next appearing beside it once a round is
+   placed - keeps every button on the same biscuit design language and out of the
+   way of the sound toggle in the top-right corner. */
+.demo-footer {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  z-index: 200;
+}

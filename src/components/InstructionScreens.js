@@ -1,5 +1,6 @@
 import React from 'react';
 import { useCurrency } from '../utils/currency';
+import NavRoundButton from './NavRoundButton';
 import './ObjectiveScreen.css';
 import './EventScreen.css';
 import './TimerEndScreen.css';
@@ -13,8 +14,8 @@ import domeSpent from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-spen
 import cookieBroken from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-broken.svg';
 
 // Countdown illustration shared by the three timer-explainer screens below: the same
-// dome art used everywhere else in the game, with a live LED-style readout and a curved
-// arrow pointing from the caption to it, instead of one flat baked-together image per screen.
+// dome art used everywhere else in the game, with a live LED-style readout, instead of
+// one flat baked-together image per screen.
 function TimerDomeScene({ label, value, wasted }) {
   return (
     <div className="tds-scene">
@@ -27,11 +28,6 @@ function TimerDomeScene({ label, value, wasted }) {
         )}
         <span className="tds-caption-text">{label}</span>
       </div>
-
-      <svg className="tds-arrow" viewBox="0 0 70 46" aria-hidden="true">
-        <path d="M2 8 Q46 4 64 34" fill="none" stroke="var(--ink-soft)" strokeWidth="2" strokeLinecap="round" strokeDasharray="1 7" />
-        <path d="M56 27 L65 35 L55 39" fill="none" stroke="var(--ink-soft)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
 
       <div className="tds-dome-col">
         <img src={wasted ? domeSpent : step1} alt="" className="tds-dome-img" />
@@ -48,16 +44,31 @@ function TimerDomeScene({ label, value, wasted }) {
 }
 
 // Shared Layout Component (Supports Green Bar & Left Replay Button)
-const InstructionLayout = ({ stepIndex, totalSteps, onBack, onNext, onReplay, children, isFinal }) => (
+// - First screen (stepIndex 0): a single Next button, nothing else.
+// - Middle screens: the top-left back arrow is dropped in favour of a
+//   Back/Forward round-icon pair (wisecrack kit style) at the bottom right.
+// - Final screen (isFinal): unchanged - Next + Replay, top-left back arrow kept.
+const InstructionLayout = ({ stepIndex, totalSteps, onBack, onNext, onReplay, children, isFinal }) => {
+  const isFirst = stepIndex === 0;
+  const showNavPair = !isFirst && !isFinal;
+
+  return (
   <div className="instruction-screen">
-    {onBack && stepIndex > 0 && <button className="back-btn" onClick={onBack}>←</button>}
-    
-    <div className="instruction-card">
-      {children}
+    {!showNavPair && onBack && stepIndex > 0 && <button className="back-btn" onClick={onBack}>←</button>}
+
+    <div className="instruction-card-row">
+      {showNavPair && <NavRoundButton direction="back" onClick={onBack} label="Back" />}
+
+      <div className="instruction-card">
+        {children}
+      </div>
+
+      {showNavPair && <NavRoundButton direction="forward" onClick={onNext} label="Forward" dataSound="progress-munch" />}
     </div>
 
-    {/* Next Button (Bottom Right) */}
-    <button className="instruction-next-btn" onClick={onNext} data-sound="progress-munch">Next</button>
+    {!showNavPair && (
+      <button className="instruction-next-btn" onClick={onNext} data-sound="progress-munch">Next</button>
+    )}
 
     {/* Replay Button (Bottom Left - Outside the card) */}
     {onReplay && (
@@ -69,7 +80,8 @@ const InstructionLayout = ({ stepIndex, totalSteps, onBack, onNext, onReplay, ch
       <div className={`progress-fill ${isFinal ? 'green' : ''}`} style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}></div>
     </div>
   </div>
-);
+  );
+};
 
 export function ObjectiveScreen({ onNext, onBack, stepIndex, totalSteps }) {
   return (

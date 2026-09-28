@@ -851,10 +851,80 @@ body {
   z-index: 200;
 }
 .instruction-replay-btn {
-  position: absolute; bottom: 30px; right: 250px;
+  position: absolute; bottom: 30px; right: 300px;
   background: #afafaf; color: rgb(41, 41, 41); border: none; padding: 12px 40px;
   border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; z-index: 200;
 }
+
+/* Card + flanking Back/Forward round-icon pair (wisecrack kit's Navigation buttons,
+   preview/Buttons.html) - the buttons sit either side of the card, vertically centred
+   on it, right up against it. Shared by every level's rules flow (LevelOneInstructions.js,
+   Level2GameInstructions.js, Level3GameInstructions.js) plus InstructionScreens.js's
+   own (differently-positioned) variant, so button placement stays consistent. */
+.instruction-card-row,
+.level-one-card-row,
+.level-card-row {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.instruction-card-row .nav-round-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.instruction-card-row .nav-round-btn[aria-label="Back"] { left: 20px; }
+.instruction-card-row .nav-round-btn[aria-label="Forward"] { right: 20px; }
+
+/* Fixed height so the card doesn't grow/shrink screen to screen in a given flow.
+   A higher-specificity, scoped selector so it wins over the two conflicting
+   global `.instruction-card` rules elsewhere in this file without touching them. */
+.instruction-card-row .instruction-card {
+  height: min(500px, calc(100vh - 180px));
+  min-height: 0;
+  overflow-y: auto;
+}
+/* Matches Level One's card size exactly, for consistency across every level. */
+.level-card-row .instruction-card {
+  height: min(560px, 70vh);
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Level One's and the per-level rules rows keep the arrows right beside the card, in
+   normal flex flow, instead of pinned out at the screen edges. */
+.level-one-card-row,
+.level-card-row { gap: 28px; }
+
+/* Reserves a missing arrow's spot so the card doesn't shift sideways when a screen
+   has no Back (or Next). */
+.nav-round-spacer { width: 52px; height: 52px; flex-shrink: 0; visibility: hidden; }
+
+.nav-round-btn {
+  width: 52px; height: 52px;
+  padding: 0;
+  border-radius: 50%;
+  border: 3px solid var(--biscuit-rim);
+  background-color: var(--biscuit);
+  background-image: linear-gradient(180deg, var(--biscuit-light) 0%, var(--biscuit) 55%, var(--biscuit-dark) 100%);
+  box-shadow: inset 0 3px 0 rgba(255, 241, 214, 0.75), inset 0 -3px 0 rgba(160, 82, 18, 0.35), 0 4px 0 var(--biscuit-lip), 0 8px 12px rgba(0, 0, 0, 0.35);
+  color: var(--text-dark);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: transform 0.08s ease-out, filter 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+.nav-round-btn:hover {
+  filter: brightness(1.04);
+  box-shadow: 0 0 0 4px rgba(255, 196, 102, 0.35), inset 0 3px 0 rgba(255, 245, 224, 0.85), inset 0 -3px 0 rgba(160, 82, 18, 0.3), 0 4px 0 var(--biscuit-lip), 0 8px 14px rgba(0, 0, 0, 0.4);
+}
+.nav-round-btn:active {
+  transform: translateY(3px);
+  filter: brightness(0.96);
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(0, 0, 0, 0.4);
+}
+.instruction-card-row .nav-round-btn:active { transform: translateY(calc(-50% + 3px)); }
 
 /* Progress Bar - OUTSIDE the card. Wisecrack kit look (preview/HUD.html): a baked
    groove track, a golden gradient trail, and cookie-progress.svg riding its leading edge. */
@@ -961,19 +1031,6 @@ body {
 }
 .demo-placed-strip .demo-fortune-strip { width: 100%; font-size: 10px; line-height: 13px; padding: 6px 8px; }
 
-/* Buttons */
-.demo-replay-btn {
-  position: absolute; bottom: 30px; left: 30px;
-  background: var(--ink-soft); color: white; border: none; padding: 12px 40px;
-  border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; z-index: 200;
-}
-
-.demo-next-btn {
-  position: absolute; bottom: 30px; right: 30px;
-  background: var(--yellow-base); color: white; border: none; padding: 12px 40px;
-  border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; z-index: 200;
-}
-
 /* LEVEL 1 INSTRUCTIONS */
 .level-one-screen {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -983,7 +1040,7 @@ body {
 }
 
 .level-one-card {
-  width: 85%; max-width: 1000px; height: 85vh;
+  width: 68%; max-width: 850px; height: min(560px, 70vh);
   background: var(--beige-elevated);
   border: 5px solid var(--yellow-deep);
   border-radius: 30px;
@@ -1003,26 +1060,8 @@ body {
   flex: 1;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   overflow-y: auto;
+  overflow-x: hidden;
 }
-
-.level-one-footer {
-  display: flex; justify-content: space-between; align-items: center;
-  padding-top: 20px;
-  border-top: 1px solid var(--grey-light);
-}
-
-.level-one-back, .level-one-next {
-  background: transparent;
-  border: none;
-  font-size: 20px; color: var(--ink-primary);
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.level-one-back { color: var(--ink-soft); }
-.level-one-next { color: var(--orange-deep); margin-left: auto; }
-.level-one-back:hover { text-decoration: underline; }
-.level-one-next:hover { text-decoration: underline; }
 
 /* Payment Screen */
 /* Payment as per inspection (DARK LAYOUT) */
@@ -1042,12 +1081,13 @@ body {
 }
 
 /* URL & Fortune Rules */
-.center-content { text-align: center; }
+.center-content { text-align: center; max-width: 100%; }
 .black-label { background: var(--ink-primary); color: white; padding: 10px 20px; border-radius: 4px; display: inline-block; margin-bottom: 20px; }
 .fortune-box {
   background: #fff; padding: 15px 25px; border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1); font-size: 18px;
-  position: relative; margin-bottom: 20px;
+  position: relative; margin: 0 auto 20px;
+  max-width: 620px;
 }
 .url-highlight {
   background: var(--pink-light);
@@ -1076,16 +1116,18 @@ body {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   z-index: 200;
 }
-.balloon-container { display: flex; gap: 20px; margin-bottom: 40px; }
-.balloon {
-  width: 100px; height: 120px; border-radius: 50%;
-  cursor: pointer; position: relative;
-  transition: all 0.3s;
+.balloon-container {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-bottom: 40px;
+  transition: transform 0.15s ease;
 }
-.balloon.orange { background: var(--orange-base); }
-.balloon.blue { background: #4ea8de; }
-.balloon.green { background: #76c893; }
-.balloon.popped { transform: scale(0); opacity: 0; }
+.balloon-container:hover { transform: scale(1.04); }
+.balloon-container:active { transform: scale(0.95); }
+.balloon-cluster-img { width: 200px; height: auto; display: block; }
 
 .balloon-text { color: white; font-size: 20px; text-align: center; margin-bottom: 30px; }
 .balloon-text strong { color: var(--orange-base); }
@@ -1765,8 +1807,8 @@ body {
 /* MARKING SCREEN (30 Seconds) */
 .marking-screen {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
+  inset: 0;
+  overflow-y: auto;
   background: var(--pink-light); /* Pink background from reference */
   display: flex;
   flex-direction: column;
@@ -2034,21 +2076,14 @@ body {
   cursor: pointer;
 }
 
-/* Skip Button (Top-right corner of instruction screens) */
-.instruction-skip-btn {
-  position: absolute;
-  bottom: 30px;
-  right: 30px;
-  background: transparent;
-  border: none;
-  color: var(--orange-base);
-  font-size: 20px;
-  font-weight: bold;
-  cursor: pointer;
-  text-decoration: underline;
-}
-.instruction-skip-btn:hover {
-  color: var(--yellow-base);
+/* Next + Skip sit side by side at the bottom of the card, in one row, instead of
+   Skip being pinned to the screen's own bottom-right corner (where it used to
+   overlap Next). */
+.instruction-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
 }
 
 /* Green Highlighted URL text */
@@ -2164,71 +2199,6 @@ body {
   position: absolute;
   bottom: 40px;
   right: 60px;
-  background: transparent;
-  border: none;
-  color: var(--yellow-base);
-  font-size: 22px;
-  font-weight: bold;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.results-next-btn:hover {
-  color: var(--yellow-light);
-}
-
-/* WHOSHH CELEBRATION SCREEN */
-.whoshh-screen {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: #1a1a1a;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-}
-
-.whoshh-card {
-  background: #1a1a1a;
-  border: 2px solid var(--yellow-base);
-  border-radius: 20px;
-  padding: 60px 80px;
-  max-width: 750px;
-  text-align: center;
-}
-
-.whoshh-title {
-  color: var(--yellow-base);
-  font-size: 32px;
-  font-style: italic;
-  font-weight: bold;
-  margin-bottom: 25px;
-  font-family: var(--font-title);
-}
-
-.whoshh-text {
-  color: var(--grey-light);
-  font-size: 18px;
-  line-height: 1.7;
-  margin-bottom: 40px;
-}
-
-.whoshh-btn {
-  background: var(--orange-base);
-  color: white;
-  border: none;
-  padding: 15px 50px;
-  border-radius: 8px;
-  font-size: 20px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.whoshh-btn:hover {
-  background: var(--yellow-base);
-  transform: translateY(-2px);
 }
 
 /* LEVEL 2 GAME INSTRUCTIONS */
@@ -2749,7 +2719,6 @@ body {
 .app .next-btn,
 .app .orange-btn,
 .app .let-start-btn,
-.app .whoshh-btn,
 .app .supervision-orange-btn,
 .app .instruction-next-btn,
 .app .demo-next-btn,
@@ -2760,6 +2729,11 @@ body {
 .app .check-samples-btn,
 .app .instruction-replay-btn,
 .app .demo-replay-btn,
+.app .demo-skip-btn,
+.app .instruction-skip-btn,
+.app .l1-rules-back,
+.app .l1-rules-next,
+.app .results-next-btn,
 .app .supervision-modal-confirm,
 .app .supervision-modal-cancel {
   appearance: none;
@@ -2779,7 +2753,6 @@ body {
 .app .next-btn,
 .app .orange-btn,
 .app .let-start-btn,
-.app .whoshh-btn,
 .app .supervision-orange-btn,
 .app .instruction-next-btn,
 .app .demo-next-btn,
@@ -2787,7 +2760,9 @@ body {
 .app .marking-screen .next-btn.enabled,
 .app .level-one-screen .orange-btn,
 .app .start-marking-screen .let-start-btn,
-.app .check-samples-btn {
+.app .check-samples-btn,
+.app .l1-rules-next,
+.app .results-next-btn {
   border: 3px solid var(--biscuit-rim);
   background-color: var(--biscuit);
   background-image: linear-gradient(180deg, var(--biscuit-light) 0%, var(--biscuit) 55%, var(--biscuit-dark) 100%);
@@ -2798,7 +2773,10 @@ body {
 
 /* Cream - replay / side steps */
 .app .instruction-replay-btn,
-.app .demo-replay-btn {
+.app .demo-replay-btn,
+.app .demo-skip-btn,
+.app .instruction-skip-btn,
+.app .l1-rules-back {
   border: 3px solid var(--cream-rim);
   background-color: var(--cream);
   background-image: linear-gradient(180deg, var(--cream-light) 0%, var(--cream) 55%, #E8CD9C 100%);
@@ -2826,36 +2804,26 @@ body {
   text-shadow: 0 1px 0 rgba(40, 5, 10, 0.5);
 }
 
-/* Text-only actions (kept quiet - the kit's own Back/Skip nav links carry no chrome either) */
-.app .instruction-skip-btn,
-.app .results-next-btn {
-  background: transparent;
-  color: var(--orange-deep);
-  border: none;
-  font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 20px;
-  font-weight: 600;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
 /* Hover - a soft coloured halo plus a slightly brighter glaze, per flavour */
 .app .next-btn:hover:not(:disabled),
 .app .orange-btn:hover:not(:disabled),
 .app .let-start-btn:hover:not(:disabled),
-.app .whoshh-btn:hover:not(:disabled),
 .app .supervision-orange-btn:hover:not(:disabled),
 .app .instruction-next-btn:hover:not(:disabled),
 .app .demo-next-btn:hover:not(:disabled),
 .app .inspection-next-btn:hover:not(:disabled),
 .app .marking-screen .next-btn.enabled:hover,
-.app .check-samples-btn:hover:not(:disabled) {
+.app .check-samples-btn:hover:not(:disabled),
+.app .l1-rules-next:hover,
+.app .results-next-btn:hover:not(:disabled) {
   filter: brightness(1.04);
   box-shadow: 0 0 0 5px rgba(255, 196, 102, 0.35), inset 0 3px 0 rgba(255, 245, 224, 0.85), inset 0 -4px 0 rgba(160, 82, 18, 0.3), 0 6px 0 var(--biscuit-lip), 0 10px 18px rgba(0, 0, 0, 0.4);
 }
 .app .instruction-replay-btn:hover,
-.app .demo-replay-btn:hover {
+.app .demo-replay-btn:hover,
+.app .demo-skip-btn:hover,
+.app .instruction-skip-btn:hover:not(:disabled),
+.app .l1-rules-back:hover {
   filter: brightness(1.04);
   box-shadow: 0 0 0 5px rgba(243, 222, 182, 0.4), inset 0 3px 0 rgba(255, 255, 255, 0.85), inset 0 -4px 0 rgba(156, 115, 80, 0.25), 0 6px 0 var(--cream-lip), 0 10px 18px rgba(0, 0, 0, 0.35);
 }
@@ -2867,14 +2835,10 @@ body {
   filter: brightness(1.04);
   box-shadow: 0 0 0 5px rgba(184, 71, 90, 0.35), inset 0 3px 0 rgba(255, 200, 200, 0.45), inset 0 -4px 0 rgba(40, 5, 10, 0.35), 0 6px 0 var(--plum-rim), 0 10px 18px rgba(0, 0, 0, 0.4);
 }
-.app .instruction-skip-btn:hover,
-.app .results-next-btn:hover { color: var(--orange-base); background: transparent; }
-
 /* Pressed - the chunky lip sinks in */
 .app .next-btn:active:not(:disabled),
 .app .orange-btn:active:not(:disabled),
 .app .let-start-btn:active:not(:disabled),
-.app .whoshh-btn:active:not(:disabled),
 .app .supervision-orange-btn:active:not(:disabled),
 .app .instruction-next-btn:active:not(:disabled),
 .app .demo-next-btn:active:not(:disabled),
@@ -2883,6 +2847,11 @@ body {
 .app .check-samples-btn:active:not(:disabled),
 .app .instruction-replay-btn:active,
 .app .demo-replay-btn:active,
+.app .demo-skip-btn:active,
+.app .instruction-skip-btn:active,
+.app .l1-rules-back:active,
+.app .l1-rules-next:active,
+.app .results-next-btn:active:not(:disabled),
 .app .supervision-modal-confirm:active:not(:disabled),
 .app .supervision-modal-cancel:active:not(:disabled) {
   transform: translateY(4px);
@@ -2897,13 +2866,12 @@ body {
 .app .marking-screen .next-btn:not(.enabled),
 .app .supervision-modal-confirm:disabled {
   cursor: not-allowed;
-  border-color: var(--grey-base);
+  border: 3px solid var(--grey-base);
   background-color: var(--grey-light);
   background-image: linear-gradient(180deg, #DED5C3 0%, var(--grey-light) 55%, #C4B8A2 100%);
   box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), 0 6px 0 var(--grey-deep);
   color: var(--grey-deep);
   text-shadow: none;
-  transform: none;
   filter: none;
 }
 

@@ -3,6 +3,7 @@ import InspectionTutorialStep from './InspectionTutorialStep';
 import Level1Game from '../components/Level1Game';
 import MarkingScreen from '../components/MarkingScreen';
 import LoaderScreen from '../components/LoaderScreen';
+import LevelDoneScreen from '../components/LevelDoneScreen';
 import {
   PaymentScreen,
   URLsPartScreen,
@@ -17,8 +18,7 @@ import {
   PaymentInspectionScreen,
   StartMarkingScreen,
   CheckSamplesScreen,
-  ResultsScreen,
-  WhoshhScreen
+  ResultsScreen
 } from '../components/Level2Instructions';
 
 // Level 1: rules -> 4-cookie sorting game -> mark -> inspect -> results.
@@ -72,7 +72,16 @@ export default function Level1Section({ onComplete, tutorialShown, onTutorialSho
       {step === 36 && (
         <ResultsScreen markedFortunes={markedFortunes} approvedItems={approvedItems} onNext={() => setStep(37)} />
       )}
-      {step === 37 && <WhoshhScreen onNext={onComplete} />}
+      {step === 37 && (
+        <LevelDoneScreen
+          batchName="Birthday Party batch"
+          sorted={faultyItems.length + approvedItems.length}
+          total={faultyItems.length + approvedItems.length}
+          incentive={(faultyItems.length + approvedItems.length) * 1000}
+          onReplay={() => setStep(19)}
+          onNext={onComplete}
+        />
+      )}
     </>
   );
 }

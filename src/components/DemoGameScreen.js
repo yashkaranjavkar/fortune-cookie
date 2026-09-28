@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SortTray from './SortTray';
 import { playSound } from '../sounds';
+import { useMascotTrigger } from '../config/mascotTriggers';
 import './DemoGameScreen.css';
 
 import domeClosed from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-covered.svg';
@@ -42,6 +43,7 @@ export default function DemoGameScreen({ onComplete }) {
   const [attempts, setAttempts] = useState(1);
   const hoverTimeout = useRef(null);
   const intervalRef = useRef(null);
+  const fireMascot = useMascotTrigger();
 
   // Hovering the dome (short delay) lifts it: the cookie opens and a fortune strip appears
   const handleMouseEnter = () => {
@@ -51,6 +53,7 @@ export default function DemoGameScreen({ onComplete }) {
         setTimer(DEMO_SECONDS);
         setPhase('revealed');
         playSound('dome-lift');
+        fireMascot('domeRevealed');
       }, 300);
     }
   };
@@ -69,6 +72,7 @@ export default function DemoGameScreen({ onComplete }) {
           setPhase('wasted');
           playSound('time-up');
           playSound('cookie-break');
+          fireMascot('fortuneWasted');
           return 0;
         }
         if (prev - 1 <= 3) playSound('timer-tick');
@@ -94,7 +98,8 @@ export default function DemoGameScreen({ onComplete }) {
     if (phase !== 'revealed') return;
     setPlacedIn(tray);
     setPhase('placed');
-    playSound(tray === 'faulty' ? 'drop-faulty' : 'drop-approved');
+    playSound('drop-approved');
+    fireMascot('fortuneSorted');
   };
 
   const resetDemo = () => {
@@ -116,7 +121,6 @@ export default function DemoGameScreen({ onComplete }) {
     <div className="demo-fullscreen">
       <div className="demo-title">Demonstration</div>
       <div className="demo-attempts">Attempt {attempts} of {MAX_ATTEMPTS}</div>
-      <button className="demo-skip-btn" onClick={onComplete}>Skip &gt;&gt;&gt;</button>
 
       <div
         className="demo-stage"
@@ -182,9 +186,13 @@ export default function DemoGameScreen({ onComplete }) {
       {(phase === 'placed' || phase === 'wasted') && attempts < MAX_ATTEMPTS && (
         <button className="demo-replay-btn" onClick={resetDemo}>Replay</button>
       )}
-      {phase === 'placed' && (
-        <button className="demo-next-btn" onClick={onComplete}>Next</button>
-      )}
+
+      <div className="demo-footer">
+        {phase === 'placed' && (
+          <button className="demo-next-btn" onClick={onComplete}>Next</button>
+        )}
+        <button className="demo-skip-btn" onClick={onComplete}>Skip &gt;&gt;&gt;</button>
+      </div>
     </div>
   );
 }

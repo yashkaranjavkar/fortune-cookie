@@ -5,7 +5,7 @@
 .tds-scene {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 28px;
 }
 
 .tds-caption {
@@ -24,8 +24,6 @@
 
 .tds-hand { width: 26px; height: 26px; flex-shrink: 0; }
 
-.tds-arrow { width: 64px; height: 42px; flex-shrink: 0; }
-
 .tds-dome-col {
   display: flex;
   flex-direction: column;
@@ -38,8 +36,11 @@
 .tds-led {
   padding: 4px 16px;
   border-radius: 6px;
-  background: var(--ink-primary);
-  color: var(--error);
+  background: var(--groove, #24170F);
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  color: #FF5A4E;
+  text-shadow: 0 0 6px rgba(255, 90, 78, 0.65);
   font-family: var(--font-sans);
   font-weight: 800;
   font-size: 22px;

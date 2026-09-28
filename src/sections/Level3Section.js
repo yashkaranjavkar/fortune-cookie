@@ -3,13 +3,13 @@ import InspectionTutorialStep from './InspectionTutorialStep';
 import Level3Game from '../components/Level3Game';
 import MarkingScreen from '../components/MarkingScreen';
 import LoaderScreen from '../components/LoaderScreen';
+import LevelDoneScreen from '../components/LevelDoneScreen';
 import { PaymentScreen } from '../components/LevelOneInstructions';
 import {
   TorchInspectScreen,
   StartMarkingScreen,
   CheckSamplesScreen,
-  ResultsScreen,
-  WhoshhThreeScreen
+  ResultsScreen
 } from '../components/Level2Instructions';
 import {
   EventThreeScreen,
@@ -65,7 +65,16 @@ export default function Level3Section({ onComplete, tutorialShown, onTutorialSho
       {step === 72 && (
         <ResultsScreen markedFortunes={markedFortunes} approvedItems={approvedItems} onNext={() => setStep(73)} />
       )}
-      {step === 73 && <WhoshhThreeScreen onNext={onComplete} />}
+      {step === 73 && (
+        <LevelDoneScreen
+          batchName="Farewell Party batch"
+          sorted={faultyItems.length + approvedItems.length}
+          total={faultyItems.length + approvedItems.length}
+          incentive={(faultyItems.length + approvedItems.length) * 1000}
+          onReplay={() => setStep(56)}
+          onNext={onComplete}
+        />
+      )}
     </>
   );
 }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import TraySortingSection from './TraySortingSection';
 import TrainingCompleteScreen from '../components/TrainingCompleteScreen';
 import DemoGameScreen from '../components/DemoGameScreen';
+import { TRAY_COUNT } from '../config/gameFlow';
 import {
   ObjectiveScreen,
   EventScreen,
@@ -17,7 +18,7 @@ export default function TrainingSection({ onComplete }) {
 
   return (
     <>
-      {step === 8 && <TraySortingSection onComplete={() => setStep(9)} />}
+      {step === 8 && <TraySortingSection trayCount={TRAY_COUNT} onComplete={() => setStep(9)} />}
 
       {step === 9 && <TrainingCompleteScreen onNext={() => setStep(10)} />}
 

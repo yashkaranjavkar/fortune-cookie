@@ -52,56 +52,6 @@
   color: var(--green-base);
 }
 
-/* Level-end "Whoshh" screens: a celebratory medal + falling confetti behind the copy,
-   so finishing a level actually feels like an achievement, not just a plain card. */
-.whoshh-card { position: relative; overflow: hidden; }
-.whoshh-title, .whoshh-text, .whoshh-btn { position: relative; z-index: 1; }
-
-.whoshh-medal-svg { position: relative; z-index: 1; width: 150px; height: auto; display: block; margin: 0 auto 8px; }
-
-.whoshh-rays { transform-box: fill-box; transform-origin: center; animation: whoshh-spin 18s linear infinite; }
-.whoshh-rays line { stroke: var(--yellow-light); stroke-width: 3; stroke-linecap: round; opacity: 0.6; }
-
-.whoshh-ribbon { fill: var(--maroon-base); }
-
-.whoshh-medal-ring { fill: var(--yellow-deep); stroke: var(--yellow-light); stroke-width: 2; }
-.whoshh-medal-face { fill: var(--yellow-base); }
-.whoshh-star { fill: var(--ink-inverse); }
-
-@keyframes whoshh-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-.whoshh-confetti {
-  position: absolute; inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 0;
-}
-.whoshh-confetti-piece {
-  position: absolute;
-  top: -24px;
-  width: 8px; height: 12px;
-  border-radius: 2px;
-  opacity: 0;
-  animation-name: whoshh-fall;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-}
-.whoshh-confetti-piece.round { border-radius: 50%; }
-.whoshh-confetti-pink { background: var(--pink-base); }
-.whoshh-confetti-yellow { background: var(--yellow-base); }
-.whoshh-confetti-orange { background: var(--orange-base); }
-.whoshh-confetti-green { background: var(--green-base); }
-
-@keyframes whoshh-fall {
-  0% { opacity: 0; transform: translateY(0) rotate(0deg); }
-  8% { opacity: 1; }
-  100% { opacity: 0.9; transform: translateY(340px) rotate(340deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .whoshh-rays, .whoshh-confetti-piece { animation: none; }
-  .whoshh-confetti { display: none; }
-}
 
 /* Payment as per inspection - dark-room reward cards (light cards would inherit
    white text from .payment-dark-screen and go illegible, so these are self-contained). */

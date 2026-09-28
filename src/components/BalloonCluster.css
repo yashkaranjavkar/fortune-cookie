@@ -1,28 +1,28 @@
-/* Balloon cluster, top-left corner of a sorting game screen - click one to review the rules. */
+/* Balloon cluster, top-left corner of a sorting game screen - click to review the rules.
+   Art comes from the wisecrack kit (balloons-3-left / balloons-docked / balloons-none-left). */
 
 .l1-balloons-wrap {
   position: absolute;
   top: 16px;
   left: 16px;
-  width: 128px;
+  width: 96px;
   z-index: 5;
 }
-.l1-balloons { width: 100%; height: auto; display: block; overflow: visible; }
 
-.l1-balloon-string { fill: none; stroke: var(--grey-base); stroke-width: 1.5; }
-.l1-balloon-shine { fill: none; stroke: rgba(255,255,255,0.55); stroke-width: 2.5; stroke-linecap: round; }
-
-.l1-balloon-body { stroke: rgba(0,0,0,0.12); stroke-width: 1.5; }
-
-.l1-balloon {
+.l1-balloons-btn {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  transform-box: fill-box;
-  transform-origin: center;
-  transition: transform 0.15s ease;
+  display: block;
+  width: 100%;
   animation: l1-bob 3.6s ease-in-out infinite;
 }
-.l1-balloon:hover { transform: scale(1.05); }
-.l1-balloon:active { transform: scale(0.94); }
+.l1-balloons-btn:hover { transform: scale(1.05); }
+.l1-balloons-btn:active { transform: scale(0.94); }
+
+.l1-balloons-img { width: 100%; height: auto; display: block; }
 
 .l1-balloons-count {
   margin-top: 4px;
@@ -38,5 +38,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .l1-balloon { animation: none; }
+  .l1-balloons-btn { animation: none; }
 }

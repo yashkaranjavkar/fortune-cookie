@@ -1,22 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import InvalidURLExplainer from './InvalidURLExplainer';
+import NavRoundButton from './NavRoundButton';
 import { useCurrency } from '../utils/currency';
 import { playSound } from '../sounds';
 import cookieIntact from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-whole.svg';
 import cookieBroken from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-broken.svg';
+import balloons3Left from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/balloons-3-left.svg';
+import balloonsPopped from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/balloons-popped.svg';
 
-// Shared Level 1 Layout
+// Shared Level 1 Layout - Back/Forward round-icon buttons flank the card
+// (wisecrack kit style), instead of the old inline text links inside its footer.
+// A blank spacer takes a missing button's place so the card never shifts sideways
+// depending on whether that particular screen has a Back (or, in principle, a Next).
 const LevelOneLayout = ({ title, onBack, onNext, children }) => (
   <div className="level-one-screen">
-    <div className="level-one-card">
-      <div className="level-one-title">{title}</div>
-      <div className="level-one-content">
-        {children}
+    <div className="level-one-card-row">
+      {onBack
+        ? <NavRoundButton direction="back" onClick={onBack} label="Back" />
+        : <span className="nav-round-spacer" aria-hidden="true" />}
+
+      <div className="level-one-card">
+        <div className="level-one-title">{title}</div>
+        <div className="level-one-content">
+          {children}
+        </div>
       </div>
-      <div className="level-one-footer">
-        {onBack && <button className="level-one-back" onClick={onBack}>&lt;&lt;&lt; Back</button>}
-        {onNext && <button className="level-one-next" onClick={onNext}>Next &gt;&gt;&gt;</button>}
-      </div>
+
+      {onNext
+        ? <NavRoundButton direction="forward" onClick={onNext} label="Forward" dataSound="progress-munch" />
+        : <span className="nav-round-spacer" aria-hidden="true" />}
     </div>
   </div>
 );
@@ -173,10 +185,10 @@ export function ValidVsFaultyScreen({ onBack, onNext }) {
 
 // Screen 8: Balloons
 export function BalloonScreen({ onReplay, onNext }) {
-  const [popped, setPopped] = useState({ orange: false, blue: false, green: false });
+  const [popped, setPopped] = useState(false);
 
-  const handlePop = (color) => {
-    setPopped(prev => ({ ...prev, [color]: true }));
+  const handlePop = () => {
+    setPopped(true);
     playSound('balloon-pop');
     setTimeout(() => {
       onReplay();
@@ -185,12 +197,16 @@ export function BalloonScreen({ onReplay, onNext }) {
 
   return (
     <div className="balloon-full-screen">
-      <div className="balloon-container">
-        <div className={`balloon orange ${popped.orange ? 'popped' : ''}`} onClick={() => handlePop('orange')}></div>
-        <div className={`balloon blue ${popped.blue ? 'popped' : ''}`} onClick={() => handlePop('blue')}></div>
-        <div className={`balloon green ${popped.green ? 'popped' : ''}`} onClick={() => handlePop('green')}></div>
-      </div>
-      
+      <button
+        type="button"
+        className="balloon-container"
+        onClick={handlePop}
+        aria-label="Pop the balloons"
+        data-sound="none"
+      >
+        <img src={popped ? balloonsPopped : balloons3Left} alt="" className="balloon-cluster-img" />
+      </button>
+
       <p className="balloon-text">
         You will get <strong>three chances</strong> to go through these instructions<br/>
         again if you need, by popping these three balloons

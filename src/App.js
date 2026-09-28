@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import './design-system/tokens.css';
+//import './design-system/tokens.css';
 import './assets/wisecrack-ui-kit/wisecrack-ui-kit/wisecrack-colors.css';
 import './App.css';
 import { CurrencyContext, currencyFor } from './utils/currency';
 import { SECTIONS, GAME_FLOW } from './config/gameFlow';
 import { preloadSounds, playSound } from './sounds';
 import SoundToggle from './components/SoundToggle';
+import { useMascot } from './components/mascot';
 
 // Runs whichever sections GAME_FLOW names, in that order (see src/config/gameFlow.js).
 // Sections are self-contained - the only things that ever need to cross a section

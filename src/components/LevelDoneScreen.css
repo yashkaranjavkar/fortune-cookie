@@ -1,0 +1,114 @@
+/* Level done panel - wisecrack kit (preview/Panels.html): a plum name plaque on a
+   golden biscuit frame around a cream board. */
+
+.level-done-screen {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+}
+
+.ld-frame {
+  position: relative;
+  width: 92%;
+  max-width: 460px;
+  box-sizing: border-box;
+  padding: 14px;
+  border-radius: 30px;
+  border: 4px solid var(--biscuit-rim, #7A3E12);
+  background-color: var(--biscuit, #EDAA52);
+  background-image: linear-gradient(180deg, var(--biscuit-light, #F8CF86) 0%, var(--biscuit, #EDAA52) 60%, var(--biscuit-dark, #DE8F33) 100%);
+  box-shadow: inset 0 3px 0 rgba(255, 241, 214, 0.75), inset 0 -5px 0 rgba(160, 82, 18, 0.35), 0 8px 0 var(--biscuit-lip, #5A2C0C), 0 20px 34px rgba(0, 0, 0, 0.45);
+}
+
+.ld-plaque {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 200px;
+  height: 54px;
+  box-sizing: border-box;
+  padding: 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  border: 3px solid var(--plum-rim, #3E0A12);
+  background-color: var(--plum, #8E2A37);
+  background-image: linear-gradient(180deg, var(--plum-light, #B8475A) 0%, var(--plum, #8E2A37) 55%, var(--plum-dark, #6E1A26) 100%);
+  box-shadow: inset 0 3px 0 rgba(255, 200, 200, 0.35), 0 5px 0 var(--plum-rim, #3E0A12), 0 9px 14px rgba(0, 0, 0, 0.35);
+  font-family: var(--font-title);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 22px;
+  color: #FFF1DC;
+  white-space: nowrap;
+}
+
+.ld-board {
+  border-radius: 20px;
+  border: 2px solid #C98A3E;
+  background: linear-gradient(180deg, #FFF8EA 0%, #F6E3BE 100%);
+  box-shadow: inset 0 4px 10px rgba(160, 82, 18, 0.18);
+  padding: 48px 28px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.ld-stars { display: flex; align-items: flex-end; justify-content: center; gap: 4px; }
+.ld-stars svg:nth-child(2) { margin-bottom: 12px; }
+
+.ld-heading { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.ld-batch-name { margin: 0; font-family: var(--font-title); font-style: italic; font-weight: 600; font-size: 23px; color: var(--text-brown, #4A2E14); }
+.ld-subtext { margin: 0; font-family: var(--font-sans); font-size: 15px; color: #6B4A2F; }
+
+.ld-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; }
+.ld-stat {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 12px; border-radius: 14px;
+  background: #EFD9AE; border: 2px solid #D9B47A;
+}
+.ld-stat-label { font-family: var(--font-sans); font-size: 12px; font-weight: 700; color: #6B4A2F; }
+.ld-stat-value { font-family: var(--font-sans); font-weight: 700; font-size: 24px; color: var(--text-dark, #3A1A08); }
+.ld-stat-value.earned { color: var(--matcha-dark, #345338); }
+
+.ld-actions { display: flex; align-items: center; gap: 16px; padding-top: 4px; }
+
+.ld-replay-btn {
+  appearance: none; cursor: pointer;
+  width: 54px; height: 54px; padding: 0;
+  border-radius: 50%;
+  border: 3px solid var(--cream-rim, #9C7350);
+  background-color: var(--cream, #F3DEB6);
+  background-image: linear-gradient(180deg, var(--cream-light, #FFF8EA) 0%, var(--cream, #F3DEB6) 55%, #E8CD9C 100%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.8), inset 0 -3px 0 rgba(156, 115, 80, 0.25), 0 5px 0 var(--cream-lip, #7A5534);
+  color: var(--text-brown, #4A2E14);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.08s ease-out, filter 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+.ld-replay-btn:hover { filter: brightness(1.04); }
+.ld-replay-btn:active { transform: translateY(3px); filter: brightness(0.96); box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(0, 0, 0, 0.35); }
+
+.ld-next-btn {
+  appearance: none; cursor: pointer;
+  height: 56px; min-width: 190px; padding: 0 30px;
+  border-radius: var(--radius-full);
+  border: 3px solid var(--biscuit-rim, #7A3E12);
+  background-color: var(--biscuit, #EDAA52);
+  background-image: linear-gradient(180deg, var(--biscuit-light, #F8CF86) 0%, var(--biscuit, #EDAA52) 55%, var(--biscuit-dark, #DE8F33) 100%);
+  box-shadow: inset 0 3px 0 rgba(255, 241, 214, 0.75), inset 0 -4px 0 rgba(160, 82, 18, 0.35), 0 6px 0 var(--biscuit-lip, #5A2C0C), 0 9px 14px rgba(0, 0, 0, 0.25);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text-dark, #3A1A08);
+  text-shadow: 0 1px 0 rgba(255, 236, 200, 0.7);
+  transition: transform 0.08s ease-out, filter 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+.ld-next-btn:hover { filter: brightness(1.04); }
+.ld-next-btn:active { transform: translateY(4px); filter: brightness(0.96); box-shadow: inset 0 4px 7px rgba(0, 0, 0, 0.3), 0 2px 0 rgba(0, 0, 0, 0.35); }

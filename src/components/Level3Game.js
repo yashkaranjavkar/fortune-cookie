@@ -5,6 +5,7 @@ import RulesOverlay from './RulesOverlay';
 import InvalidURLExplainer from './InvalidURLExplainer';
 import { pickFortune } from '../utils/fortunePool';
 import { playSound } from '../sounds';
+import { useMascotTrigger } from '../config/mascotTriggers';
 import './DomeFocus.css';
 import './SampleFortune.css';
 
@@ -64,6 +65,7 @@ export default function Level3Game({ onComplete, onSkip }) {
 
   const hoverTimeout = useRef(null);
   const intervalRef = useRef(null);
+  const fireMascot = useMascotTrigger();
 
   // Countdown timer - paused (not reset) while the rules overlay is open
   useEffect(() => {
@@ -84,12 +86,17 @@ export default function Level3Game({ onComplete, onSkip }) {
   }, [activeDome, rulesOpen]);
 
   const handleMouseEnter = (index) => {
-    if (domes[index].status === 'closed') {
+    // Only one dome may be mid-hover or open at a time - guard both against another
+    // dome already being open (activeDome) and against a different dome's own 300ms
+    // hover timer still pending (hoverTimeout.current).
+    if (domes[index].status === 'closed' && activeDome === null && !hoverTimeout.current) {
       hoverTimeout.current = setTimeout(() => {
+        hoverTimeout.current = null;
         setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'open', text: pickFortune(prev.map(x => x.text)) } : d));
         setTimer(10);
         setActiveDome(index);
         playSound('dome-lift');
+        fireMascot('domeRevealed');
       }, 300);
     }
   };
@@ -102,7 +109,10 @@ export default function Level3Game({ onComplete, onSkip }) {
     playSound('popup-open');
   };
 
-  const handleMouseLeave = () => clearTimeout(hoverTimeout.current);
+  const handleMouseLeave = () => {
+    clearTimeout(hoverTimeout.current);
+    hoverTimeout.current = null;
+  };
 
   const handleDragStart = (e) => {
     e.dataTransfer.setData('domeIndex', activeDome);
@@ -125,7 +135,8 @@ export default function Level3Game({ onComplete, onSkip }) {
 
     setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: trayType } : d));
     setActiveDome(null);
-    playSound(trayType === 'faulty' ? 'drop-faulty' : 'drop-approved');
+    playSound('drop-approved');
+    fireMascot('fortuneSorted');
 
     const newCount = sortedCount + 1;
     setSortedCount(newCount);
@@ -144,6 +155,7 @@ export default function Level3Game({ onComplete, onSkip }) {
     setActiveDome(null);
     playSound('time-up');
     playSound('cookie-break');
+    fireMascot('fortuneWasted');
 
     const newCount = sortedCount + 1;
     setSortedCount(newCount);
@@ -286,14 +298,15 @@ export default function Level3Game({ onComplete, onSkip }) {
               <span className="invalid-url">http://www.youtube.com/</span> 🖊️
             </div>
 
-            <button className="next-btn" onClick={() => onComplete(faultyItems, approvedItems)}>
-              Next
-            </button>
+            <div className="instruction-card-actions">
+              <button className="instruction-skip-btn" onClick={() => onSkip(faultyItems, approvedItems)}>
+                Skip &gt;&gt;&gt;
+              </button>
+              <button className="next-btn" onClick={() => onComplete(faultyItems, approvedItems)}>
+                Next
+              </button>
+            </div>
           </div>
-
-          <button className="instruction-skip-btn" onClick={() => onSkip(faultyItems, approvedItems)}>
-            Skip &gt;&gt;&gt;
-          </button>
         </div>
       )}
 

@@ -27,8 +27,7 @@ const TrayPreview = ({ broken = false, distance = 1 }) => (
   </div>
 );
 
-export default function TraySelectionScreen({ trayNumber, brokenBunches, onSelectBunch }) {
-  const totalTrays = 3;
+export default function TraySelectionScreen({ trayNumber, totalTrays = 3, brokenBunches, onSelectBunch }) {
   const completedTrays = trayNumber;                      // Trays to the left
   const upcomingTrays = totalTrays - trayNumber - 1;      // Trays to the right
 
@@ -98,9 +97,9 @@ export default function TraySelectionScreen({ trayNumber, brokenBunches, onSelec
       </div>
 
       <div className="tray-dots">
-        <span className={`dot ${trayNumber === 0 ? 'active' : ''}`}></span>
-        <span className={`dot ${trayNumber === 1 ? 'active' : ''}`}></span>
-        <span className={`dot ${trayNumber === 2 ? 'active' : ''}`}></span>
+        {Array.from({ length: totalTrays }).map((_, i) => (
+          <span key={i} className={`dot ${trayNumber === i ? 'active' : ''}`}></span>
+        ))}
       </div>
     </div>
   );

@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import TraySelectionScreen from '../components/TraySelectionScreen';
 import FortuneSelectionScreen from '../components/FortuneSelectionScreen';
 
-// The 3-tray / 2-bunch fortune-picking minigame, extracted so it can be reused both
-// inside Training and standalone (the "last three trays" section).
+// The tray / 2-bunch-per-tray fortune-picking minigame, extracted so it can be reused
+// both inside Training and standalone (the "final trays" section). How many trays run
+// is set by TRAY_COUNT in src/config/gameFlow.js, passed in as the trayCount prop.
 const FORTUNES_POOL = [
   [
     "Your talents will soon catch the eye of a top recruiter who discovers you on naukri.com. ✨💼",
@@ -25,7 +26,7 @@ const FORTUNES_POOL = [
   ]
 ];
 
-export default function TraySortingSection({ onComplete }) {
+export default function TraySortingSection({ onComplete, trayCount = 3 }) {
   const [gamePhase, setGamePhase] = useState('selection');
   const [trayIndex, setTrayIndex] = useState(0);
   const [bunchIndex, setBunchIndex] = useState(0);
@@ -40,7 +41,7 @@ export default function TraySortingSection({ onComplete }) {
   const handleSubmitFortunes = () => {
     if (brokenBunches.length < 2) {
       setGamePhase('selection');
-    } else if (trayIndex < 2) {
+    } else if (trayIndex < trayCount - 1) {
       setTrayIndex(trayIndex + 1);
       setBunchIndex(0);
       setBrokenBunches([]);
@@ -50,11 +51,16 @@ export default function TraySortingSection({ onComplete }) {
     }
   };
 
+  // Cycles back through the curated fortune sets if trayCount is configured
+  // higher than the number of hand-written sets above.
+  const fortunes = FORTUNES_POOL[trayIndex % FORTUNES_POOL.length];
+
   return (
     <>
       {gamePhase === 'selection' && (
         <TraySelectionScreen
           trayNumber={trayIndex}
+          totalTrays={trayCount}
           brokenBunches={brokenBunches}
           onSelectBunch={handleSelectBunch}
         />
@@ -63,7 +69,7 @@ export default function TraySortingSection({ onComplete }) {
         <FortuneSelectionScreen
           trayNumber={trayIndex}
           bunchNumber={bunchIndex}
-          fortunes={FORTUNES_POOL[trayIndex]}
+          fortunes={fortunes}
           onSubmit={handleSubmitFortunes}
         />
       )}

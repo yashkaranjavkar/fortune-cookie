@@ -1,8 +1,3 @@
-/* The Next button is absolutely positioned over the card (unlike Level 1's card,
-   where it sits in normal flow), so tall content like the full URL explainer needs
-   reserved space at the bottom or the last row gets covered instead of pushing it down. */
-.l2-content-area { padding-bottom: 60px; box-sizing: border-box; }
-
 /* Level 2 instruction screens, brought in line with Level 1's look:
    the .title/.fortune-box/.valid-box/.faulty-box/.rule-text classes are reused
    directly from App.css so both levels render identically; these are just the

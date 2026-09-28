@@ -1,0 +1,130 @@
+/* Wisecrack — component styles from the UI kit.
+   Import AFTER tokens.css. Every class starts with "wc-".
+   ------------------------------------------------------------------ */
+
+/* ================= Buttons ================= */
+.wc-btn {
+  --rim: var(--biscuit-rim);
+  --lip: var(--biscuit-lip);
+  --fill: var(--biscuit-fill);
+  --fill-hover: var(--biscuit-fill-hover);
+  --ink: var(--biscuit-text);
+
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  height: 60px; padding: 0 32px;
+  border: 3px solid var(--rim);
+  border-radius: var(--radius-full);
+  background: var(--fill);
+  color: var(--ink);
+  font: 600 22px/1 var(--font-display);
+  text-shadow: 0 1px 0 rgba(255, 236, 200, .7);
+  box-shadow: var(--shine), var(--shade), 0 6px 0 var(--lip), var(--drop);
+  cursor: pointer; user-select: none;
+  transition: transform .08s ease, box-shadow .08s ease, filter .15s ease;
+}
+.wc-btn:hover       { background: var(--fill-hover); box-shadow: var(--shine), var(--shade), 0 6px 0 var(--lip), var(--drop), var(--glow); }
+.wc-btn:active      { transform: translateY(4px); box-shadow: var(--shine), var(--shade), 0 2px 0 var(--lip), 0 4px 8px rgba(0,0,0,.3); }
+.wc-btn:focus-visible { outline: none; box-shadow: var(--shine), var(--shade), 0 6px 0 var(--lip), var(--drop), 0 0 0 5px rgba(255,196,102,.7); }
+.wc-btn:disabled,
+.wc-btn[aria-disabled="true"] {
+  background: var(--disabled); border-color: var(--disabled-rim); color: var(--disabled-text);
+  text-shadow: none; box-shadow: 0 6px 0 var(--disabled-rim); cursor: not-allowed; transform: none;
+}
+
+/* colours */
+.wc-btn--cream  { --rim: var(--cream-rim);  --lip: var(--cream-lip);  --fill: var(--cream-fill);  --fill-hover: var(--cream-fill);  --ink: var(--cream-text); }
+.wc-btn--plum   { --rim: var(--plum-rim);   --lip: var(--plum-lip);   --fill: var(--plum-fill);   --fill-hover: var(--plum-fill);   --ink: var(--plum-text);   text-shadow: 0 1px 0 rgba(0,0,0,.3); }
+.wc-btn--matcha { --rim: var(--matcha-rim); --lip: var(--matcha-lip); --fill: var(--matcha-fill); --fill-hover: var(--matcha-fill); --ink: var(--matcha-text); text-shadow: 0 1px 0 rgba(0,0,0,.3); }
+.wc-btn--cream:hover, .wc-btn--plum:hover, .wc-btn--matcha:hover { filter: brightness(1.07); }
+
+/* sizes */
+.wc-btn--lg { height: 72px; padding: 0 44px; font-size: 26px; }
+.wc-btn--sm { height: 44px; padding: 0 20px; font-size: 17px; box-shadow: var(--shine), var(--shade), 0 4px 0 var(--lip), 0 6px 10px rgba(0,0,0,.3); }
+
+/* round icon button (64px disc) */
+.wc-icon-btn { width: 64px; height: 64px; padding: 0; }
+.wc-icon-btn svg { width: 28px; height: 28px; stroke: currentColor; stroke-width: 2.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.wc-icon-btn.wc-btn--sm { width: 48px; height: 48px; }
+
+/* ================= Panels & popups ================= */
+.wc-overlay {
+  position: fixed; inset: 0; display: grid; place-items: center;
+  background: rgba(43, 27, 18, .6); z-index: 100;
+}
+.wc-panel {
+  position: relative; padding: 14px;
+  border: 4px solid var(--biscuit-rim); border-radius: var(--radius-xl);
+  background: var(--biscuit-fill);
+  box-shadow: var(--shine), 0 8px 0 var(--biscuit-lip), 0 18px 30px rgba(0,0,0,.35);
+  min-width: 360px; max-width: min(560px, 92vw);
+}
+.wc-panel__board {
+  border: 2px solid var(--board-rim); border-radius: var(--radius-lg);
+  background: var(--board-fill);
+  padding: 44px 28px 28px; text-align: center; color: var(--ink-primary);
+}
+.wc-panel__plaque {
+  position: absolute; top: -24px; left: 50%; transform: translateX(-50%);
+  padding: 8px 32px; white-space: nowrap;
+  border: 3px solid var(--plum-rim); border-radius: var(--radius-full);
+  background: var(--plum-fill); color: var(--plum-text);
+  font: 600 22px/1.2 var(--font-display);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.25), 0 4px 0 var(--plum-lip);
+}
+.wc-panel__close { position: absolute; top: -18px; right: -18px; }
+.wc-panel__actions { display: flex; gap: 16px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
+
+/* ================= Progress bar (munching cookie) ================= */
+.wc-progress {
+  position: relative; height: 34px;
+  background: var(--groove); border: 3px solid var(--biscuit-rim); border-radius: 14px;
+  box-shadow: inset 0 3px 6px rgba(0,0,0,.6); overflow: visible;
+}
+.wc-progress__fill {
+  position: absolute; left: 4px; top: 4px; bottom: 4px; border-radius: 10px;
+  width: calc((100% - 8px) * var(--value, 0));
+  background: linear-gradient(180deg, #FFE3A3, #F4B650 60%, #D98A2B);
+  transition: width .4s ease;
+}
+.wc-progress__cookie {             /* place the cookie-progress.svg <img> here */
+  position: absolute; top: 50%; width: 46px; height: 46px;
+  left: calc(4px + (100% - 8px) * var(--value, 0)); transform: translate(-50%, -50%);
+  transition: left .4s ease;
+}
+.wc-progress--done { background: #1A2414; border-color: var(--matcha-rim); }
+.wc-progress--done .wc-progress__fill { background: var(--matcha-fill); width: calc(100% - 8px); }
+.wc-progress--done .wc-progress__cookie { display: none; }
+
+/* ================= Timer dial ================= */
+/* set style="--p: 0.7" (fraction of time left) */
+.wc-timer {
+  --ring: var(--star-fill);
+  width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center;
+  background: conic-gradient(var(--ring) calc(var(--p, 1) * 360deg), var(--groove) 0);
+  border: 3px solid var(--biscuit-rim); box-shadow: 0 5px 0 var(--biscuit-lip);
+}
+.wc-timer__face {
+  width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--board-fill); color: var(--ink-primary);
+  font: 600 28px/1 var(--font-display); font-variant-numeric: tabular-nums;
+}
+.wc-timer--hurry { --ring: #E07A1F; }        /* last 3 seconds */
+.wc-timer--out   { --ring: var(--maroon-base); }
+
+/* ================= Stars & score chips ================= */
+.wc-star        { width: 44px; height: 44px; fill: var(--star-fill);  stroke: var(--star-stroke); stroke-width: 3; }
+.wc-star--empty { fill: var(--star-empty); }
+
+.wc-score {
+  display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 20px;
+  border: 3px solid var(--biscuit-rim); border-radius: var(--radius-full);
+  background: var(--board-fill); color: var(--ink-primary);
+  font: 600 24px/1 var(--font-display); font-variant-numeric: tabular-nums;
+  box-shadow: 0 4px 0 var(--biscuit-lip);
+}
+.wc-chip {
+  display: inline-block; padding: 4px 14px; border-radius: var(--radius-full);
+  font: 600 18px/1.2 var(--font-display); border: 2px solid;
+}
+.wc-chip--gain { background: var(--matcha-fill); color: var(--matcha-text); border-color: var(--matcha-rim); }
+.wc-chip--loss { background: var(--plum-fill);   color: var(--plum-text);   border-color: var(--plum-rim); }
