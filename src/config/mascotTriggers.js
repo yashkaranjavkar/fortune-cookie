@@ -14,11 +14,18 @@ export const MASCOT_MOMENTS = {
   // A dome lifts, revealing the fortune inside (Demo/Level1/2/3 games)
   domeRevealed: { event: 'unlock', message: 'New fortune!' },
 
-  // A fortune is dragged into a tray before its timer runs out
-  fortuneSorted: { event: 'correct', message: 'Correct!' },
+  // A fortune is dragged into a tray before its timer runs out - purely an
+  // acknowledgement that it was sorted, NOT a verdict. Whether that tray choice was
+  // actually right isn't revealed until the torch-inspection step, so this must stay
+  // a neutral reaction (not 'correct'/'wrong').
+  fortuneSorted: { event: 'idle', message: 'Sorted!' },
 
   // The timer runs out before the fortune is sorted
   fortuneWasted: { event: 'wrong', message: 'Not quite!' },
+
+  // The 30-second marking timer runs out - whatever's marked (or not) gets sent for
+  // inspection as-is, right away, instead of waiting on the player.
+  markingTimeUp: { event: 'streakLost', message: "Time's up! Sending for inspection..." },
 
   // A level (or the practice demo round) is finished
   levelComplete: { event: 'sessionComplete', message: 'Session complete!' },

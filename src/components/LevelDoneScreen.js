@@ -47,7 +47,9 @@ export default function LevelDoneScreen({ batchName, sorted, total, incentive, o
             </div>
             <div className="ld-stat">
               <span className="ld-stat-label">Incentive earned</span>
-              <span className="ld-stat-value earned">+ {currency}{incentive}</span>
+              <span className={`ld-stat-value ${incentive < 0 ? 'lost' : 'earned'}`}>
+                {incentive < 0 ? '−' : '+'} {currency}{Math.abs(incentive)}
+              </span>
             </div>
           </div>
 

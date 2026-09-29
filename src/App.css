@@ -2045,22 +2045,44 @@ body {
   font-weight: bold;
 }
 
-/* Legend below the text */
+/* Legend below the text - one column per correct/wrong/missed segment actually
+   present on this fortune, side by side (see TorchInspectScreen's real reveal). */
+.inspection-legend-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
 .inspection-legend-area {
   text-align: center;
   margin-top: 10px;
+  max-width: 200px;
 }
 
 .legend-text {
   color: var(--green-base);
   font-size: 16px; font-weight: bold;
 }
+.legend-text.wrong, .legend-text.missed { color: var(--error); }
 
 .legend-subtext {
   color: #aaa;
   font-size: 14px;
   margin-top: 5px;
 }
+
+.legend-amount {
+  align-self: center;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 22px;
+  margin-top: 10px;
+}
+.legend-amount-correct { color: var(--green-base); }
+.legend-amount-partial { color: #aaa; }
+.legend-amount-wrong { color: var(--error); }
 
 /* Next Button - smaller and to the right */
 .inspection-next-btn {
@@ -2093,6 +2115,26 @@ body {
   padding: 2px 4px;
   border-radius: 3px;
   font-weight: bold;
+}
+
+/* Marked, but not actually invalid - a false alarm */
+.highlighted-wrong {
+  background: var(--pink-light);
+  color: var(--maroon-deep);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: bold;
+}
+
+/* Actually invalid, but left unmarked - a dashed underline reads as "should have
+   been caught" rather than an active false-alarm colour like .highlighted-wrong. */
+.highlighted-missed {
+  background: var(--grey-light);
+  color: var(--grey-deep);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: bold;
+  border-bottom: 2px dashed var(--error);
 }
 
 /* Inline legend item (green dot + text) */

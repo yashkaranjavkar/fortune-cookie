@@ -3,10 +3,11 @@ import './TimerDial.css';
 
 // A stopwatch face (ring + tick marks + knob) around the countdown number,
 // instead of a plain circle with a number in it. Shared across timed screens.
-export default function TimerDial({ value }) {
+// urgent: pops the dial red and pulses it, for the last few seconds of a countdown.
+export default function TimerDial({ value, urgent = false }) {
   const ticks = Array.from({ length: 12 }, (_, i) => i);
   return (
-    <div className="timer-dial">
+    <div className={`timer-dial${urgent ? ' urgent' : ''}`}>
       <svg className="timer-dial-svg" viewBox="0 0 100 100" aria-hidden="true">
         <circle className="timer-dial-ring" cx="50" cy="50" r="42" />
         {ticks.map(i => {

@@ -3,7 +3,7 @@ import SortTray from './SortTray';
 import InvalidURLExplainer from './InvalidURLExplainer';
 import BalloonCluster from './BalloonCluster';
 import RulesOverlay from './RulesOverlay';
-import { pickFortune } from '../utils/fortunePool';
+import { pickLevel1Fortune } from '../utils/level1Fortunes';
 import { playSound } from '../sounds';
 import { useMascotTrigger } from '../config/mascotTriggers';
 import './DomeFocus.css';
@@ -96,7 +96,7 @@ export default function Level1Game({ onComplete }) {
     if (domes[index].status === 'closed' && activeDome === null && !hoverTimeout.current) {
       hoverTimeout.current = setTimeout(() => {
         hoverTimeout.current = null;
-        setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'open', text: pickFortune(prev.map(x => x.text)) } : d));
+        setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'open', fortune: pickLevel1Fortune(prev.filter(x => x.fortune).map(x => x.fortune.text)) } : d));
         setTimer(10);
         setActiveDome(index);
         playSound('dome-lift');
@@ -132,9 +132,11 @@ export default function Level1Game({ onComplete }) {
     clearInterval(intervalRef.current);
 
     if (trayType === 'faulty') {
-      setFaultyItems(prev => [...prev, index]);
+      setFaultyItems(prev => [...prev, domes[index].fortune]);
     } else {
-      setApprovedItems(prev => [...prev, { text: domes[index].text }]);
+      // Kept as the full fortune object (not just text) so a genuinely phishy
+      // fortune that slipped through into Approved can still be graded wrong later.
+      setApprovedItems(prev => [...prev, { ...domes[index].fortune }]);
     }
 
     setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: trayType } : d));
@@ -236,7 +238,7 @@ export default function Level1Game({ onComplete }) {
                         onDragStart={handleDragStart}
                         onDragEnd={handleDragEnd}
                       >
-                        {dome.text}
+                        {dome.fortune.text}
                       </div>
                   </>
                 )}

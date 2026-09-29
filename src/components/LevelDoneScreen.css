@@ -77,6 +77,7 @@
 .ld-stat-label { font-family: var(--font-sans); font-size: 12px; font-weight: 700; color: #6B4A2F; }
 .ld-stat-value { font-family: var(--font-sans); font-weight: 700; font-size: 24px; color: var(--text-dark, #3A1A08); }
 .ld-stat-value.earned { color: var(--matcha-dark, #345338); }
+.ld-stat-value.lost { color: var(--plum, #8E2A37); }
 
 .ld-actions { display: flex; align-items: center; gap: 16px; padding-top: 4px; }
 

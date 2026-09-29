@@ -121,7 +121,7 @@ export function ContextValidFaultyScreen({ onBack, onNext, stepIndex, totalSteps
   return (
     <L2Layout stepIndex={stepIndex} totalSteps={totalSteps} title="Identifying Faulty Fortune" onBack={onBack} onNext={onNext}>
       <div className="center-content">
-        <p className="rule-text">1. Valid URL + context that matches it = valid fortune.</p>
+        <p className="rule-text">1. If the URL is correct and the context is related to the category of the URL, then the fortune is valid.</p>
 
         <div className="valid-box">
           <span className="valid-label">Valid</span>
@@ -129,13 +129,15 @@ export function ContextValidFaultyScreen({ onBack, onNext, stepIndex, totalSteps
             The brand new trailer of your favorite movie is soon going to stream on https://www.youtube.com/
           </div>
         </div>
+        <p className="l2-shared-note">Here, the valid URL belongs to YouTube, a media streaming platform &mdash; and the context of the fortune is related to media streaming.</p>
 
         <div className="faulty-box">
           <span className="faulty-label">Faulty</span>
           <div className="fortune-box">
-            Your favorite artist has uploaded their new album on <span className="red-highlight">http://www.youtude.com/</span>
+            Your favorite artist has uploaded their new album on <span className="red-highlight">http://www.youtube.corn/</span>
           </div>
         </div>
+        <p className="l2-shared-note">Here, the context of the fortune is related to media streaming, but the URL is invalid.</p>
       </div>
     </L2Layout>
   );
@@ -170,27 +172,27 @@ export function InvalidURLSequenceTwo({ onBack, onNext, stepIndex, totalSteps })
   );
 }
 
-export function ContextUnrelatedScreen({ onBack, onNext, stepIndex, totalSteps }) {
+export function InvalidUrlMeaningScreen({ onBack, onNext, stepIndex, totalSteps }) {
   return (
     <L2Layout stepIndex={stepIndex} totalSteps={totalSteps} title="Identifying Faulty Fortune" onBack={onBack} onNext={onNext}>
       <div className="center-content">
-        <p className="rule-text">2. Context unrelated to the URL &mdash; even a real one &mdash; is still faulty.</p>
+        <p className="rule-text">2. If the URL is invalid, then you have to check the overall meaning of the fortune.</p>
 
         <div className="faulty-box">
           <span className="faulty-label">Faulty</span>
           <div className="fortune-box">
-            You will make your payments safer with the help of <span className="red-highlight">https://www.youttube.com/</span>
+            Your favorite artist has uploaded their new album on <span className="red-highlight">http://www.youtube.corn/</span>
           </div>
         </div>
+        <p className="l2-shared-note">Here, the URL is invalid, and the context is related to video streaming &mdash; but the fortune is inviting you to visit that link, which makes it a phishing attempt.</p>
 
-        <div className="faulty-box">
-          <span className="faulty-label">Faulty</span>
+        <div className="valid-box">
+          <span className="valid-label">Valid</span>
           <div className="fortune-box">
-            You have saved enough money to buy your shoes from <span className="red-highlight">http://www.youttube.com/</span>
+            Avoid clicking on links like <span className="red-highlight">http://www.youtube.corn/</span> to watch a video
           </div>
         </div>
-
-        <p className="l2-shared-note">Both URLs belong to a real streaming site &mdash; but neither fortune is actually about streaming.</p>
+        <p className="l2-shared-note">Same invalid URL &mdash; but this fortune is warning you not to access it, so it's actually valid, safe advice.</p>
       </div>
     </L2Layout>
   );

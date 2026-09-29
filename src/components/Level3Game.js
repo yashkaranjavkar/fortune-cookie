@@ -128,7 +128,7 @@ export default function Level3Game({ onComplete, onSkip }) {
     clearInterval(intervalRef.current);
 
     if (trayType === 'faulty') {
-      setFaultyItems(prev => [...prev, index]);
+      setFaultyItems(prev => [...prev, { text: domes[index].text }]);
     } else {
       setApprovedItems(prev => [...prev, { text: domes[index].text }]);
     }

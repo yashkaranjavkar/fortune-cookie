@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import TimerDial from './TimerDial';
 import { playSound } from '../sounds';
+import { useMascotTrigger } from '../config/mascotTriggers';
 import './MarkingScreen.css';
 
 // Hand-drawn highlighter icon, matching the line-icon style used elsewhere in the app
@@ -25,21 +26,32 @@ const HighlightedText = ({ text, selectedText }) => {
 };
 
 export default function MarkingScreen({ faultyItems, onNext }) {
-  const itemCount = faultyItems.length > 0 ? faultyItems.length : 2;
+  const itemCount = faultyItems.length;
   const [timer, setTimer] = useState(30);
   const [highlights, setHighlights] = useState(new Array(itemCount).fill(null));
   const cardRefs = useRef([]);
+  const fireMascot = useMascotTrigger();
 
-  const fullTexts = [
-    "Your path to success is beautifully customized, matching the perfect recommendations found on free-amazon.com. 🎀⭐",
-    "A meaningful connection made today on linkedin.com will open doors to unexpected opportunities tomorrow. 💼✨",
-    "Your creative spark will lead to a unique project, celebrated on deviantart.org. 🎨🚀",
-    "An upcoming payment is waiting for you at paypa1-secure.com. 💰🔒"
-  ];
+  // The interval below is set up once on mount, so it closes over whatever
+  // handleSubmit/highlights looked like at that moment - this ref always points at
+  // the latest handleSubmit so the auto-submit-at-zero below never fires with stale
+  // (empty) marking data.
+  const handleSubmitRef = useRef(() => {});
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTimer(prev => (prev > 0 ? prev - 1 : 0));
+      setTimer(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          playSound('time-up');
+          playSound('toast');
+          fireMascot('markingTimeUp');
+          handleSubmitRef.current();
+          return 0;
+        }
+        if (prev - 1 <= 5) playSound('timer-tick');
+        return prev - 1;
+      });
     }, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -72,22 +84,25 @@ export default function MarkingScreen({ faultyItems, onNext }) {
     playSound('highlight-remove');
   };
 
-  const allMarked = highlights.every(h => h !== null && h.length > 0);
-
-  // This is the function that packages the data and moves to the next screen
+  // Marking is a judgement call, not a requirement - a fortune that isn't actually
+  // phishy is correctly left unmarked, so submitting doesn't force every item to have
+  // a highlight. Whatever's marked (or not) gets sent through as-is for inspection.
   const handleSubmit = () => {
-    const data = fullTexts.slice(0, itemCount).map((text, i) => ({
-      fullText: text,
-      markedText: highlights[i]
+    const data = faultyItems.map((fortune, i) => ({
+      fullText: fortune.text,
+      markedText: highlights[i],
+      isPhishy: fortune.isPhishy,
+      invalidPart: fortune.invalidPart
     }));
     onNext(data);
   };
+  handleSubmitRef.current = handleSubmit;
 
   return (
     <div className="marking-screen">
       <div className="marking-header">
         <div className="tray-label faulty-label">Faulty Tray</div>
-        <TimerDial value={timer} />
+        <TimerDial value={timer} urgent={timer <= 5 && timer > 0} />
       </div>
 
       <div className="marking-instruction">
@@ -103,7 +118,7 @@ export default function MarkingScreen({ faultyItems, onNext }) {
               ref={el => cardRefs.current[index] = el}
               onMouseUp={() => handleMouseUp(index)}
             >
-              <HighlightedText text={fullTexts[index]} selectedText={highlights[index]} />
+              <HighlightedText text={faultyItems[index].text} selectedText={highlights[index]} />
               {highlights[index] && (
                 <span className="remove-highlight-btn" onDoubleClick={() => handleDoubleClick(index)}>
                   (Double-click to remove)
@@ -114,15 +129,9 @@ export default function MarkingScreen({ faultyItems, onNext }) {
         ))}
       </div>
 
-      {/* ✅ THE BUTTON GOES HERE */}
-      <button 
-        className={`next-btn ${allMarked ? 'enabled' : ''}`} 
-        disabled={!allMarked} 
-        onClick={handleSubmit}
-      >
+      <button className="next-btn enabled" onClick={handleSubmit}>
         Next
       </button>
-      {/* ✅ END OF BUTTON */}
 
     </div>
   );

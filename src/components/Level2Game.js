@@ -3,7 +3,7 @@ import SortTray from './SortTray';
 import BalloonCluster from './BalloonCluster';
 import RulesOverlay from './RulesOverlay';
 import InvalidURLExplainer from './InvalidURLExplainer';
-import { pickFortune } from '../utils/fortunePool';
+import { pickLevel2Fortune } from '../utils/level2Fortunes';
 import { playSound } from '../sounds';
 import { useMascotTrigger } from '../config/mascotTriggers';
 import './DomeFocus.css';
@@ -21,8 +21,8 @@ const RULE_SLIDES = [
     title: 'Identifying Faulty Fortune',
     content: (
       <>
-        <p className="l1-rules-text">1. Valid URL + context that matches it = valid fortune.</p>
-        <p className="l1-rules-text">2. Context unrelated to the URL &mdash; even a real one &mdash; is still faulty.</p>
+        <p className="l1-rules-text">1. If the URL is correct and the context is related to the category of the URL, the fortune is valid.</p>
+        <p className="l1-rules-text">2. If the URL is invalid, check the overall meaning &mdash; a fortune warning you away from a bad link is still valid.</p>
 
         <div className="l1-rules-box valid">
           <span className="l1-rules-box-label valid">Valid</span>
@@ -34,7 +34,7 @@ const RULE_SLIDES = [
         <div className="l1-rules-box faulty">
           <span className="l1-rules-box-label faulty">Faulty</span>
           <div className="l1-rules-fortune-box">
-            <span className="context-highlight">You will make your payments safer with the help of</span> <span className="l1-rules-highlight">https://www.youttube.com/</span>
+            Your favorite artist has uploaded their new album on <span className="l1-rules-highlight">http://www.youtube.corn/</span>
           </div>
         </div>
       </>
@@ -93,7 +93,7 @@ export default function Level2Game({ onComplete, onSkip }) {
     if (domes[index].status === 'closed' && activeDome === null && !hoverTimeout.current) {
       hoverTimeout.current = setTimeout(() => {
         hoverTimeout.current = null;
-        setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'open', text: pickFortune(prev.map(x => x.text)) } : d));
+        setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'open', fortune: pickLevel2Fortune(prev.filter(x => x.fortune).map(x => x.fortune.text)) } : d));
         setTimer(10);
         setActiveDome(index);
         playSound('dome-lift');
@@ -129,9 +129,11 @@ export default function Level2Game({ onComplete, onSkip }) {
     clearInterval(intervalRef.current);
 
     if (trayType === 'faulty') {
-      setFaultyItems(prev => [...prev, index]);
+      setFaultyItems(prev => [...prev, domes[index].fortune]);
     } else {
-      setApprovedItems(prev => [...prev, { text: domes[index].text }]);
+      // Kept as the full fortune object (not just text) so a genuinely phishy
+      // fortune that slipped through into Approved can still be graded wrong later.
+      setApprovedItems(prev => [...prev, { ...domes[index].fortune }]);
     }
 
     setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: trayType } : d));
@@ -236,7 +238,7 @@ export default function Level2Game({ onComplete, onSkip }) {
                         onDragStart={handleDragStart}
                         onDragEnd={handleDragEnd}
                       >
-                        {dome.text}
+                        {dome.fortune.text}
                       </div>
                     </>
                   )}
@@ -294,12 +296,12 @@ export default function Level2Game({ onComplete, onSkip }) {
             <SortTray type="faulty" items={faultyItems} className="centered" />
 
             <p className="instruction-text">
-              You have to mark the invalid part in the URL of the fortune before sending for inspection
+              You have to mark whatever makes the fortune faulty - a fake URL, or context that
+              doesn't match a real one - before sending for inspection
             </p>
 
             <div className="sample-fortune">
-              Your favorite artist has uploaded their new album on{' '}
-              <span className="invalid-url">http://www.youtube.com/</span> 🖊️
+              You will make your <span className="invalid-url">payments safer</span> with the help of https://www.youtube.com/ 🖊️
             </div>
 
             <div className="instruction-card-actions">

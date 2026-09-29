@@ -17,3 +17,25 @@
   font-weight: 800;
   color: var(--maroon-deep);
 }
+
+/* Last few seconds: the dial pops a brighter red and pulses to grab attention. */
+.timer-dial.urgent .timer-dial-ring { fill: color-mix(in srgb, var(--error) 22%, #fff); }
+.timer-dial.urgent .timer-dial-value { color: #FFFFFF; }
+.timer-dial.urgent .timer-dial-ring,
+.timer-dial.urgent .timer-dial-knob { animation: timer-dial-pop 1s ease-in-out infinite; }
+.timer-dial.urgent .timer-dial-value { animation: timer-dial-pop-text 1s ease-in-out infinite; }
+
+@keyframes timer-dial-pop {
+  0%, 100% { fill: color-mix(in srgb, var(--error) 22%, #fff); }
+  50% { fill: var(--error); }
+}
+@keyframes timer-dial-pop-text {
+  0%, 100% { transform: scale(1); color: var(--maroon-deep); }
+  50% { transform: scale(1.15); color: #FFFFFF; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timer-dial.urgent .timer-dial-ring,
+  .timer-dial.urgent .timer-dial-knob,
+  .timer-dial.urgent .timer-dial-value { animation: none; }
+}

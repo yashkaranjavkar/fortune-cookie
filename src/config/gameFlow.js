@@ -25,10 +25,10 @@ export const SECTIONS = {
 // sorting round, set:
 //   export const GAME_FLOW = ['job', 'training', 'level1', 'finalTrays'];
 export const GAME_FLOW = [
-  //'job',
+  'job',
   //'training',
   'level1',
-  'level2',
+  //'level2',
   'level3',
   'supervisor',
   'finalTrays'

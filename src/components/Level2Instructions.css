@@ -51,6 +51,37 @@
   font-size: 14px;
   color: var(--green-base);
 }
+.sr-strip-amount-partial { color: var(--ink-soft); }
+.sr-strip-amount-wrong { color: var(--error); }
+
+.sorting-totals-list { width: 85%; max-width: 640px; margin: 28px auto 0; }
+
+.sorting-total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 85%;
+  max-width: 640px;
+  margin: 22px auto 0;
+  padding: 14px 22px;
+  border-radius: 12px;
+  background: #FFFEFA;
+  border: 1px solid rgba(120, 90, 40, 0.18);
+}
+.sorting-total-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--ink-primary);
+}
+.sorting-total-amount {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+.sorting-total-amount.positive { color: var(--green-base); }
+.sorting-total-amount.negative { color: var(--error); }
 
 
 /* Payment as per inspection - dark-room reward cards (light cards would inherit
