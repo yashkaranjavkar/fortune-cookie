@@ -19,6 +19,7 @@ import {
   InvalidURLThreeSequence,
   BalloonsThreeScreen
 } from '../../components/Level3GameInstructions';
+import { walkStep, roomIntroStep } from './transitionSteps';
 
 // Level 3's screen order: rules -> 6-cookie sorting game -> mark -> inspect -> results.
 // Reorder, insert, or remove entries here to change the flow - nothing else references
@@ -38,6 +39,9 @@ export const LEVEL3_STEPS = [
 
   { key: 'payment', render: (ctx, nav) => <PaymentScreen onBack={nav.back} onNext={nav.next} /> },
 
+  walkStep('walkToLine', 'briefing', 'line3', 'Level 3'),
+  roomIntroStep('enterLine', 'line3', 'Level 3'),
+
   {
     key: 'game',
     render: (ctx, nav) => (
@@ -48,6 +52,9 @@ export const LEVEL3_STEPS = [
     )
   },
 
+  walkStep('walkToMarking', 'line3', 'marking', 'Level 3'),
+  roomIntroStep('enterMarking', 'marking', 'Level 3'),
+
   { key: 'startMarking', render: (ctx, nav) => <StartMarkingScreen faultyCount={ctx.faultyItems.length} onNext={nav.next} /> },
   {
     key: 'marking',
@@ -56,7 +63,11 @@ export const LEVEL3_STEPS = [
     )
   },
 
-  { key: 'loader', render: (ctx, nav) => <LoaderScreen faultyItems={ctx.faultyItems} onComplete={nav.next} /> },
+  // The walk to the Inspection Room below replaces the old "Going for inspection..."
+  // loader - uncomment this line to bring it back.
+  //{ key: 'loader', render: (ctx, nav) => <LoaderScreen faultyItems={ctx.faultyItems} onComplete={nav.next} /> },
+  walkStep('walkToInspection', 'marking', 'inspection', 'Level 3'),
+  roomIntroStep('enterInspection', 'inspection', 'Level 3'),
   {
     key: 'tutorial',
     skip: (ctx) => ctx.tutorialShown,
@@ -66,6 +77,8 @@ export const LEVEL3_STEPS = [
   },
 
   { key: 'torchInspect', render: (ctx, nav) => <TorchInspectScreen markedFortunes={ctx.markedFortunes} onNext={nav.next} /> },
+  walkStep('walkToDispatch', 'inspection', 'results', 'Level 3'),
+  roomIntroStep('enterDispatch', 'results', 'Level 3'),
   { key: 'checkSamples', render: (ctx, nav) => <CheckSamplesScreen onNext={nav.next} /> },
   {
     key: 'results',

@@ -1,4 +1,5 @@
 import React from 'react';
+import FactoryFront, { Ledger, LedgerButton, SEAL_ICONS } from './FactoryFront';
 
 // Confetti in the celebration tones of the design system (pink, yellow, orange, green)
 const CONFETTI_COLORS = [
@@ -60,36 +61,39 @@ function OfferScene() {
 
 export default function CongratulationsScreen({ onAccept }) {
   return (
-    <div className="flow-screen">
-      <div className="flow-card cong-card">
-        <div className="cong-confetti" aria-hidden="true">
-          {CONFETTI.map((c, i) => (
-            <span
-              key={i}
-              className={c.round ? 'round' : ''}
-              style={{
-                left: c.left, width: c.size, height: c.round ? c.size : c.size * 1.6,
-                background: c.color, animationDelay: c.delay, animationDuration: c.duration,
-                '--spin': c.spin
-              }}
-            />
-          ))}
-        </div>
-
-        <div className="flow-body centered cong-body">
-          <div className="cong-scene">
-            <OfferScene />
-          </div>
-
-          <div className="title">Congratulations !</div>
-          <p>
-            You have been selected as an Inspector in The Fortune Cookie Factory.<br/>
-            Click on the Accept button to accept the this offer.
-          </p>
-        </div>
-
-        <button className="next-btn cong-accept" onClick={onAccept}>Accept</button>
+    <FactoryFront>
+      {/* Confetti falls across the whole doorway, behind the ledger */}
+      <div className="cong-confetti" aria-hidden="true">
+        {CONFETTI.map((c, i) => (
+          <span
+            key={i}
+            className={c.round ? 'round' : ''}
+            style={{
+              left: c.left, width: c.size, height: c.round ? c.size : c.size * 1.6,
+              background: c.color, animationDelay: c.delay, animationDuration: c.duration,
+              '--spin': c.spin
+            }}
+          />
+        ))}
       </div>
-    </div>
+
+      <Ledger
+        kicker="You're hired! Welcome to the night shift."
+        centered
+        icon={SEAL_ICONS.star}
+        title="Congratulations!"
+        subtitle="Your offer letter has arrived."
+        footer={<LedgerButton onClick={onAccept}>Accept</LedgerButton>}
+      >
+        <div className="ff-scene">
+          <OfferScene />
+        </div>
+
+        <p className="ff-text">
+          You have been selected as an Inspector in The Fortune Cookie Factory.
+          Click on the Accept button to accept this offer.
+        </p>
+      </Ledger>
+    </FactoryFront>
   );
 }

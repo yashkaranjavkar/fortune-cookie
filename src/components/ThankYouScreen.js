@@ -1,4 +1,5 @@
 import React from 'react';
+import FactoryFront, { Ledger, LedgerButton, SEAL_ICONS } from './FactoryFront';
 
 // Phosphor-style line icons, drawn inline so no extra dependency is needed
 const FileIcon = () => (
@@ -80,31 +81,33 @@ function ApplicationScene() {
 
 export default function ThankYouScreen({ onNext }) {
   return (
-    <div className="flow-screen">
-      <div className="flow-card thanks-card">
-        <div className="flow-body centered thanks-body">
-          <div className="thanks-scene">
-            <ApplicationScene />
-          </div>
-
-          <div className="title">Thank you !</div>
-          <p>
-            You have successfully completed your application at The Fortune Cookie Bakery as a Fortune cookies Inspector.
-            We will shortly get to know about your shortlisting for the role.
-          </p>
-
-          <ol className="thanks-track">
-            {TRACK.map(({ key, label, state, Icon }) => (
-              <li key={key} className={`thanks-step ${state}`}>
-                <span className="thanks-step-icon"><Icon /></span>
-                <span className="thanks-step-label">{label}</span>
-              </li>
-            ))}
-          </ol>
+    <FactoryFront>
+      <Ledger
+        kicker="Application received. Fingers crossed!"
+        centered
+        icon={SEAL_ICONS.check}
+        title="Thank you!"
+        subtitle="Your application is in the factory's hands."
+        footer={<LedgerButton onClick={onNext}>Next</LedgerButton>}
+      >
+        <div className="ff-scene">
+          <ApplicationScene />
         </div>
 
-        <button className="next-btn" onClick={onNext}>Next</button>
-      </div>
-    </div>
+        <p className="ff-text">
+          You have successfully completed your application at The Fortune Cookie Bakery as a Fortune Cookie Inspector.
+          We will shortly let you know about your shortlisting for the role.
+        </p>
+
+        <ol className="thanks-track">
+          {TRACK.map(({ key, label, state, Icon }) => (
+            <li key={key} className={`thanks-step ${state}`}>
+              <span className="thanks-step-icon"><Icon /></span>
+              <span className="thanks-step-label">{label}</span>
+            </li>
+          ))}
+        </ol>
+      </Ledger>
+    </FactoryFront>
   );
 }

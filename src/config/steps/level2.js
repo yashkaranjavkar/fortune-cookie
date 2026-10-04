@@ -22,6 +22,7 @@ import {
   InvalidUrlMeaningScreen,
   BalloonsTwoScreen
 } from '../../components/Level2GameInstructions';
+import { walkStep, roomIntroStep } from './transitionSteps';
 
 // Level 2's screen order: rules -> 5-cookie sorting game -> mark -> inspect -> results.
 // Reorder, insert, or remove entries here to change the flow - nothing else references
@@ -40,6 +41,9 @@ export const LEVEL2_STEPS = [
 
   { key: 'payment', render: (ctx, nav) => <PaymentScreen onBack={nav.back} onNext={nav.next} /> },
 
+  walkStep('walkToLine', 'briefing', 'line2', 'Level 2'),
+  roomIntroStep('enterLine', 'line2', 'Level 2'),
+
   {
     key: 'game',
     render: (ctx, nav) => (
@@ -49,6 +53,9 @@ export const LEVEL2_STEPS = [
       />
     )
   },
+
+  walkStep('walkToMarking', 'line2', 'marking', 'Level 2'),
+  roomIntroStep('enterMarking', 'marking', 'Level 2'),
 
   {
     key: 'thirtySeconds',
@@ -74,7 +81,11 @@ export const LEVEL2_STEPS = [
     )
   },
 
-  { key: 'loader', render: (ctx, nav) => <LoaderScreen faultyItems={ctx.faultyItems} onComplete={nav.next} /> },
+  // The walk to the Inspection Room below replaces the old "Going for inspection..."
+  // loader - uncomment this line to bring it back.
+  //{ key: 'loader', render: (ctx, nav) => <LoaderScreen faultyItems={ctx.faultyItems} onComplete={nav.next} /> },
+  walkStep('walkToInspection', 'marking', 'inspection', 'Level 2'),
+  roomIntroStep('enterInspection', 'inspection', 'Level 2'),
 
   {
     key: 'torchInspect',
@@ -85,6 +96,8 @@ export const LEVEL2_STEPS = [
       />
     )
   },
+  walkStep('walkToDispatch', 'inspection', 'results', 'Level 2'),
+  roomIntroStep('enterDispatch', 'results', 'Level 2'),
   { key: 'checkSamples', render: (ctx, nav) => <CheckSamplesScreen onNext={nav.next} /> },
   {
     key: 'results',

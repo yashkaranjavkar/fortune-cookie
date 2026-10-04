@@ -1,12 +1,10 @@
 import React, { useMemo } from 'react';
 import MultiSelect from './MultiSelect';
 import SearchableDropdown from './SearchableDropdown';
+import FactoryFront, { Ledger, LedgerButton, SEAL_ICONS } from './FactoryFront';
 import { regions, ageGroups, baseInterests } from '../data/constants';
 import { getRelatedInterests } from '../utils/relatedInterests';
 import { playSound } from '../sounds';
-
-// ADD THIS LINE! It looks for the image inside your src/assets folder
-import fciLogo from '../assets/fci-logo.png'; 
 
 export default function JobApplication({ age, setAge, region, setRegion, interests, setInterests, onNext }) {
   const related = useMemo(() => getRelatedInterests(interests), [interests]);
@@ -20,83 +18,75 @@ export default function JobApplication({ age, setAge, region, setRegion, interes
   const isValid = age && region && interests.length > 0;
 
   return (
-  <div className="flow-screen job-screen">
-    <div className="flow-card">
-      <div className="title">Job Application</div>
-        <p className="subtitle">Kindly fill your details to proceed with the application</p>
-
-        <div className="two-col">
-          <div className="left-col">
-            <div className="form-group">
-              <label>Age*</label>
-              <div className="radio-group">
-                {ageGroups.map(g => (
-                  <label key={g} className="radio-label">
-                    <input
-                      type="radio"
-                      name="age"
-                      value={g}
-                      checked={age === g}
-                      onChange={() => { setAge(g); playSound('select'); }}
-                    />
-                    {g}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Region*</label>
-              <SearchableDropdown
-                options={regions}
-                value={region}
-                onSelect={setRegion}
-                placeholder="Choose from options"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Interests*</label>
-              <MultiSelect
-                options={baseInterests}
-                selected={interests}
-                onToggle={(interest) => {
-                  if (interests.includes(interest)) {
-                    setInterests(interests.filter(i => i !== interest));
-                  } else {
-                    setInterests([...interests, interest]);
-                  }
-                }}
-                placeholder="Choose from options"
-                allowAdd={true}
-                storageKey="interests"
-                related={related}
-                onAddRelated={addRelated}
-              />
-            </div>
-
-
-            {related.length > 0 && (
-              <div className="related-section">
-                <label>Related</label>
-                <div className="related-chips">
-                  {related.map(r => (
-                    <button key={r} className="related-chip" onClick={() => addRelated(r)}>
-                      {r} +
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="right-col">
-            <img src={fciLogo} alt="FCI Logo" className="fci-logo" />
+    <FactoryFront>
+      <Ledger
+        kicker="Tell the factory a little about yourself."
+        icon={SEAL_ICONS.form}
+        title="Job Application"
+        subtitle="Kindly fill your details to proceed with the application."
+        footer={<LedgerButton onClick={onNext} disabled={!isValid}>Next</LedgerButton>}
+      >
+        <div className="ff-field">
+          <span className="ff-field-label">Age <span className="ff-req">*</span></span>
+          <div className="ff-radios" role="radiogroup" aria-label="Age">
+            {ageGroups.map(g => (
+              <label key={g} className={`ff-radio${age === g ? ' checked' : ''}`}>
+                <input
+                  type="radio"
+                  name="age"
+                  value={g}
+                  checked={age === g}
+                  onChange={() => { setAge(g); playSound('select'); }}
+                />
+                {g}
+              </label>
+            ))}
           </div>
         </div>
 
-        <button className="next-btn" onClick={onNext} disabled={!isValid}>Next</button>
-      </div>
-    </div>
+        <div className="ff-field">
+          <span className="ff-field-label">Region <span className="ff-req">*</span></span>
+          <SearchableDropdown
+            options={regions}
+            value={region}
+            onSelect={setRegion}
+            placeholder="Choose from options"
+          />
+        </div>
+
+        <div className="ff-field">
+          <span className="ff-field-label">Interests <span className="ff-req">*</span></span>
+          <MultiSelect
+            options={baseInterests}
+            selected={interests}
+            onToggle={(interest) => {
+              if (interests.includes(interest)) {
+                setInterests(interests.filter(i => i !== interest));
+              } else {
+                setInterests([...interests, interest]);
+              }
+            }}
+            placeholder="Choose from options"
+            allowAdd={true}
+            storageKey="interests"
+            related={related}
+            onAddRelated={addRelated}
+          />
+        </div>
+
+        {related.length > 0 && (
+          <div className="ff-field">
+            <span className="ff-field-label ff-field-label-soft">You might also like</span>
+            <div className="related-chips">
+              {related.map(r => (
+                <button key={r} type="button" className="related-chip" onClick={() => addRelated(r)}>
+                  {r} +
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </Ledger>
+    </FactoryFront>
   );
 }

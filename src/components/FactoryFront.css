@@ -1,0 +1,651 @@
+/* FactoryFront - the factory storefront every onboarding screen sits in (sign, tiled
+   roof, welcome banner, doorway) and the Ledger card inside it. The storefront is kept
+   compact so the ledger is the star; everything is sized from the window height (vh)
+   so it always fits on one screen. */
+.ff-screen {
+  /* Warm, rich palette - saturated enough to feel lively, short of neon */
+  --ff-sky: #2A1418;
+  --ff-wall: #E2B54C;
+  --ff-gold: #D29A2E;
+  --ff-gold-deep: #B07E1E;
+  --ff-sign: #F0C75E;
+  --ff-maroon: #7A2632;
+  --ff-maroon-deep: #561923;
+  --ff-rose: #C66B62;
+  --ff-rose-deep: #A5534B;
+  --ff-tile: #5E8A4E;
+  --ff-tile-dark: #4C7440;
+  --ff-tile-edge: #3B5C32;
+  --ff-cream-text: #F2CF7A;
+  --ff-paper: #FBF5E6;
+  --ff-paper-deep: #F0E3C6;
+  --ff-line: #EAD9B5;
+  --ff-ink: #36201C;
+  --ff-ink-soft: #6A5144;
+  --ff-input-border: #B8956A;
+  --ff-button: #F08A45;
+  --ff-button-lip: #B8612A;
+
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--ff-wall);
+  font-family: var(--font-sans), sans-serif;
+  color: var(--ff-ink);
+}
+
+/* ---- Night sky band: sign + roof (kept compact) ---- */
+.ff-sky {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: clamp(4px, 0.8vh, 10px);
+  background: linear-gradient(180deg, #22100F 0%, var(--ff-sky) 100%);
+}
+
+.ff-sign {
+  position: relative;
+  z-index: 3;
+  width: min(440px, 62vw);
+  margin-bottom: clamp(-12px, -1.2vh, -6px); /* hangs over the roof ridge */
+  padding: 3px;
+  background: var(--ff-gold);
+  border-radius: 6px;
+  box-shadow: 0 0 0 2px var(--ff-maroon-deep), 0 6px 0 rgba(10, 4, 6, 0.3);
+}
+.ff-sign-inner {
+  padding: clamp(3px, 0.6vh, 8px) 16px clamp(3px, 0.6vh, 7px);
+  background: var(--ff-sign);
+  border: 2px solid var(--ff-gold-deep);
+  border-radius: 3px;
+  text-align: center;
+}
+.ff-sign-title {
+  font-family: 'Anton', 'Impact', sans-serif;
+  font-size: clamp(18px, min(2.4vw, 3.6vh), 34px);
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ff-maroon);
+}
+.ff-sign-sub {
+  margin-top: clamp(2px, 0.4vh, 5px);
+  font-size: clamp(8px, min(0.75vw, 1.05vh), 10px);
+  font-weight: 800;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ff-maroon);
+}
+
+.ff-roof {
+  position: relative;
+  width: min(1240px, 96vw);
+  height: clamp(26px, 4.2vh, 46px);
+}
+.ff-roof-ridge {
+  position: absolute;
+  top: 0;
+  left: 4%;
+  right: 4%;
+  height: clamp(8px, 1.2vh, 12px);
+  border-radius: 8px;
+  background: var(--ff-rose);
+  border-bottom: 3px solid var(--ff-rose-deep);
+  z-index: 2;
+}
+.ff-roof-curl {
+  position: absolute;
+  top: clamp(-16px, -1.8vh, -11px);
+  width: clamp(22px, 3.4vh, 34px);
+  height: clamp(22px, 3.4vh, 34px);
+  z-index: 2;
+}
+.ff-roof-curl path {
+  fill: none;
+  stroke: var(--ff-rose);
+  stroke-width: 9;
+  stroke-linecap: round;
+}
+.ff-roof-curl.left { left: calc(4% - 24px); }
+.ff-roof-curl.right { right: calc(4% - 24px); transform: scaleX(-1); }
+.ff-roof-gable {
+  position: absolute;
+  top: 1px;
+  left: 50%;
+  width: clamp(36px, 5.2vh, 56px);
+  transform: translateX(-50%);
+  z-index: 4;
+}
+.ff-gable { fill: var(--ff-rose); stroke: var(--ff-maroon); stroke-width: 3; stroke-linejoin: round; }
+.ff-gable-cookie { fill: #EDB84F; stroke: #8A5528; stroke-width: 2; }
+.ff-roof-tiles {
+  position: absolute;
+  top: clamp(5px, 0.9vh, 9px);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  clip-path: polygon(4% 0, 96% 0, 100% 100%, 0 100%);
+  background: repeating-linear-gradient(90deg, var(--ff-tile) 0 12px, var(--ff-tile-dark) 12px 17px);
+  box-shadow: inset 0 -6px 0 var(--ff-tile-edge), inset 0 5px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* ---- Storefront: banner + doorway ---- */
+.ff-front {
+  flex: 1;
+  min-height: 0;
+  width: min(1240px, 96vw);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.ff-banner {
+  width: 92%;
+  margin: 0 auto;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: clamp(5px, 0.9vh, 10px) 22px;
+  box-sizing: border-box;
+  background: var(--ff-maroon);
+  border-top: 3px solid var(--ff-gold);
+  border-bottom: 3px solid var(--ff-gold);
+  box-shadow: 0 4px 0 rgba(30, 10, 12, 0.3);
+  position: relative;
+  z-index: 1;
+}
+.ff-banner-text {
+  flex: 1;
+  text-align: center;
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(14px, min(1.6vw, 2.5vh), 22px);
+  color: var(--ff-cream-text);
+}
+.ff-banner-gem {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  background: var(--ff-gold);
+  transform: rotate(45deg);
+}
+
+.ff-doorway {
+  position: relative;
+  width: 92%;
+  margin: 0 auto;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: clamp(6px, 1.4vh, 18px) 16px clamp(8px, 1.8vh, 22px);
+  box-sizing: border-box;
+  border-top: 4px solid var(--ff-gold); /* lintel under the roof */
+  border-left: 12px solid var(--ff-gold);
+  border-right: 12px solid var(--ff-gold);
+  background: radial-gradient(ellipse 60% 70% at 50% 45%, #6B3331 0%, #48211F 55%, #2E1415 100%);
+}
+.ff-doorway::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 10%;
+  background: linear-gradient(180deg, #7A3238 0%, #66282E 100%);
+  z-index: 0;
+}
+
+/* ---- Ledger card ---- */
+.ff-ledger {
+  position: relative;
+  z-index: 1;
+  max-height: 100%;
+  display: flex;
+  background: var(--ff-paper);
+  border: 4px solid var(--ff-gold);
+  border-radius: 20px;
+  box-shadow:
+    14px 16px 0 rgba(20, 6, 8, 0.45),
+    0 0 60px rgba(240, 199, 94, 0.18);
+  animation: ff-ledger-in 0.45s ease-out both;
+}
+.ff-ledger-md { width: min(720px, 100%); }
+.ff-ledger-lg { width: min(1000px, 100%); }
+@keyframes ff-ledger-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.ff-ledger-binding {
+  width: clamp(30px, 3vw, 44px);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  background: var(--ff-paper-deep);
+  border-right: 2px dashed #D0B27C;
+  border-radius: 16px 0 0 16px;
+}
+.ff-ledger-binding span {
+  width: clamp(9px, 1.4vh, 13px);
+  height: clamp(9px, 1.4vh, 13px);
+  border-radius: 50%;
+  background: var(--ff-maroon-deep);
+}
+
+.ff-ledger-page {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(14px, 3vh, 36px) clamp(20px, 3vw, 46px) clamp(12px, 2.4vh, 28px);
+}
+
+.ff-ledger-head {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 1.4vw, 20px);
+  padding-bottom: clamp(8px, 1.8vh, 20px);
+  margin-bottom: clamp(10px, 2.2vh, 24px);
+  border-bottom: 2px solid var(--ff-line);
+}
+.ff-seal {
+  width: clamp(44px, 7.6vh, 74px);
+  height: clamp(44px, 7.6vh, 74px);
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--ff-maroon);
+  box-shadow: inset 0 0 0 3px #9B4450, 0 4px 0 var(--ff-maroon-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ff-seal svg { width: 54%; height: 54%; }
+
+.ff-ledger-kicker {
+  margin: 0 0 clamp(2px, 0.5vh, 6px);
+  font-size: clamp(10px, 1.4vh, 13px);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ff-gold-deep);
+}
+.ff-ledger-title {
+  margin: 0;
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(22px, min(2.8vw, 4.3vh), 40px);
+  line-height: 1.08;
+  color: var(--ff-maroon-deep);
+}
+.ff-ledger-sub {
+  margin: clamp(4px, 0.7vh, 8px) 0 0;
+  font-size: clamp(13px, 1.9vh, 17px);
+  line-height: 1.4;
+  color: var(--ff-ink-soft);
+}
+
+.ff-ledger-body {
+  flex: 1;
+  min-height: 0;
+}
+.ff-ledger.scroll .ff-ledger-body {
+  overflow-y: auto;
+  padding-right: 10px;
+  margin-right: -10px;
+}
+.ff-ledger.scroll .ff-ledger-body::-webkit-scrollbar { width: 6px; }
+.ff-ledger.scroll .ff-ledger-body::-webkit-scrollbar-thumb { background: #D9C29A; border-radius: 3px; }
+.ff-ledger.centered .ff-ledger-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.ff-ledger-footer {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(6px, 1.2vh, 12px);
+  margin-top: clamp(10px, 2.2vh, 24px);
+}
+
+/* Body copy inside a ledger */
+.ff-text {
+  max-width: 620px;
+  margin: 0 auto clamp(8px, 1.6vh, 16px);
+  font-size: clamp(14px, 2vh, 17px);
+  line-height: 1.55;
+  color: var(--ff-ink-soft);
+}
+.ff-footnote {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(11px, 1.6vh, 14px);
+  color: var(--ff-ink-soft);
+}
+
+/* ---- Buttons ---- */
+.ff-screen .ff-btn {
+  width: 100%;
+  height: clamp(44px, 6.6vh, 62px);
+  border: none;
+  border-radius: 999px;
+  background: var(--ff-button);
+  color: #2E1A12;
+  font-family: var(--font-sans), sans-serif;
+  font-size: clamp(16px, 2.3vh, 21px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  box-shadow: 0 5px 0 var(--ff-button-lip);
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.15s ease;
+}
+.ff-ledger-lg .ff-btn { width: min(100%, 420px); }
+.ff-screen .ff-btn:hover:not(:disabled) {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 0 var(--ff-button-lip);
+}
+.ff-screen .ff-btn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 var(--ff-button-lip);
+}
+.ff-screen .ff-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ---- Form fields ---- */
+.ff-field { margin-bottom: clamp(12px, 2.3vh, 24px); }
+.ff-field:last-child { margin-bottom: 0; }
+.ff-field-label {
+  display: block;
+  margin-bottom: clamp(5px, 1vh, 10px);
+  font-size: clamp(14px, 2vh, 18px);
+  font-weight: 800;
+  color: var(--ff-ink);
+}
+.ff-req { color: #C0392B; }
+
+/* Text input, searchable dropdown and multi-select share one look */
+.ff-ledger .ff-input,
+.ff-ledger .dropdown-input,
+.ff-ledger .multiselect-input {
+  width: 100%;
+  min-height: clamp(42px, 6.4vh, 58px);
+  box-sizing: border-box;
+  padding: 0 16px;
+  border: 2px solid var(--ff-input-border);
+  border-radius: 12px;
+  background: #FFFFFF;
+  font-family: var(--font-sans), sans-serif;
+  font-size: clamp(15px, 2.2vh, 19px);
+  color: var(--ff-ink);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.ff-ledger .ff-input { height: clamp(42px, 6.4vh, 58px); }
+.ff-ledger .dropdown-input,
+.ff-ledger .multiselect-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.ff-ledger .multiselect-input { flex-wrap: wrap; padding: 6px 16px; }
+.ff-ledger .dropdown-input input,
+.ff-ledger .multiselect-input input {
+  flex: 1;
+  min-width: 120px;
+  height: clamp(28px, 4.4vh, 40px);
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+}
+.ff-ledger .ff-input:focus,
+.ff-ledger .dropdown-input:focus-within,
+.ff-ledger .multiselect-input:focus-within {
+  outline: none;
+  border-color: var(--ff-gold);
+  box-shadow: 0 0 0 4px rgba(210, 154, 46, 0.3);
+}
+.ff-ledger .ff-input::placeholder,
+.ff-ledger .dropdown-input input::placeholder,
+.ff-ledger .multiselect-input input::placeholder { color: #A28E7C; }
+.ff-ledger .arrow { color: #9C8268; }
+
+.ff-ledger .dropdown-list,
+.ff-ledger .multiselect-list {
+  margin-top: 6px;
+  border: 2px solid var(--ff-line);
+  border-radius: 12px;
+  background: #FFFFFF;
+  box-shadow: 0 12px 24px -10px rgba(54, 32, 28, 0.35);
+  font-size: clamp(14px, 2vh, 17px);
+  max-height: min(240px, 30vh); /* never runs off the bottom of the screen */
+  z-index: 20;
+}
+.ff-ledger .dropdown-item:hover,
+.ff-ledger .multiselect-item:hover,
+.ff-ledger .dropdown-item.active { background: #FBF0D8; }
+.ff-ledger .add-new { color: var(--ff-maroon); background: #FBF0D8; }
+
+/* Chips (selected interests) and suggestion chips */
+.ff-ledger .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ff-ledger .chip {
+  padding: 4px 12px;
+  border: none;
+  border-radius: 999px;
+  background: var(--ff-maroon);
+  color: #FBF0D8;
+  font-size: clamp(13px, 1.8vh, 15px);
+  font-weight: 700;
+  cursor: pointer;
+}
+.ff-ledger .related-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.ff-ledger .related-chip {
+  padding: 5px 14px;
+  border: 1.5px dashed var(--ff-gold);
+  border-radius: 999px;
+  background: #FFF8E8;
+  color: var(--ff-maroon);
+  font-family: var(--font-sans), sans-serif;
+  font-size: clamp(13px, 1.8vh, 15px);
+  font-weight: 700;
+  cursor: pointer;
+}
+.ff-ledger .related-chip:hover { background: #FBEBC4; }
+.ff-ledger .multiselect-related { padding: 10px 12px; border-bottom: 1px solid var(--ff-line); }
+.ff-ledger .multiselect-related-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ff-ink-soft);
+}
+.ff-ledger .multiselect-related-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Pill radio buttons (e.g. age groups) */
+.ff-radios { display: flex; flex-wrap: wrap; gap: 10px; }
+.ff-radio {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: clamp(7px, 1.2vh, 11px) clamp(14px, 1.6vw, 20px);
+  border: 2px solid var(--ff-input-border);
+  border-radius: 999px;
+  background: #FFFFFF;
+  font-size: clamp(14px, 2vh, 17px);
+  font-weight: 700;
+  color: var(--ff-ink);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.ff-radio input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.ff-radio:hover { border-color: var(--ff-gold); }
+.ff-radio.checked {
+  background: var(--ff-maroon);
+  border-color: var(--ff-maroon);
+  color: #FBF0D8;
+}
+.ff-radio:focus-within { box-shadow: 0 0 0 4px rgba(210, 154, 46, 0.3); }
+
+/* ---- Illustrations inside a ledger ---- */
+.ff-scene {
+  width: min(420px, 100%);
+  margin: 0 auto clamp(8px, 1.8vh, 18px);
+  flex-shrink: 0;
+}
+.ff-scene svg { display: block; width: 100%; height: auto; max-height: 24vh; overflow: visible; }
+
+.ff-scene-wide { width: min(760px, 100%); }
+
+/* Message screens never have dropdowns, so it's safe to let them scroll on very
+   short windows instead of overflowing the card */
+.ff-ledger.centered .ff-ledger-body { overflow-y: auto; }
+
+.ff-field-label-soft {
+  font-size: clamp(11px, 1.5vh, 13px);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ff-ink-soft);
+}
+
+/* ---- Per-screen content, restyled for the ledger ---- */
+
+/* Intro story cards */
+.ff-ledger .intro-steps { gap: clamp(12px, 1.6vw, 20px); padding-top: 14px; }
+.ff-ledger .intro-step {
+  padding: clamp(14px, 2.4vh, 22px) clamp(14px, 1.4vw, 20px) clamp(10px, 1.8vh, 16px);
+  background: #FFFFFF;
+  border: 1.5px solid var(--ff-line);
+  border-radius: 14px;
+  box-shadow: 0 4px 0 var(--ff-paper-deep);
+}
+.ff-ledger .intro-step-num {
+  background: var(--ff-maroon);
+  color: #FBF0D8;
+  box-shadow: 0 0 0 3px var(--ff-paper);
+}
+.ff-ledger .intro-step-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(16px, 2.3vh, 20px);
+  line-height: 1.2;
+  color: var(--ff-maroon-deep);
+  margin-bottom: 4px;
+}
+.ff-ledger .intro-step-text {
+  margin: 0;
+  font-size: clamp(13px, 1.8vh, 15px);
+  line-height: 1.45;
+  color: var(--ff-ink-soft);
+}
+
+/* Website picker: one panel per category, in a responsive grid */
+.ff-websites {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr));
+  gap: clamp(10px, 2vh, 20px) clamp(14px, 1.8vw, 24px);
+}
+.ff-websites .website-category {
+  padding: clamp(10px, 1.6vh, 16px) 16px;
+  border: 1.5px solid var(--ff-line);
+  border-radius: 14px;
+  background: #FFFFFF;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.ff-websites .website-category:last-child { padding-bottom: clamp(10px, 1.6vh, 16px); border-bottom: 1.5px solid var(--ff-line); }
+.ff-websites .website-category.complete { border-color: #A9C795; background: #F6FAF0; }
+.ff-websites .website-category-head { margin-bottom: 10px; }
+.ff-websites .website-category-label {
+  font-family: var(--font-sans), sans-serif;
+  font-size: clamp(14px, 1.9vh, 16px);
+  font-weight: 800;
+  color: var(--ff-maroon-deep);
+}
+.ff-websites .website-category-count {
+  background: var(--ff-paper-deep);
+  color: var(--ff-ink-soft);
+}
+.ff-websites .website-category-count.complete { background: var(--ff-tile); color: #FFFFFF; }
+.ff-websites .website-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: none;
+  overflow: visible;
+  margin-top: 0;
+  padding-right: 0;
+}
+.ff-websites .website-btn {
+  padding: clamp(5px, 0.9vh, 8px) 14px;
+  border: 1.5px solid #D9C29A;
+  border-radius: 999px;
+  background: #FFFDF8;
+  color: var(--ff-ink);
+  font-family: var(--font-sans), sans-serif;
+  font-size: clamp(13px, 1.7vh, 15px);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.ff-websites .website-btn:hover:not(:disabled) { border-color: var(--ff-gold); background: #FFF6DE; }
+.ff-websites .website-btn.selected {
+  background: var(--ff-maroon);
+  border-color: var(--ff-maroon);
+  color: #FBF0D8;
+}
+.ff-websites .website-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.ff-websites-footer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.ff-websites-footer .ff-btn { width: min(100%, 320px); }
+.ff-websites-progress {
+  font-size: clamp(13px, 1.9vh, 16px);
+  font-weight: 800;
+  color: var(--ff-ink-soft);
+}
+.ff-websites-progress.done { color: var(--ff-tile-edge); }
+
+/* Confetti on the Congratulations screen falls across the whole doorway */
+.ff-doorway > .cong-confetti { z-index: 0; border-radius: 0; }
+
+@media (max-width: 640px) {
+  .ff-banner-gem { display: none; }
+  .ff-ledger-binding { width: 24px; }
+  .ff-websites-footer { flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ff-ledger { animation: none; }
+}

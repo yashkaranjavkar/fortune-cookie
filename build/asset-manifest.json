@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.css": "/static/css/main.fbfc340e.css",
-    "main.js": "/static/js/main.8b54a254.js",
-    "static/media/fci-logo.png": "/static/media/fci-logo.ce8a7b80391866f5c60a.png",
+    "main.css": "/static/css/main.727001cc.css",
+    "main.js": "/static/js/main.490d6ef7.js",
+    "static/media/Opening screen.jpg": "/static/media/Opening screen.0fbaef5a3052aceb73d8.jpg",
     "static/media/balloons-3-left.svg": "/static/media/balloons-3-left.b77d49d9034c82bb9e2bb6bcd2482e92.svg",
     "static/media/balloons-popped.svg": "/static/media/balloons-popped.0b0c2e343a30128d116876843e6f80c2.svg",
     "static/media/dome-lifted.svg": "/static/media/dome-lifted.bc49bc4941f952410ab204ab8736d785.svg",
@@ -15,11 +15,11 @@
     "static/media/dome-spent.svg": "/static/media/dome-spent.cfa4094ed7bf9257b9e481e559a2f9ce.svg",
     "index.html": "/index.html",
     "static/media/balloons-none-left.svg": "/static/media/balloons-none-left.3624cca258b22dd2a28ac089be9e568a.svg",
-    "main.fbfc340e.css.map": "/static/css/main.fbfc340e.css.map",
-    "main.8b54a254.js.map": "/static/js/main.8b54a254.js.map"
+    "main.727001cc.css.map": "/static/css/main.727001cc.css.map",
+    "main.490d6ef7.js.map": "/static/js/main.490d6ef7.js.map"
   },
   "entrypoints": [
-    "static/css/main.fbfc340e.css",
-    "static/js/main.8b54a254.js"
+    "static/css/main.727001cc.css",
+    "static/js/main.490d6ef7.js"
   ]
 }

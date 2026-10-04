@@ -25,10 +25,12 @@ export default function SectionRunner({ steps, context }) {
         return n < steps.length ? n : i;
       });
     },
+    // Back also passes over `passThrough` steps (the factory-walk transitions) -
+    // stepping back onto one would just replay the walk and bounce forward again.
     back: () => {
       setIndex(i => {
         let n = i - 1;
-        while (n >= 0 && isSkipped(n)) n--;
+        while (n >= 0 && (isSkipped(n) || steps[n].passThrough)) n--;
         return n >= 0 ? n : i;
       });
     },

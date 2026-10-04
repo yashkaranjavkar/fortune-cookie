@@ -1,3 +1,4 @@
+import OpeningSection from '../sections/OpeningSection';
 import JobApplicationSection from '../sections/JobApplicationSection';
 import TrainingSection from '../sections/TrainingSection';
 import Level1Section from '../sections/Level1Section';
@@ -9,6 +10,7 @@ import FinalTraysSection from '../sections/FinalTraysSection';
 // Every section the game can be built from. Each one is fully self-contained - it owns
 // all of its own internal screens/state and only ever calls onComplete() when it's done.
 export const SECTIONS = {
+  opening: OpeningSection,             // Title screen (assets/Drawings/Opening screen.jpg)
   job: JobApplicationSection,          // Job application and offer acceptance
   training: TrainingSection,           // Training
   level1: Level1Section,               // Level one (rules, 4-cookie gameplay, inspection)
@@ -25,10 +27,11 @@ export const SECTIONS = {
 // sorting round, set:
 //   export const GAME_FLOW = ['job', 'training', 'level1', 'finalTrays'];
 export const GAME_FLOW = [
+  'opening',
   'job',
-  //'training',
+  'training',
   'level1',
-  //'level2',
+  'level2',
   'level3',
   'supervisor',
   'finalTrays'

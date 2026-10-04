@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import './WebsitesScreen.css';
+import FactoryFront, { Ledger, LedgerButton, SEAL_ICONS } from './FactoryFront';
 import { generateWebsiteCategories } from '../utils/generateWebsites';
 import { CATEGORIES, PICK_PER_CATEGORY } from '../data/websiteCategories';
-import fciLogo from '../assets/fci-logo.png';
 
 export default function WebsitesScreen({ userData, onNext }) {
   // One list of selected sites per category, e.g. { work: ['github.com', ...], ... }
@@ -25,66 +25,62 @@ export default function WebsitesScreen({ userData, onNext }) {
     });
   };
 
-  const canProceed = CATEGORIES.every(c => selected[c.key].length === PICK_PER_CATEGORY);
+  const completeCount = CATEGORIES.filter(c => selected[c.key].length === PICK_PER_CATEGORY).length;
+  const canProceed = completeCount === CATEGORIES.length;
 
   return (
-    <div className="flow-screen">
-      <div className="flow-card websites-card">
-        <div className="title">Choose familiar websites</div>
-        <p className="subtitle">
-          Pick {PICK_PER_CATEGORY} websites from each category below that you find most familiar
-        </p>
-
-        <div className="websites-content">
-          {/* LEFT: One section per category */}
-          <div className="websites-left">
-            {CATEGORIES.map(({ key, label }) => {
-              const count = selected[key].length;
-              const full = count === PICK_PER_CATEGORY;
-              return (
-                <div className={`website-category${full ? ' complete' : ''}`} key={key}>
-                  <div className="website-category-head">
-                    <span className="website-category-label">{label}</span>
-                    <span className={`website-category-count${full ? ' complete' : ''}`}>
-                      {count}/{PICK_PER_CATEGORY}
-                    </span>
-                  </div>
-                  <div className="website-grid">
-                    {categories[key].map(site => {
-                      const isSelected = selected[key].includes(site);
-                      const disabled = !isSelected && full;
-                      return (
-                        <button
-                          key={site}
-                          className={`website-btn ${isSelected ? 'selected' : ''}`}
-                          onClick={() => toggleWebsite(key, site)}
-                          disabled={disabled}
-                          data-sound="select"
-                        >
-                          {site}
-                        </button>
-                      );
-                    })}
-                  </div>
+    <FactoryFront>
+      <Ledger
+        kicker="Every inspector knows their way around the web."
+        size="lg"
+        scroll
+        icon={SEAL_ICONS.globe}
+        title="Choose familiar websites"
+        subtitle={`Pick ${PICK_PER_CATEGORY} websites from each category below that you find most familiar.`}
+        footer={
+          <div className="ff-websites-footer">
+            <span className={`ff-websites-progress${canProceed ? ' done' : ''}`}>
+              {completeCount}/{CATEGORIES.length} categories done
+            </span>
+            <LedgerButton onClick={onNext} disabled={!canProceed}>Next</LedgerButton>
+          </div>
+        }
+      >
+        <div className="ff-websites">
+          {CATEGORIES.map(({ key, label }) => {
+            const count = selected[key].length;
+            const full = count === PICK_PER_CATEGORY;
+            return (
+              <div className={`website-category${full ? ' complete' : ''}`} key={key}>
+                <div className="website-category-head">
+                  <span className="website-category-label">{label}</span>
+                  <span className={`website-category-count${full ? ' complete' : ''}`}>
+                    {count}/{PICK_PER_CATEGORY}
+                  </span>
                 </div>
-              );
-            })}
-          </div>
-
-          {/* RIGHT: FCI Logo */}
-          <div className="websites-right">
-            <img src={fciLogo} alt="FCI Logo" className="websites-logo" />
-          </div>
+                <div className="website-grid">
+                  {categories[key].map(site => {
+                    const isSelected = selected[key].includes(site);
+                    const disabled = !isSelected && full;
+                    return (
+                      <button
+                        key={site}
+                        type="button"
+                        className={`website-btn ${isSelected ? 'selected' : ''}`}
+                        onClick={() => toggleWebsite(key, site)}
+                        disabled={disabled}
+                        data-sound="select"
+                      >
+                        {site}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
-
-        <button
-          className="next-btn"
-          onClick={onNext}
-          disabled={!canProceed}
-        >
-          Next
-        </button>
-      </div>
-    </div>
+      </Ledger>
+    </FactoryFront>
   );
 }

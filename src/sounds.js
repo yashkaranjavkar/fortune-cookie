@@ -65,9 +65,19 @@ export function playSound(name) {
   audio.play().catch(() => { /* browser blocked audio before the first click: ignore */ });
 }
 
+const muteListeners = new Set();
+
 export function setMuted(value) {
   muted = value;
   try { localStorage.setItem('wisecrack-muted', String(value)); } catch (e) { /* ignore */ }
+  muteListeners.forEach(fn => fn(value));
+}
+
+// Lets long-running audio (the ambient music) follow the mute button too.
+// Returns an unsubscribe function.
+export function onMuteChange(fn) {
+  muteListeners.add(fn);
+  return () => muteListeners.delete(fn);
 }
 
 export function isMuted() {

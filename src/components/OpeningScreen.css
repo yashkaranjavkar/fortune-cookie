@@ -1,0 +1,456 @@
+/* Title screen - the drawing fills the whole window edge to edge, slowly zooms in
+   once, and has window light + dust drifting in it; the "BATCH 26" logo and Start
+   button sit in the lower right, well inset from the edges, clear of the board. */
+.opening-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow: hidden;
+  background: #13182b;
+}
+
+/* ---- Living background ---- */
+
+/* One slow zoom-in from the full drawing to a slightly closer framing, then it holds
+   still. Applied to the whole picture layer so the animated overlays zoom with the art.
+   Zooming from near the top edge keeps the hats in frame. */
+.op-stage {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 4%;
+  animation:
+    op-fade 1.4s ease-out both,
+    op-zoom 720s linear both;
+}
+
+/* The picture layer: sized and placed exactly like a "cover" crop of the drawing -
+   fills the window, centred sideways, overflow trimmed mostly off the bottom of the
+   cookie tray (anchored 20% from the top) so the hats stay in frame. Overlays inside
+   it are positioned in % of the drawing, so they always sit on the right spot. */
+.op-scene {
+  --scene-w: max(100vw, calc(100vh * var(--art-ratio)));
+  --scene-h: max(100vh, calc(100vw / var(--art-ratio)));
+  position: absolute;
+  width: var(--scene-w);
+  height: var(--scene-h);
+  left: calc((100vw - var(--scene-w)) / 2);
+  top: calc((100vh - var(--scene-h)) * 0.2);
+}
+
+.op-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- Light through the door's narrow opening ----
+   The thin lit gap along the door's left edge and top (right side of the drawing)
+   glows up at random intervals - OpeningScreen.js picks when, and which of the three
+   glows below plays. Each glow is a one-shot animation that ends dark again. */
+.op-door {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.op-door-gap,
+.op-door-spill {
+  position: absolute;
+  opacity: 0;
+  mix-blend-mode: screen;
+  animation-fill-mode: both;
+}
+/* The gap itself: a hot, bright line */
+.op-door-gap {
+  background: rgba(255, 232, 170, 0.95);
+  box-shadow: 0 0 8px 2px rgba(255, 214, 130, 0.9), 0 0 26px 8px rgba(255, 200, 110, 0.45);
+  filter: blur(0.6px);
+}
+.op-door-gap.side { left: 78.1%; top: 6%; width: 0.4%; height: 94%; }
+.op-door-gap.top  { left: 78.1%; top: 5.5%; width: 9.5%; height: 0.65%; }
+/* Light spilling out of the gap onto the curtains either side */
+.op-door-spill {
+  left: 73.5%;
+  top: 3%;
+  width: 9.5%;
+  height: 97%;
+  background: linear-gradient(90deg,
+    rgba(255, 210, 130, 0) 0%,
+    rgba(255, 210, 130, 0.16) 35%,
+    rgba(255, 220, 150, 0.38) 50%,
+    rgba(255, 210, 130, 0.16) 65%,
+    rgba(255, 210, 130, 0) 100%);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, #000 30%, #000 85%, transparent 100%);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, #000 30%, #000 85%, transparent 100%);
+}
+
+/* Quick, uneven flicker - like someone passing in front of a light behind the door */
+.op-door.flicker .op-door-gap,
+.op-door.flicker .op-door-spill { animation: op-door-flicker 1.3s linear; }
+@keyframes op-door-flicker {
+  0%   { opacity: 0; }
+  8%   { opacity: 0.9; }
+  16%  { opacity: 0.2; }
+  26%  { opacity: 1; }
+  34%  { opacity: 0.35; }
+  46%  { opacity: 0.85; }
+  70%  { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+
+/* Slow, warm swell - a light turned on in the next room, then dimmed again */
+.op-door.swell .op-door-gap,
+.op-door.swell .op-door-spill { animation: op-door-swell 3.6s ease-in-out; }
+@keyframes op-door-swell {
+  0%   { opacity: 0; }
+  40%  { opacity: 0.9; }
+  60%  { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
+/* Strong, brief flash, fading out slowly */
+.op-door.flash .op-door-gap,
+.op-door.flash .op-door-spill { animation: op-door-flash 1.8s ease-out; }
+@keyframes op-door-flash {
+  0%   { opacity: 0; }
+  6%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Steam curling up off the fresh cookies */
+.op-steam span {
+  position: absolute;
+  width: 4.5%;
+  aspect-ratio: 1 / 2.4;
+  margin-left: -2.25%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse 50% 50% at 50% 60%, rgba(255, 248, 238, 0.75) 0%, rgba(255, 248, 238, 0) 70%);
+  filter: blur(6px);
+  opacity: 0;
+  transform-origin: 50% 100%;
+  animation-name: op-steam;
+  animation-timing-function: ease-out;
+  animation-iteration-count: infinite;
+}
+@keyframes op-steam {
+  0%   { opacity: 0;    transform: translate(0, 0) scale(0.5, 0.4); }
+  25%  { opacity: 0.55; }
+  60%  { opacity: 0.35; transform: translate(12%, -55%) scale(0.9, 0.9) skewX(-6deg); }
+  100% { opacity: 0;    transform: translate(-10%, -110%) scale(1.25, 1.2) skewX(6deg); }
+}
+
+/* Light catching glass - a four-point sparkle that flashes now and then */
+.op-glints span {
+  position: absolute;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%) scale(0);
+  background:
+    linear-gradient(90deg, transparent 46%, rgba(255, 255, 255, 0.95) 50%, transparent 54%),
+    linear-gradient(0deg, transparent 46%, rgba(255, 255, 255, 0.95) 50%, transparent 54%),
+    radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 244, 214, 0.35) 18%, transparent 42%);
+  filter: drop-shadow(0 0 4px rgba(255, 244, 214, 0.9));
+  animation: op-glint 7s ease-in-out infinite;
+}
+@keyframes op-glint {
+  0%, 82%, 100% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+  88%           { transform: translate(-50%, -50%) scale(1) rotate(45deg); opacity: 1; }
+  94%           { transform: translate(-50%, -50%) scale(0.2) rotate(90deg); opacity: 0; }
+}
+
+/* Fortune slips drifting down the dark right side, like loose paper. Four layers:
+   - outer span: the fall (`top`, % of the drawing's height, so speed doesn't depend on
+     slip size) plus a sway - a gentle one, or a wide pendulum glide (.glide);
+   - .op-slip-base: each slip's own starting angle / mirroring (set inline), and the
+     perspective for the 3D motion inside it;
+   - .op-slip-motion: how it falls - tumble, spin, twist, rock or flutter (in 3D);
+   - two .op-slip-face: printed front + plain back, so turning over shows the back. */
+.op-slips > span {
+  position: absolute;
+  top: -6%;
+  opacity: 0;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.35));
+  animation-name: op-slip;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.op-slips > span.glide { animation-name: op-slip-glide; }
+
+@keyframes op-slip {
+  0%   { opacity: 0;   top: -6%;  transform: translateX(0) rotate(-10deg); }
+  6%   { opacity: 0.9; }
+  25%  {               top: 21%;  transform: translateX(45%) rotate(8deg); }
+  50%  {               top: 48%;  transform: translateX(-25%) rotate(-6deg); }
+  75%  {               top: 75%;  transform: translateX(40%) rotate(10deg); }
+  92%  { opacity: 0.9; }
+  100% { opacity: 0;   top: 104%; transform: translateX(-10%) rotate(-4deg); }
+}
+/* Leaf-like: swings far left and right, dipping more slowly at each end */
+@keyframes op-slip-glide {
+  0%     { opacity: 0;   top: -6%;  transform: translateX(-60%); }
+  6%     { opacity: 0.9; }
+  12.5%  {               top: 8%;   transform: translateX(70%); }
+  25%    {               top: 21%;  transform: translateX(-70%); }
+  37.5%  {               top: 35%;  transform: translateX(70%); }
+  50%    {               top: 48%;  transform: translateX(-70%); }
+  62.5%  {               top: 62%;  transform: translateX(70%); }
+  75%    {               top: 75%;  transform: translateX(-70%); }
+  87.5%  {               top: 89%;  transform: translateX(70%); }
+  92%    { opacity: 0.9; }
+  100%   { opacity: 0;   top: 104%; transform: translateX(-60%); }
+}
+
+.op-slip-base {
+  display: block;
+  perspective: 300px;
+}
+
+.op-slip-motion {
+  display: block;
+  position: relative;
+  transform-style: preserve-3d;
+  animation-iteration-count: infinite;
+}
+/* End over end, showing front, back, front... */
+.op-slip-motion.tumble { animation-name: op-tumble; animation-timing-function: linear; }
+@keyframes op-tumble {
+  0%   { transform: rotateX(0deg) rotateY(-12deg); }
+  50%  { transform: rotateX(180deg) rotateY(12deg); }
+  100% { transform: rotateX(360deg) rotateY(-12deg); }
+}
+/* Flat-ish propeller spin, tilted so it reads as spinning through the air */
+.op-slip-motion.spin { animation-name: op-spin; animation-timing-function: linear; }
+@keyframes op-spin {
+  from { transform: rotateX(48deg) rotateZ(0deg); }
+  to   { transform: rotateX(48deg) rotateZ(360deg); }
+}
+/* Corkscrew along its length - goes edge-on, flips to the back, and round again */
+.op-slip-motion.twist { animation-name: op-twist; animation-timing-function: linear; }
+@keyframes op-twist {
+  from { transform: rotateY(0deg) rotateX(14deg); }
+  to   { transform: rotateY(360deg) rotateX(14deg); }
+}
+/* Rocks like a falling leaf, in time with the wide .glide sway (2 rocks per swing) */
+.op-slip-motion.rock { animation-name: op-rock; animation-timing-function: ease-in-out; }
+@keyframes op-rock {
+  0%, 100% { transform: rotateZ(-32deg) rotateX(28deg); }
+  50%      { transform: rotateZ(32deg) rotateX(-12deg); }
+}
+/* Tips forward and back as the air catches it, never quite turning over */
+.op-slip-motion.flutter { animation-name: op-flutter; animation-timing-function: ease-in-out; }
+@keyframes op-flutter {
+  0%   { transform: rotateX(12deg) rotateY(-8deg); }
+  25%  { transform: rotateX(62deg) rotateY(14deg); }
+  50%  { transform: rotateX(-18deg) rotateY(-12deg); }
+  75%  { transform: rotateX(-58deg) rotateY(10deg); }
+  100% { transform: rotateX(12deg) rotateY(-8deg); }
+}
+
+.op-slip-face {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 140 / 27;
+  overflow: visible;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.op-slip-face.back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+}
+@keyframes op-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes op-zoom {
+  from { transform: scale(1); }
+  to   { transform: scale(1.07); }
+}
+
+/* Soft shafts of light falling from the window on the left across the scene */
+.op-light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background:
+    linear-gradient(118deg,
+      transparent 4%,
+      rgba(255, 226, 196, 0.16) 10%, transparent 17%,
+      rgba(255, 226, 196, 0.11) 23%, transparent 29%,
+      rgba(255, 226, 196, 0.14) 34%, transparent 42%,
+      rgba(255, 226, 196, 0.08) 47%, transparent 54%);
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 35%, transparent 62%);
+  mask-image: linear-gradient(90deg, #000 0%, #000 35%, transparent 62%);
+  animation: op-light 7s ease-in-out infinite alternate;
+}
+@keyframes op-light {
+  from { opacity: 0.55; transform: translateX(-1.5%); }
+  to   { opacity: 1; transform: translateX(1.5%); }
+}
+
+/* Dust motes drifting up and sideways through the light */
+.op-motes { position: absolute; inset: 0; pointer-events: none; }
+.op-motes span {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 241, 220, 0.85);
+  box-shadow: 0 0 6px rgba(255, 226, 196, 0.9);
+  opacity: 0;
+  animation-name: op-mote;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@keyframes op-mote {
+  0%   { opacity: 0; transform: translate(0, 0); }
+  20%  { opacity: 0.8; }
+  80%  { opacity: 0.6; }
+  100% { opacity: 0; transform: translate(40px, -90px); }
+}
+
+/* Darkens just the area behind the logo so it reads with full contrast */
+.op-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 36% 48% at 85% 78%, rgba(8, 11, 24, 0.7) 0%, rgba(8, 11, 24, 0) 100%);
+}
+
+/* ---- Logo + Start ---- */
+
+.op-corner {
+  position: absolute;
+  right: 8vw;
+  bottom: 13vh;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 24px;
+}
+
+.op-logo {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.op-logo-kicker {
+  font-family: var(--font-sans), sans-serif;
+  font-size: clamp(12px, 0.9vw, 16px);
+  font-weight: 800;
+  letter-spacing: 0.42em;
+  margin-right: -0.42em; /* cancel trailing letter-spacing so it right-aligns flush */
+  margin-bottom: 18px;   /* clears the top of the tilted "26" */
+  text-transform: uppercase;
+  color: var(--yellow-base);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+  animation: op-in 0.7s ease-out 0.5s both;
+}
+
+.op-logo-main {
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(12px, 1vw, 20px);
+  font-family: 'Anton', 'Impact', sans-serif;
+  text-transform: uppercase;
+}
+
+/* Cream lettering, plum outline, hard stepped extrusion - the chunky printed-poster
+   look, in the game's palette. */
+.op-logo-batch {
+  font-size: clamp(50px, 4.6vw, 92px);
+  letter-spacing: 0.02em;
+  color: #FFF1DC;
+  -webkit-text-stroke: 3px #3E0A12;
+  paint-order: stroke fill;
+  text-shadow:
+    1px 1px 0 #3E0A12, 2px 2px 0 #3E0A12, 3px 3px 0 #3E0A12,
+    4px 4px 0 #3E0A12, 5px 5px 0 #3E0A12, 6px 6px 0 #3E0A12, 7px 7px 0 #3E0A12,
+    0 14px 30px rgba(0, 0, 0, 0.6);
+  padding-bottom: 0.08em;
+  animation: op-slide 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s both;
+}
+
+/* The batch number - bigger, gold, tilted like a stamped label; it stamps in. */
+.op-logo-num {
+  font-size: clamp(80px, 7.4vw, 148px);
+  letter-spacing: 0.01em;
+  color: #F7C948;
+  -webkit-text-stroke: 3.5px #3E0A12;
+  paint-order: stroke fill;
+  text-shadow:
+    1px 1px 0 #7A3E12, 2px 2px 0 #7A3E12, 3px 3px 0 #7A3E12,
+    4px 4px 0 #7A3E12, 5px 5px 0 #7A3E12, 6px 6px 0 #7A3E12, 7px 7px 0 #7A3E12, 8px 8px 0 #3E0A12,
+    0 16px 34px rgba(0, 0, 0, 0.6);
+  transform: rotate(-6deg) translateY(-0.04em);
+  transform-origin: bottom left;
+  animation: op-stamp 0.55s cubic-bezier(0.3, 1.5, 0.5, 1) 0.85s both;
+}
+
+/* Subtitle between two short rules */
+.op-logo-tag {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-family: var(--font-sans), sans-serif;
+  font-size: clamp(12px, 1vw, 17px);
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #FFF1DC;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+  animation: op-in 0.7s ease-out 1.2s both;
+}
+.op-logo-tag::before,
+.op-logo-tag::after {
+  content: '';
+  width: 28px;
+  height: 2px;
+  background: var(--yellow-base);
+  border-radius: 2px;
+}
+
+.app .opening-screen .op-start {
+  width: auto;
+  min-width: 200px;
+  margin: 0;
+  font-size: 22px;
+  animation: op-in 0.7s ease-out 1.4s both;
+}
+
+@keyframes op-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes op-slide {
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes op-stamp {
+  from { opacity: 0; transform: rotate(-16deg) translateY(-0.04em) scale(1.8); }
+  to   { opacity: 1; transform: rotate(-6deg) translateY(-0.04em) scale(1); }
+}
+
+@media (max-width: 760px) {
+  .op-shade {
+    background: linear-gradient(0deg, rgba(10, 14, 30, 0.8) 0%, rgba(10, 14, 30, 0) 55%);
+  }
+  .op-corner {
+    right: 24px;
+    bottom: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .op-stage { animation: none; }
+  .op-steam, .op-glints, .op-slips { display: none; }
+  .op-light { animation: none; opacity: 0.8; }
+  .op-motes { display: none; }
+  .op-logo-kicker, .op-logo-batch, .op-logo-num, .op-logo-tag, .app .opening-screen .op-start {
+    animation: none;
+  }
+}

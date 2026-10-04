@@ -1,4 +1,5 @@
 import React from 'react';
+import FactoryFront, { Ledger, LedgerButton, SEAL_ICONS } from './FactoryFront';
 
 // Bakery-themed line icons (in place of the generic office book/monitor icons),
 // drawn inline so no extra dependency is needed
@@ -81,34 +82,35 @@ function WorkstationScene() {
 
 export default function WelcomeScreen({ onReady }) {
   return (
-    <div className="flow-screen">
-      <div className="flow-card welcome-card">
-        <div className="flow-body centered welcome-body">
-          <div className="welcome-scene">
-            <WorkstationScene />
-          </div>
-
-          <div className="title">Welcome to the Fortune Cookie Factory !</div>
-          <p>
-            You will be undergoing your training to move further in the<br/>
-            posting on your workstation
-          </p>
-
-          <div className="welcome-path" aria-hidden="true">
-            <div className="welcome-node active">
-              <span className="welcome-node-icon"><ChefHatIcon /></span>
-              <span className="welcome-node-label">Training</span>
-            </div>
-            <span className="welcome-path-line" />
-            <div className="welcome-node">
-              <span className="welcome-node-icon"><DomeIcon /></span>
-              <span className="welcome-node-label">Workstation</span>
-            </div>
-          </div>
+    <FactoryFront>
+      <Ledger
+        kicker="Your apron's ready. Let's get you trained."
+        centered
+        icon={SEAL_ICONS.hat}
+        title="Welcome to the Fortune Cookie Factory!"
+        subtitle="Training first, then your own workstation."
+        footer={<LedgerButton onClick={onReady}>I am Ready</LedgerButton>}
+      >
+        <div className="ff-scene">
+          <WorkstationScene />
         </div>
 
-        <button className="next-btn welcome-ready" onClick={onReady}>I am Ready</button>
-      </div>
-    </div>
+        <p className="ff-text">
+          You will be undergoing your training before moving on to your posting at your workstation.
+        </p>
+
+        <div className="welcome-path" aria-hidden="true">
+          <div className="welcome-node active">
+            <span className="welcome-node-icon"><ChefHatIcon /></span>
+            <span className="welcome-node-label">Training</span>
+          </div>
+          <span className="welcome-path-line" />
+          <div className="welcome-node">
+            <span className="welcome-node-icon"><DomeIcon /></span>
+            <span className="welcome-node-label">Workstation</span>
+          </div>
+        </div>
+      </Ledger>
+    </FactoryFront>
   );
 }

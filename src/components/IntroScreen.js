@@ -1,5 +1,6 @@
 import React from 'react';
 import cookie from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-whole.svg';
+import FactoryFront, { Ledger, LedgerButton, SEAL_ICONS } from './FactoryFront';
 
 // Storyboard: graduate -> applies to the factory -> the Inspector role
 const STORY = [
@@ -95,28 +96,29 @@ function FactoryScene() {
 
 export default function IntroScreen({ onNext }) {
   return (
-    <div className="flow-screen">
-      <div className="flow-card intro-card">
-        <div className="title">FCI</div>
-
-        <div className="flow-body intro-body">
-          <div className="intro-scene">
-            <FactoryScene />
-          </div>
-
-          <div className="intro-steps">
-            {STORY.map((s, i) => (
-              <div className="intro-step" key={s.title} style={{ animationDelay: `${0.15 + i * 0.12}s` }}>
-                <span className="intro-step-num">{i + 1}</span>
-                <div className="intro-step-title">{s.title}</div>
-                <p className="intro-step-text">{s.text}</p>
-              </div>
-            ))}
-          </div>
+    <FactoryFront>
+      <Ledger
+        kicker="Every inspector starts somewhere."
+        size="lg"
+        icon={SEAL_ICONS.story}
+        title="Fortune Cookie Inspector"
+        subtitle="How you got here, in three steps."
+        footer={<LedgerButton onClick={onNext}>Next</LedgerButton>}
+      >
+        <div className="ff-scene ff-scene-wide">
+          <FactoryScene />
         </div>
 
-        <button className="next-btn" onClick={onNext}>Next</button>
-      </div>
-    </div>
+        <div className="intro-steps">
+          {STORY.map((s, i) => (
+            <div className="intro-step" key={s.title} style={{ animationDelay: `${0.15 + i * 0.12}s` }}>
+              <span className="intro-step-num">{i + 1}</span>
+              <div className="intro-step-title">{s.title}</div>
+              <p className="intro-step-text">{s.text}</p>
+            </div>
+          ))}
+        </div>
+      </Ledger>
+    </FactoryFront>
   );
 }

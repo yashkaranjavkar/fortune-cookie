@@ -1,0 +1,170 @@
+/* Top-down factory floor plan walk (StationTransitionScreen + FactoryFloorPlan).
+   Framed like the rest of the game's cards: cream pills, yellow-deep borders,
+   Fredoka headings, plum/biscuit palette. */
+.station-transition-screen {
+  --st-map-width: min(94vw, calc((100vh - 150px) * 1260 / 760));
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 20px 16px;
+  box-sizing: border-box;
+  transition: opacity 0.45s ease-in;
+}
+/* Fades the map out at the end of the arrival beat, before the room card fades in */
+.station-transition-screen.st-leaving { opacity: 0; }
+
+/* HUD - where you're heading (left) and which part of the game this is (right) */
+.st-hud {
+  width: var(--st-map-width);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.st-hud-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 20px 8px 14px;
+  border-radius: var(--radius-full, 999px);
+  background: var(--beige-elevated);
+  border: 3px solid var(--yellow-deep);
+  box-shadow: 0 4px 0 var(--biscuit-lip), 0 8px 18px -8px rgba(58, 26, 8, 0.45);
+  color: var(--ink-primary);
+}
+.st-hud-icon { font-size: 28px; line-height: 1; }
+.st-hud-text { display: flex; flex-direction: column; line-height: 1.15; }
+.st-hud-kicker {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+.st-hud-label {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+}
+.st-hud-sub {
+  padding: 10px 22px;
+  background: #8E2A37;
+  border-color: #3E0A12;
+  color: #FFF1DC;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  box-shadow: 0 4px 0 #3E0A12, 0 8px 18px -8px rgba(58, 26, 8, 0.45);
+}
+
+.st-map {
+  width: var(--st-map-width);
+  border: 5px solid var(--yellow-deep);
+  border-radius: 24px;
+  overflow: hidden;
+  background: #B9D3A0;
+  box-shadow: 0 6px 0 var(--biscuit-lip), 0 18px 40px -14px rgba(58, 26, 8, 0.55);
+}
+.st-map-svg { display: block; width: 100%; height: auto; }
+
+/* ---- Static map details (FactoryFloorPlan) ---- */
+.fp-belt {
+  stroke: #5A4632;
+  stroke-width: 26;
+  stroke-dasharray: 3 11;
+  animation: fp-belt-move 0.9s linear infinite;
+}
+@keyframes fp-belt-move {
+  to { stroke-dashoffset: -14; }
+}
+
+.fp-line-label,
+.fp-truck-label {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+.fp-line-label { font-size: 10px; fill: #FFF1DC; }
+.fp-truck-label { font-size: 12px; fill: #8E2A37; }
+
+.fp-sign rect { fill: #3E0A12; stroke: #8A5228; stroke-width: 2; }
+.fp-sign text {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  fill: #FFF1DC;
+  letter-spacing: 0.03em;
+}
+.fp-sign.active rect { fill: #F7C948; stroke: #3E0A12; }
+.fp-sign.active text { fill: #3A1A08; }
+
+.fp-dest-glow {
+  fill: rgba(247, 201, 72, 0.18);
+  stroke: #F7C948;
+  stroke-width: 4;
+  stroke-dasharray: 14 8;
+  animation: fp-dest-pulse 1.4s ease-in-out infinite;
+}
+@keyframes fp-dest-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+/* ---- Walk layer (StationTransitionScreen) ---- */
+.st-route {
+  fill: none;
+  stroke: #FFF1DC;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1 13;
+  opacity: 0.9;
+}
+.st-route-walked {
+  fill: none;
+  stroke: #F7C948;
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+
+.st-target {
+  fill: rgba(247, 201, 72, 0.25);
+  stroke: #F7C948;
+  stroke-width: 3;
+  stroke-dasharray: 8 6;
+  animation: st-target-spin 1.2s linear infinite;
+}
+.st-target.arrived {
+  fill: rgba(247, 201, 72, 0.55);
+  stroke-dasharray: none;
+  animation: none;
+}
+@keyframes st-target-spin {
+  to { stroke-dashoffset: -28; }
+}
+
+.st-pin { animation: st-pin-bob 0.9s ease-in-out infinite; }
+@keyframes st-pin-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.st-pin-bubble { fill: #FFF1DC; stroke: #F7C948; stroke-width: 4; }
+.st-pin-tip { fill: #F7C948; }
+.st-pin-icon { font-size: 20px; }
+
+.st-player-ring {
+  fill: none;
+  stroke: #F7C948;
+  stroke-width: 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fp-belt, .fp-dest-glow, .st-target, .st-pin { animation: none; }
+}
