@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { isMuted, setMuted, playSound } from '../sounds';
+import { track } from '../analytics';
 import './SoundToggle.css';
 
 // The one persistent, always-on-screen control in the game: mute/unmute, remembered
@@ -11,6 +12,7 @@ export default function SoundToggle() {
     const next = !muted;
     setMuted(next);
     setMutedState(next);
+    track('sound_toggled', { muted: next });
     if (!next) playSound('button-press');
   };
 

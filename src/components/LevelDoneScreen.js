@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useCurrency } from '../utils/currency';
 import { playSound } from '../sounds';
+import { track } from '../analytics';
 import { useMascotTrigger } from '../config/mascotTriggers';
 import './LevelDoneScreen.css';
 
@@ -21,6 +22,7 @@ export default function LevelDoneScreen({ batchName, sorted, total, incentive, o
     playSound('star-earn');
     playSound('level-done');
     fireMascot('levelComplete');
+    track('level_complete', { batch: batchName, sorted, total, incentive });
   }, []);
 
   return (
@@ -54,7 +56,7 @@ export default function LevelDoneScreen({ batchName, sorted, total, incentive, o
           </div>
 
           <div className="ld-actions">
-            <button className="ld-replay-btn" onClick={onReplay} aria-label="Replay level">
+            <button className="ld-replay-btn" onClick={() => { track('level_replay', { batch: batchName }); onReplay(); }} aria-label="Replay level">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" />
                 <path d="M4.5 4.5v4.2h4.2" />

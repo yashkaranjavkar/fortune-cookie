@@ -31,10 +31,10 @@ export const GAME_FLOW = [
   'job',
   'training',
   'level1',
-  'level2',
-  'level3',
-  'supervisor',
-  'finalTrays'
+  //'level2',
+  //'level3',
+  //'supervisor',
+  //'finalTrays'
 ];
 
 // How many trays the tray-sorting minigame runs through - shared by Training's own

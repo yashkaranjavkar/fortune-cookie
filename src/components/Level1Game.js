@@ -6,6 +6,7 @@ import RulesOverlay from './RulesOverlay';
 import { pickLevel1Fortune } from '../utils/level1Fortunes';
 import { playSound } from '../sounds';
 import { useMascotTrigger } from '../config/mascotTriggers';
+import useSortingTracker from '../analytics/useSortingTracker';
 import './DomeFocus.css';
 import './SampleFortune.css';
 
@@ -70,6 +71,12 @@ export default function Level1Game({ onComplete }) {
   const hoverTimeout = useRef(null);
   const intervalRef = useRef(null);
   const fireMascot = useMascotTrigger();
+  const stats = useSortingTracker('level1');
+
+  // Analytics: a dome just opened
+  useEffect(() => {
+    if (activeDome !== null && domes[activeDome].status === 'open') stats.revealed(activeDome, domes[activeDome].fortune);
+  }, [activeDome]); // eslint-disable-line
 
   // Timer Logic - paused (not reset) while the rules overlay is open
   useEffect(() => {
@@ -106,6 +113,7 @@ export default function Level1Game({ onComplete }) {
   };
 
   const handlePopBalloon = (key) => {
+    stats.help(key, usesLeft - 1);
     setPoppedBalloons(prev => ({ ...prev, [key]: true }));
     setRuleSlide(0);
     setRulesOpen(true);
@@ -130,6 +138,7 @@ export default function Level1Game({ onComplete }) {
     setDragging(false);
     const index = Number(e.dataTransfer.getData('domeIndex'));
     clearInterval(intervalRef.current);
+    stats.sorted(index, domes[index].fortune, trayType, timer);
 
     if (trayType === 'faulty') {
       setFaultyItems(prev => [...prev, domes[index].fortune]);
@@ -154,8 +163,9 @@ export default function Level1Game({ onComplete }) {
     }
   };
 
-  const handleWaste = (index) => {
+  const handleWaste = (index, reason = 'timer') => {
     clearInterval(intervalRef.current);
+    stats.timedOut(index, domes[index].fortune, reason);
     setDragging(false);
     setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'wasted' } : d));
     setActiveDome(null);
@@ -178,12 +188,13 @@ export default function Level1Game({ onComplete }) {
   const handleDragEnd = () => {
     setDragging(false);
     if (activeDome !== null && domes[activeDome].status === 'open') {
-       handleWaste(activeDome);
+       handleWaste(activeDome, 'dropped_outside_tray');
     }
   };
 
   // Handle the "Next" button after sorting
   const handleSortingNext = () => {
+    stats.roundComplete(faultyItems, approvedItems);
     setPhase('transition');
     setTimeout(() => setPhase('instruction'), 2000); // Truck leaves in 2s, then show instruction
   };

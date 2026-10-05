@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
+import { track, identify, startTimer } from '../analytics';
 import './WebsitesScreen.css';
 import FactoryFront, { Ledger, LedgerButton, SEAL_ICONS } from './FactoryFront';
 import { generateWebsiteCategories } from '../utils/generateWebsites';
@@ -14,19 +15,40 @@ export default function WebsitesScreen({ userData, onNext }) {
   const answers = JSON.stringify(userData);
   const categories = useMemo(() => generateWebsiteCategories(JSON.parse(answers)), [answers]);
 
+  const timer = useRef(startTimer());
+  const toggles = useRef(0);
+
   const toggleWebsite = (categoryKey, site) => {
-    setSelected(prev => {
-      const current = prev[categoryKey];
-      if (current.includes(site)) {
-        return { ...prev, [categoryKey]: current.filter(s => s !== site) };
-      }
-      if (current.length >= PICK_PER_CATEGORY) return prev; // already picked 3 in this category
-      return { ...prev, [categoryKey]: [...current, site] };
+    const current = selected[categoryKey];
+    const isSelected = current.includes(site);
+    if (!isSelected && current.length >= PICK_PER_CATEGORY) return; // already picked 3 in this category
+    toggles.current += 1;
+    track('website_toggled', {
+      category: categoryKey,
+      site,
+      selected: !isSelected,
+      position: categories[categoryKey].indexOf(site), // where it sat in the offered list
+      picked_in_category: isSelected ? current.length - 1 : current.length + 1,
     });
+    setSelected(prev => ({
+      ...prev,
+      [categoryKey]: isSelected ? prev[categoryKey].filter(s => s !== site) : [...prev[categoryKey], site],
+    }));
   };
 
   const completeCount = CATEGORIES.filter(c => selected[c.key].length === PICK_PER_CATEGORY).length;
   const canProceed = completeCount === CATEGORIES.length;
+
+  const handleNext = () => {
+    track('websites_submitted', {
+      selected,
+      offered: categories,
+      toggle_count: toggles.current,
+      decision_ms: timer.current(),
+    });
+    identify({ familiar_websites: selected });
+    onNext();
+  };
 
   return (
     <FactoryFront>
@@ -42,7 +64,7 @@ export default function WebsitesScreen({ userData, onNext }) {
             <span className={`ff-websites-progress${canProceed ? ' done' : ''}`}>
               {completeCount}/{CATEGORIES.length} categories done
             </span>
-            <LedgerButton onClick={onNext} disabled={!canProceed}>Next</LedgerButton>
+            <LedgerButton onClick={handleNext} disabled={!canProceed}>Next</LedgerButton>
           </div>
         }
       >

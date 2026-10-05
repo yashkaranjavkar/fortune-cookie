@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { playSound } from '../sounds';
+import { track } from '../analytics';
 import cookieIntact from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-whole.svg';
 import cookieBroken from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-cracked.svg';
 
 export default function FortuneSelectionScreen({ trayNumber, bunchNumber, fortunes, onSubmit }) {
   const [phase, setPhase] = useState('breaking'); // breaking -> cracked -> fortunes
   const [selected, setSelected] = useState([]);
+  const shownAt = useRef(null); // when the fortunes appeared, for decision time
 
   useEffect(() => {
     const timer1 = setTimeout(() => {
@@ -15,6 +17,7 @@ export default function FortuneSelectionScreen({ trayNumber, bunchNumber, fortun
 
     const timer2 = setTimeout(() => {
       setPhase('fortunes');
+      shownAt.current = performance.now();
     }, 1400);
 
     return () => {
@@ -33,6 +36,13 @@ export default function FortuneSelectionScreen({ trayNumber, bunchNumber, fortun
   };
 
   const handleNext = () => {
+    track('tray_fortunes_selected', {
+      tray: trayNumber,
+      bunch: bunchNumber,
+      selected: selected.map(i => fortunes[i]),
+      selected_count: selected.length,
+      decision_ms: shownAt.current ? Math.round(performance.now() - shownAt.current) : null,
+    });
     onSubmit(selected);
     setSelected([]);
     playSound('toast');

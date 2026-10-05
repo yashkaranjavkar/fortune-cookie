@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useCurrency } from '../utils/currency';
 import { playSound } from '../sounds';
+import { track } from '../analytics';
 import { diffFortuneMarking, gradeFortuneMarking, gradeApprovedSort, gradeSort, REWARD_AMOUNT, SORT_REWARD_AMOUNT } from '../utils/fortuneGrading';
 import SortTray from './SortTray';
 import TimerDial from './TimerDial';
@@ -116,8 +117,19 @@ export function TorchInspectScreen({ markedFortunes, onNext }) {
   const tier = gradeFortuneMarking(currentFortune.fullText, currentFortune, currentFortune.markedText);
   const kindsShown = Array.from(new Set(segments.map(s => s.kind).filter(k => k !== 'plain')));
 
+  const tierCounts = useRef({ correct: 0, partial: 0, wrong: 0 });
   const handleNext = () => {
     const runningTotal = totalScore + REWARD_AMOUNT[tier];
+    tierCounts.current[tier] = (tierCounts.current[tier] || 0) + 1;
+    track('inspection_revealed', {
+      index: currentIndex,
+      fortune: currentFortune.fullText,
+      marked_text: currentFortune.markedText || null,
+      invalid_part: currentFortune.invalidPart || null,
+      tier,
+      points: REWARD_AMOUNT[tier],
+    });
+    if (isLast) track('inspection_complete', { total_points: runningTotal, tiers: { ...tierCounts.current } });
     if (isLast) {
       onNext(runningTotal);
     } else {
@@ -416,7 +428,12 @@ export function SortingResultsScreen({ faultyItems, approvedItems, onNext }) {
         </span>
       </div>
 
-      <button className="results-next-btn" onClick={() => onNext(total)}>
+      <button className="results-next-btn" onClick={() => {
+        const tiers = {};
+        rows.forEach(r => { tiers[r.tier] = (tiers[r.tier] || 0) + 1; });
+        track('sorting_scored', { total_points: total, tiers });
+        onNext(total);
+      }}>
         Next &gt;&gt;&gt;
       </button>
     </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import TimerDial from './TimerDial';
 import { playSound } from '../sounds';
 import { useMascotTrigger } from '../config/mascotTriggers';
+import { track, startTimer } from '../analytics';
 import './MarkingScreen.css';
 
 // Hand-drawn highlighter icon, matching the line-icon style used elsewhere in the app
@@ -31,6 +32,9 @@ export default function MarkingScreen({ faultyItems, onNext }) {
   const [highlights, setHighlights] = useState(new Array(itemCount).fill(null));
   const cardRefs = useRef([]);
   const fireMascot = useMascotTrigger();
+  const markTimer = useRef(startTimer());
+  const timeLeftRef = useRef(30);
+  timeLeftRef.current = timer;
 
   // The interval below is set up once on mount, so it closes over whatever
   // handleSubmit/highlights looked like at that moment - this ref always points at
@@ -46,7 +50,7 @@ export default function MarkingScreen({ faultyItems, onNext }) {
           playSound('time-up');
           playSound('toast');
           fireMascot('markingTimeUp');
-          handleSubmitRef.current();
+          handleSubmitRef.current(true);
           return 0;
         }
         if (prev - 1 <= 5) playSound('timer-tick');
@@ -65,6 +69,13 @@ export default function MarkingScreen({ faultyItems, onNext }) {
     if (!cardRef) return;
     const range = selection.getRangeAt(0);
     if (cardRef.contains(range.commonAncestorContainer)) {
+      track('fortune_marked', {
+        index,
+        fortune: faultyItems[index].text,
+        marked_text: text,
+        replaced: highlights[index] || null,
+        time_into_marking_ms: markTimer.current(),
+      });
       setHighlights(prev => {
         const newHighlights = [...prev];
         newHighlights[index] = text;
@@ -76,6 +87,7 @@ export default function MarkingScreen({ faultyItems, onNext }) {
   };
 
   const handleDoubleClick = (index) => {
+    track('fortune_mark_removed', { index, fortune: faultyItems[index].text, removed_text: highlights[index] });
     setHighlights(prev => {
       const newHighlights = [...prev];
       newHighlights[index] = null;
@@ -87,13 +99,21 @@ export default function MarkingScreen({ faultyItems, onNext }) {
   // Marking is a judgement call, not a requirement - a fortune that isn't actually
   // phishy is correctly left unmarked, so submitting doesn't force every item to have
   // a highlight. Whatever's marked (or not) gets sent through as-is for inspection.
-  const handleSubmit = () => {
+  const handleSubmit = (autoSubmitted = false) => {
     const data = faultyItems.map((fortune, i) => ({
       fullText: fortune.text,
       markedText: highlights[i],
       isPhishy: fortune.isPhishy,
       invalidPart: fortune.invalidPart
     }));
+    track('marking_submitted', {
+      items: data.map(d => ({ fortune: d.fullText, marked_text: d.markedText || null, is_phishy: typeof d.isPhishy === 'boolean' ? d.isPhishy : null, invalid_part: d.invalidPart || null })),
+      marked_count: data.filter(d => d.markedText).length,
+      item_count: data.length,
+      auto_submitted: autoSubmitted === true,
+      time_left_s: timeLeftRef.current,
+      decision_ms: markTimer.current(),
+    });
     onNext(data);
   };
   handleSubmitRef.current = handleSubmit;

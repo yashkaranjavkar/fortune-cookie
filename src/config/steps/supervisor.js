@@ -16,11 +16,7 @@ export const SUPERVISOR_STEPS = [
     key: 'checklist',
     render: (ctx, nav) => (
       <SupervisionChecklistScreen
-        onNext={(data) => {
-          console.log('Decisions:', data.decisions);
-          console.log('Revoke reasons:', data.revokeReasons);
-          nav.next();
-        }}
+        onNext={() => nav.next()} // decisions are recorded by analytics (supervisor_checklist_submitted)
       />
     )
   },

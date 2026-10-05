@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
+import { track, identify, startTimer } from '../analytics';
 import MultiSelect from './MultiSelect';
 import SearchableDropdown from './SearchableDropdown';
 import FactoryFront, { Ledger, LedgerButton, SEAL_ICONS } from './FactoryFront';
@@ -9,13 +10,33 @@ import { playSound } from '../sounds';
 export default function JobApplication({ age, setAge, region, setRegion, interests, setInterests, onNext }) {
   const related = useMemo(() => getRelatedInterests(interests), [interests]);
 
+  const timer = useRef(startTimer());
+  const suggestionsAdded = useRef(0);
+
   const addRelated = (r) => {
     if (!interests.includes(r)) {
+      suggestionsAdded.current += 1;
+      track('interest_suggestion_added', { interest: r, from_picks: interests });
       setInterests([...interests, r]);
     }
   };
 
   const isValid = age && region && interests.length > 0;
+
+  const handleNext = () => {
+    const custom = interests.filter(i => !baseInterests.includes(i));
+    track('application_submitted', {
+      age_group: age,
+      region,
+      interests,
+      interest_count: interests.length,
+      custom_interests: custom,
+      suggestions_added: suggestionsAdded.current,
+      decision_ms: timer.current(),
+    });
+    identify({ age_group: age, region, interests });
+    onNext();
+  };
 
   return (
     <FactoryFront>
@@ -24,7 +45,7 @@ export default function JobApplication({ age, setAge, region, setRegion, interes
         icon={SEAL_ICONS.form}
         title="Job Application"
         subtitle="Kindly fill your details to proceed with the application."
-        footer={<LedgerButton onClick={onNext} disabled={!isValid}>Next</LedgerButton>}
+        footer={<LedgerButton onClick={handleNext} disabled={!isValid}>Next</LedgerButton>}
       >
         <div className="ff-field">
           <span className="ff-field-label">Age <span className="ff-req">*</span></span>

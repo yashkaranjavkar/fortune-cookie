@@ -28,6 +28,21 @@ function useDoorGlow() {
 import openingArt from '../assets/Drawings/Opening screen.jpg';
 import './OpeningScreen.css';
 
+// The FORTUNERY logo, letter by letter: each one sits at its own slight tilt and
+// height for a bouncy cartoon-game-title look. `kern` nudges the space before a letter
+// (in em, negative = tighter) to even out the gaps the tilts would otherwise create.
+const LOGO_LETTERS = [
+  { char: 'F', tilt: -4, lift: 0.02, kern: 0 },
+  { char: 'O', tilt: 3, lift: -0.04, kern: 0.01 },
+  { char: 'R', tilt: -2, lift: 0.02, kern: 0.01 },
+  { char: 'T', tilt: 3, lift: -0.03, kern: 0.03 },
+  { char: 'U', tilt: -3, lift: 0.03, kern: 0.03 },
+  { char: 'N', tilt: 2, lift: -0.03, kern: 0.03 },
+  { char: 'E', tilt: -3, lift: 0.02, kern: 0.04 },
+  { char: 'R', tilt: 4, lift: -0.04, kern: 0.03 },
+  { char: 'Y', tilt: -3, lift: 0.02, kern: 0.03 },
+];
+
 // Everything below is positioned in % of the DRAWING (not the window), so it stays on
 // the right spot of the art at any window size and through the slow zoom.
 
@@ -204,11 +219,18 @@ export default function OpeningScreen({ onStart }) {
       <div className="op-shade" aria-hidden="true" />
 
       <div className="op-corner">
-        <h1 className="op-logo" aria-label="Batch 26">
+        <h1 className="op-logo" aria-label="Fortunery">
           <span className="op-logo-kicker" aria-hidden="true">Fortune Co.</span>
           <span className="op-logo-main" aria-hidden="true">
-            <span className="op-logo-batch">Batch</span>
-            <span className="op-logo-num">26</span>
+            {LOGO_LETTERS.map(({ char, tilt, lift, kern }, i) => (
+              <span
+                key={i}
+                className="op-logo-letter"
+                style={{ '--tilt': `${tilt}deg`, '--lift': `${lift}em`, marginLeft: `${kern}em`, animationDelay: `${0.3 + i * 0.07}s` }}
+              >
+                {char}
+              </span>
+            ))}
           </span>
           <span className="op-logo-tag" aria-hidden="true">Spot the sus fortunes</span>
         </h1>

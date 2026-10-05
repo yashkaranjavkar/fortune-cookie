@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import SearchableDropdown from './SearchableDropdown';
 import FactoryFront, { Ledger, SEAL_ICONS } from './FactoryFront';
 import { designations } from '../data/constants';
+import { track, identify, startTimer } from '../analytics';
 
 // Clock in at the factory front: the inspector signs the ledger with their ID and
 // designation before stepping onto the factory floor.
 export default function StartScreen({ employeeId, setEmployeeId, designation, setDesignation, onConfirm }) {
   const canClockIn = Boolean(employeeId && designation);
+  const timer = useRef(startTimer());
 
   return (
     <FactoryFront>
@@ -18,7 +20,16 @@ export default function StartScreen({ employeeId, setEmployeeId, designation, se
         subtitle="Sign the inspector's ledger before you step onto the factory floor."
         onSubmit={(e) => {
           e.preventDefault();
-          if (canClockIn) onConfirm();
+          if (!canClockIn) return;
+          const isCustom = !designations.includes(designation);
+          track('player_clock_in', {
+            employee_id: employeeId,
+            designation,
+            designation_is_custom: isCustom,
+            decision_ms: timer.current(),
+          });
+          identify({ employee_id: employeeId, designation, designation_is_custom: isCustom });
+          onConfirm();
         }}
         footer={
           <>

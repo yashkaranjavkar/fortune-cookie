@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import TraySelectionScreen from '../components/TraySelectionScreen';
 import FortuneSelectionScreen from '../components/FortuneSelectionScreen';
+import { track } from '../analytics';
 
 // The tray / 2-bunch-per-tray fortune-picking minigame, extracted so it can be reused
 // both inside Training and standalone (the "final trays" section). How many trays run
@@ -33,6 +34,7 @@ export default function TraySortingSection({ onComplete, trayCount = 3 }) {
   const [brokenBunches, setBrokenBunches] = useState([]);
 
   const handleSelectBunch = (bunch) => {
+    track('tray_bunch_opened', { tray: trayIndex, bunch, bunches_opened: brokenBunches.length + 1 });
     setBunchIndex(bunch);
     setBrokenBunches(prev => [...prev, bunch]);
     setGamePhase('fortune');

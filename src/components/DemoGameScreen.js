@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SortTray from './SortTray';
 import { playSound } from '../sounds';
+import { track } from '../analytics';
 import { useMascotTrigger } from '../config/mascotTriggers';
 import './DemoGameScreen.css';
 
@@ -43,6 +44,7 @@ export default function DemoGameScreen({ onComplete }) {
   const [attempts, setAttempts] = useState(1);
   const hoverTimeout = useRef(null);
   const intervalRef = useRef(null);
+  const revealedAt = useRef(null);
   const fireMascot = useMascotTrigger();
 
   // Hovering the dome (short delay) lifts it: the cookie opens and a fortune strip appears
@@ -52,6 +54,7 @@ export default function DemoGameScreen({ onComplete }) {
         setFortuneText(prev => pickFortune(prev));
         setTimer(DEMO_SECONDS);
         setPhase('revealed');
+        revealedAt.current = performance.now();
         playSound('dome-lift');
         fireMascot('domeRevealed');
       }, 300);
@@ -96,6 +99,12 @@ export default function DemoGameScreen({ onComplete }) {
     clearInterval(intervalRef.current);
     setDragging(false);
     if (phase !== 'revealed') return;
+    track('demo_fortune_sorted', {
+      tray,
+      fortune: fortuneText,
+      attempt: attempts,
+      decision_ms: revealedAt.current ? Math.round(performance.now() - revealedAt.current) : null,
+    });
     setPlacedIn(tray);
     setPhase('placed');
     playSound('drop-approved');

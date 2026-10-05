@@ -350,19 +350,20 @@
   animation: op-in 0.7s ease-out 0.5s both;
 }
 
+/* "FORTUNERY" in bouncy cartoon-game-title lettering (Luckiest Guy): each letter at its
+   own tilt, height and spacing (set per letter in OpeningScreen.js), all in cream with
+   the plum outline and hard stepped extrusion. */
 .op-logo-main {
   display: flex;
-  align-items: flex-end;
-  gap: clamp(12px, 1vw, 20px);
-  font-family: 'Anton', 'Impact', sans-serif;
+  align-items: baseline;
+  font-family: 'Luckiest Guy', 'Impact', sans-serif;
+  font-size: clamp(44px, 3.8vw, 80px);
+  line-height: 1;
   text-transform: uppercase;
+  padding: 0.1em 0 0.12em;
 }
-
-/* Cream lettering, plum outline, hard stepped extrusion - the chunky printed-poster
-   look, in the game's palette. */
-.op-logo-batch {
-  font-size: clamp(50px, 4.6vw, 92px);
-  letter-spacing: 0.02em;
+.op-logo-letter {
+  display: inline-block;
   color: #FFF1DC;
   -webkit-text-stroke: 3px #3E0A12;
   paint-order: stroke fill;
@@ -370,24 +371,14 @@
     1px 1px 0 #3E0A12, 2px 2px 0 #3E0A12, 3px 3px 0 #3E0A12,
     4px 4px 0 #3E0A12, 5px 5px 0 #3E0A12, 6px 6px 0 #3E0A12, 7px 7px 0 #3E0A12,
     0 14px 30px rgba(0, 0, 0, 0.6);
-  padding-bottom: 0.08em;
-  animation: op-slide 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s both;
+  transform: translateY(var(--lift, 0)) rotate(var(--tilt, 0));
+  transform-origin: bottom center;
+  animation: op-letter-in 0.55s cubic-bezier(0.3, 1.7, 0.5, 1) both;
 }
-
-/* The batch number - bigger, gold, tilted like a stamped label; it stamps in. */
-.op-logo-num {
-  font-size: clamp(80px, 7.4vw, 148px);
-  letter-spacing: 0.01em;
-  color: #F7C948;
-  -webkit-text-stroke: 3.5px #3E0A12;
-  paint-order: stroke fill;
-  text-shadow:
-    1px 1px 0 #7A3E12, 2px 2px 0 #7A3E12, 3px 3px 0 #7A3E12,
-    4px 4px 0 #7A3E12, 5px 5px 0 #7A3E12, 6px 6px 0 #7A3E12, 7px 7px 0 #7A3E12, 8px 8px 0 #3E0A12,
-    0 16px 34px rgba(0, 0, 0, 0.6);
-  transform: rotate(-6deg) translateY(-0.04em);
-  transform-origin: bottom left;
-  animation: op-stamp 0.55s cubic-bezier(0.3, 1.5, 0.5, 1) 0.85s both;
+/* Each letter drops in and bounces into its own tilt, one after another */
+@keyframes op-letter-in {
+  0%   { opacity: 0; transform: translateY(-0.7em) rotate(0deg) scale(0.6); }
+  100% { opacity: 1; transform: translateY(var(--lift, 0)) rotate(var(--tilt, 0)) scale(1); }
 }
 
 /* Subtitle between two short rules */
@@ -430,10 +421,6 @@
   from { opacity: 0; transform: translateX(30px); }
   to   { opacity: 1; transform: none; }
 }
-@keyframes op-stamp {
-  from { opacity: 0; transform: rotate(-16deg) translateY(-0.04em) scale(1.8); }
-  to   { opacity: 1; transform: rotate(-6deg) translateY(-0.04em) scale(1); }
-}
 
 @media (max-width: 760px) {
   .op-shade {
@@ -450,7 +437,7 @@
   .op-steam, .op-glints, .op-slips { display: none; }
   .op-light { animation: none; opacity: 0.8; }
   .op-motes { display: none; }
-  .op-logo-kicker, .op-logo-batch, .op-logo-num, .op-logo-tag, .app .opening-screen .op-start {
+  .op-logo-kicker, .op-logo-letter, .op-logo-tag, .app .opening-screen .op-start {
     animation: none;
   }
 }

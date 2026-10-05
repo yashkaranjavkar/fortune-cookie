@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 //import './design-system/tokens.css';
 import './assets/wisecrack-ui-kit/wisecrack-ui-kit/wisecrack-colors.css';
 import './App.css';
@@ -13,6 +13,12 @@ import { SECTION_STOPS } from './config/stations';
 import { PlayerLookContext } from './utils/playerLook';
 import { startAmbience, stopAmbience } from './ambience';
 import { AMBIENCE } from './config/ambience';
+import { initAnalytics, setContext, track, enterScreen } from './analytics';
+import { isDashboardRoute, openDashboard } from './analytics/route';
+import { ANALYTICS } from './config/analytics';
+
+// Only record a play session when the game itself is open (not the Analytics page)
+if (!isDashboardRoute()) initAnalytics({ gameFlow: GAME_FLOW });
 
 // Sections that come before the player has been trained (no chef's hat yet)
 const PRE_TRAINING_SECTIONS = ['opening', 'job'];
@@ -54,7 +60,27 @@ function App() {
     if (toStops && toStops.roomIntroIn) setPhase('roomIntro');
     else startNextSection();
   };
+  // Analytics: every event is tagged with the current section + phase. Set during render
+  // (not in an effect) so screens inside the section, whose effects run first, already
+  // see the right section.
+  setContext({ section: sectionKey || null, phase });
+  const sectionStartRef = useRef(null);
+  useEffect(() => {
+    if (phase !== 'section' || !sectionKey) return;
+    sectionStartRef.current = performance.now();
+    track('section_start', { section: sectionKey, index: sectionIndex });
+  }, [sectionKey, sectionIndex, phase]);
+  // The walk + "Now entering" card are screens of their own
+  useEffect(() => {
+    if (phase === 'walk') enterScreen(`walk_to_${toStops ? toStops.start : 'next'}`);
+    if (phase === 'roomIntro') enterScreen(`room_intro_${toStops ? toStops.start : 'next'}`);
+  }, [phase]); // eslint-disable-line
+
   const handleSectionComplete = () => {
+    track('section_complete', {
+      section: sectionKey,
+      duration_ms: sectionStartRef.current ? Math.round(performance.now() - sectionStartRef.current) : null,
+    });
     if (!nextSectionKey) setSectionIndex(i => i + 1); // past the end - renders nothing
     else if (toStops && toStops.walkIn) setPhase('walk');
     else showRoomIntroOrStart();
@@ -94,6 +120,18 @@ function App() {
      <PlayerLookContext.Provider value={{ chefHat }}>
       <div className="app">
         <SoundToggle />
+        {ANALYTICS.showDashboardButton && (
+          <button
+            type="button"
+            className="ad-open-btn"
+            onClick={openDashboard}
+            title="Open the Analytics page (new tab)"
+            aria-label="Open the Analytics page"
+            data-sound="none"
+          >
+            📊
+          </button>
+        )}
         {phase === 'section' && Section && (
           <Section
             onComplete={handleSectionComplete}

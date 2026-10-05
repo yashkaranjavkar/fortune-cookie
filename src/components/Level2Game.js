@@ -6,6 +6,7 @@ import InvalidURLExplainer from './InvalidURLExplainer';
 import { pickLevel2Fortune } from '../utils/level2Fortunes';
 import { playSound } from '../sounds';
 import { useMascotTrigger } from '../config/mascotTriggers';
+import useSortingTracker from '../analytics/useSortingTracker';
 import './DomeFocus.css';
 import './SampleFortune.css';
 import './Level2GameInstructions.css';
@@ -67,6 +68,12 @@ export default function Level2Game({ onComplete, onSkip }) {
   const hoverTimeout = useRef(null);
   const intervalRef = useRef(null);
   const fireMascot = useMascotTrigger();
+  const stats = useSortingTracker('level2');
+
+  // Analytics: a dome just opened
+  useEffect(() => {
+    if (activeDome !== null && domes[activeDome].status === 'open') stats.revealed(activeDome, domes[activeDome].fortune);
+  }, [activeDome]); // eslint-disable-line
 
   // Countdown timer - paused (not reset) while the rules overlay is open
   useEffect(() => {
@@ -103,6 +110,7 @@ export default function Level2Game({ onComplete, onSkip }) {
   };
 
   const handlePopBalloon = (key) => {
+    stats.help(key, usesLeft - 1);
     setPoppedBalloons(prev => ({ ...prev, [key]: true }));
     setRuleSlide(0);
     setRulesOpen(true);
@@ -127,6 +135,7 @@ export default function Level2Game({ onComplete, onSkip }) {
     setDragging(false);
     const index = Number(e.dataTransfer.getData('domeIndex'));
     clearInterval(intervalRef.current);
+    stats.sorted(index, domes[index].fortune, trayType, timer);
 
     if (trayType === 'faulty') {
       setFaultyItems(prev => [...prev, domes[index].fortune]);
@@ -151,8 +160,9 @@ export default function Level2Game({ onComplete, onSkip }) {
     }
   };
 
-  const handleWaste = (index) => {
+  const handleWaste = (index, reason = 'timer') => {
     clearInterval(intervalRef.current);
+    stats.timedOut(index, domes[index].fortune, reason);
     setDragging(false);
     setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'wasted' } : d));
     setActiveDome(null);
@@ -175,12 +185,13 @@ export default function Level2Game({ onComplete, onSkip }) {
   const handleDragEnd = () => {
     setDragging(false);
     if (activeDome !== null && domes[activeDome].status === 'open') {
-      handleWaste(activeDome);
+      handleWaste(activeDome, 'dropped_outside_tray');
     }
   };
 
   // Trigger truck + instruction
   const handleSortingNext = () => {
+    stats.roundComplete(faultyItems, approvedItems);
     setPhase('transition');
     setTimeout(() => setPhase('instruction'), 2000);
   };
@@ -305,7 +316,7 @@ export default function Level2Game({ onComplete, onSkip }) {
             </div>
 
             <div className="instruction-card-actions">
-              <button className="instruction-skip-btn" onClick={() => onSkip(faultyItems, approvedItems)}>
+              <button className="instruction-skip-btn" onClick={() => { stats.skippedMarkingIntro(); onSkip(faultyItems, approvedItems); }}>
                 Skip &gt;&gt;&gt;
               </button>
               <button className="next-btn" onClick={() => onComplete(faultyItems, approvedItems)}>

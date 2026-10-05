@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { playSound } from '../sounds';
+import { track, startTimer } from '../analytics';
 import './SupervisionPhase.css';
 import './ObjectiveScreen.css';
 
@@ -125,6 +126,8 @@ export function SupervisionChecklistScreen({ onNext }) {
     Array.from({ length: FORTUNES_DATA.length }, () => null)
   );
 
+  const timer = useRef(startTimer());
+
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [modalRowIndex, setModalRowIndex] = useState(null);
@@ -138,6 +141,7 @@ export function SupervisionChecklistScreen({ onNext }) {
       setModalOpen(true);
       playSound('popup-open');
     } else {
+      track('supervisor_decision', { row: index, fortune: FORTUNES_DATA[index].text, original: FORTUNES_DATA[index].decision, choice: 'stay' });
       // Stay with original decision — no modal needed
       setDecisions(prev => {
         const updated = [...prev];
@@ -156,6 +160,8 @@ export function SupervisionChecklistScreen({ onNext }) {
 
   const handleModalConfirm = () => {
     if (modalChoice === null) return;
+    track('supervisor_decision', { row: modalRowIndex, fortune: FORTUNES_DATA[modalRowIndex].text, original: FORTUNES_DATA[modalRowIndex].decision, choice: 'revoke' });
+    track('supervisor_revoke_reason', { row: modalRowIndex, fortune: FORTUNES_DATA[modalRowIndex].text, reason: modalChoice });
     setDecisions(prev => {
       const updated = [...prev];
       updated[modalRowIndex] = 'revoke';
@@ -256,7 +262,14 @@ export function SupervisionChecklistScreen({ onNext }) {
           <button
             className="supervision-orange-btn sc-submit"
             disabled={!allDecided}
-            onClick={() => onNext({ decisions, revokeReasons })}
+            onClick={() => {
+              track('supervisor_checklist_submitted', {
+                decisions: decisions.map((d, i) => ({ fortune: FORTUNES_DATA[i].text, original: FORTUNES_DATA[i].decision, choice: d, reason: revokeReasons[i] })),
+                revoke_reasons: revokeReasons.filter(Boolean),
+                decision_ms: timer.current(),
+              });
+              onNext({ decisions, revokeReasons });
+            }}
           >
             Submit
           </button>
