@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Personalization Profile - Dashboard</title>
+  <link rel="icon" href="../icons/icon-48.png">
+  <link rel="stylesheet" href="ui.css">
+  <style>
+    main { max-width: 1040px; margin: 0 auto; padding: 28px 16px 56px; display: grid; gap: 20px; }
+    header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    header .actions { margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap; }
+    .overview { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 760px) { .overview { grid-template-columns: 1fr; } }
+    dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0 0 12px; }
+    dt { color: var(--muted); }
+    dd { margin: 0; font-weight: 600; }
+    .status-line { margin: 12px 0 0; color: var(--text-2); }
+    .table-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+    .table-head .input { max-width: 240px; margin-left: auto; padding: 6px 10px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    th { font-size: 13px; color: var(--text-2); font-weight: 600; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    td.host { font-weight: 600; white-space: normal; overflow-wrap: anywhere; }
+    .excluded { display: flex; flex-wrap: wrap; gap: 8px; }
+    .excluded span { background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 2px 4px 2px 12px; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="brand">
+        <img src="../icons/icon-128.png" alt="">
+        <div><small>Personalization</small><h1>Browsing profile</h1></div>
+      </div>
+      <span class="pill" id="pill"></span>
+      <div class="actions">
+        <button class="btn secondary" id="pause"></button>
+        <button class="btn" id="export">Export data (.json)</button>
+      </div>
+    </header>
+
+    <section class="panel" id="setup" hidden>
+      <h2>Not set up yet</h2>
+      <p class="sub">Nothing is being recorded. Add your details and agree to start.</p>
+      <a class="btn" href="onboarding.html" style="text-decoration:none">Set up</a>
+    </section>
+
+    <div class="overview" id="overview">
+      <section class="panel">
+        <h2>Your details</h2>
+        <p class="sub">Included in the export with your browsing data.</p>
+        <dl id="details"></dl>
+        <a href="onboarding.html">Edit details</a>
+      </section>
+      <section class="panel">
+        <h2>Collection</h2>
+        <p class="sub" id="collection-sub"></p>
+        <div id="progress"></div>
+        <p class="status-line" id="status"></p>
+      </section>
+    </div>
+
+    <section class="panel">
+      <div class="table-head">
+        <h2>Recorded websites (<span id="count">0</span>)</h2>
+        <input class="input" id="filter" type="search" placeholder="Filter">
+      </div>
+      <p class="sub">Totals across all days. The export also has the per-day breakdown. Removing a website deletes its data and stops recording it and its subdomains.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Website</th><th class="num">Visits</th><th class="num">Active time</th><th class="num">Days</th><th>First seen</th><th>Last seen</th><th></th></tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" id="excluded-panel" hidden>
+      <h2>Not recorded</h2>
+      <p class="sub">Websites you removed. They're ignored until you allow them again.</p>
+      <div class="excluded" id="excluded"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Delete everything</h2>
+      <p class="sub">Erases your details and all browsing data from this browser and stops recording. This can't be undone.</p>
+      <button class="btn danger" id="reset">Delete all data</button>
+    </section>
+  </main>
+  <script type="module" src="dashboard.js"></script>
+</body>
+</html>

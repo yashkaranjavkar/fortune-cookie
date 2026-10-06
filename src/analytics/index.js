@@ -1,17 +1,23 @@
 // Player analytics client.
 //
-//   track(type, data)        record an event (types: src/analytics/events.js)
+//   track(type, data)        record an event (types: backend/src/catalog.js)
 //   identify(traits)         attach player traits (designation, region...) to the profile
 //   setContext(partial)      update the section/phase every later event is tagged with
 //   enterScreen(name, meta)  start timing a screen (ends + reports the previous one)
 //   useScreen(name, meta)    React hook form of enterScreen
 //   startTimer() -> () => ms  measure how long a decision took
 //
-// Events are batched and handed to the transport set in src/config/analytics.js -
-// by default the in-browser dummy backend (mockBackend.js).
+// Events are batched and POSTed to the analytics backend's REST API (backend/, address
+// in src/config/analytics.js). Unsent events are kept in an outbox in localStorage
+// until the backend confirms it has them, so a backend outage or a closed tab loses
+// nothing - the backend ignores any it already has (same event_id).
 import { useEffect } from 'react';
 import { ANALYTICS } from '../config/analytics';
-import { ingest } from './mockBackend';
+
+const EVENTS_URL = `${ANALYTICS.apiUrl}/api/v1/events`;
+const OUTBOX_KEY = 'fortunery.analytics.outbox';
+const MAX_PER_REQUEST = 200;
+const BEACON_LIMIT_BYTES = 60000; // browsers cap a closing-tab beacon at ~64 KB
 
 const PLAYER_KEY = 'fortunery.analytics.player_id';
 const SESSIONS_KEY = 'fortunery.analytics.session_count';
@@ -41,8 +47,20 @@ const sessionId = uid();
 const sessionStart = performance.now();
 let seq = 0;
 let sent = 0;
-let queue = [];
 let flushTimer = null;
+let inFlight = false;
+let retryDelay = 0;
+
+// Events not yet confirmed by the backend, oldest first. Persisted so they survive a
+// reload or a backend outage.
+function loadOutbox() {
+  try { return JSON.parse(readStorage(OUTBOX_KEY) || '[]'); } catch (e) { return []; }
+}
+let queue = loadOutbox();
+function saveOutbox() {
+  if (queue.length > ANALYTICS.maxStoredEvents) queue = queue.slice(-ANALYTICS.maxStoredEvents);
+  writeStorage(OUTBOX_KEY, JSON.stringify(queue));
+}
 let context = { section: null, screen: null, phase: null };
 
 /* ---------------- Active-time tracking ---------------- */
@@ -126,8 +144,9 @@ export function track(type, data = {}) {
   };
   if (ANALYTICS.debug) console.log('[analytics]', type, data); // eslint-disable-line no-console
   queue.push(event);
-  if (queue.length >= ANALYTICS.batchSize) flush();
-  else if (!flushTimer) flushTimer = setTimeout(flush, ANALYTICS.flushIntervalMs);
+  saveOutbox();
+  if (queue.length >= ANALYTICS.batchSize && !retryDelay) flush();
+  else scheduleFlush(ANALYTICS.flushIntervalMs);
 }
 
 export function identify(traits) {
@@ -139,31 +158,62 @@ export function startTimer() {
   return () => Math.round(performance.now() - t0);
 }
 
-function send(batch, { unloading } = {}) {
-  const payload = { sent_at: new Date().toISOString(), player_id: playerId, session_id: sessionId, events: batch };
-  sent += batch.length;
-  if (ANALYTICS.transport === 'mock') {
-    ingest(payload);
-  } else if (ANALYTICS.transport === 'http') {
-    const body = JSON.stringify(payload);
-    if (unloading && navigator.sendBeacon) {
-      navigator.sendBeacon(ANALYTICS.endpoint, new Blob([body], { type: 'text/plain' }));
-    } else {
-      fetch(ANALYTICS.endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body, keepalive: true })
-        .catch(() => { queue = batch.concat(queue); }); // server down: keep the events for the next flush
-    }
-  } else {
-    console.log('[analytics] batch', payload); // eslint-disable-line no-console
+function scheduleFlush(ms) {
+  if (!flushTimer) flushTimer = setTimeout(flush, ms);
+}
+
+// POSTs the oldest waiting events; on success drops them from the outbox, on failure
+// keeps them and tries again later (backing off up to a minute while the backend is down)
+export async function flush() {
+  clearTimeout(flushTimer);
+  flushTimer = null;
+  if (inFlight || !queue.length) return;
+  inFlight = true;
+  const batch = queue.slice(0, MAX_PER_REQUEST);
+  try {
+    const res = await fetch(EVENTS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' }, // a simple request: no CORS preflight needed
+      body: JSON.stringify({ sent_at: new Date().toISOString(), player_id: playerId, session_id: sessionId, events: batch }),
+      keepalive: true,
+    });
+    // 4xx other than 429 means the batch itself is bad - retrying won't help
+    if (!res.ok && (res.status >= 500 || res.status === 429)) throw new Error(`HTTP ${res.status}`);
+    const sentIds = new Set(batch.map(e => e.event_id));
+    queue = queue.filter(e => !sentIds.has(e.event_id));
+    saveOutbox();
+    sent += batch.length;
+    retryDelay = 0;
+    if (queue.length) scheduleFlush(50);
+  } catch (e) {
+    retryDelay = Math.min(60000, retryDelay ? retryDelay * 2 : 5000);
+    if (ANALYTICS.debug) console.warn('[analytics] backend unreachable, retrying in', retryDelay, 'ms'); // eslint-disable-line no-console
+    scheduleFlush(retryDelay);
+  } finally {
+    inFlight = false;
   }
 }
 
-export function flush(options) {
-  clearTimeout(flushTimer);
-  flushTimer = null;
-  if (!queue.length) return;
-  const batch = queue;
-  queue = [];
-  send(batch, options);
+// When the tab is closing there's no time to wait for a response - hand everything to
+// sendBeacon. The events stay in the outbox; if they did arrive, the backend simply
+// ignores them when they're sent again next time.
+function flushOnExit() {
+  if (!queue.length || !navigator.sendBeacon) return;
+  let chunk = [];
+  let size = 0;
+  const post = () => {
+    if (!chunk.length) return;
+    navigator.sendBeacon(EVENTS_URL, new Blob([JSON.stringify({ events: chunk })], { type: 'text/plain' }));
+    chunk = [];
+    size = 0;
+  };
+  queue.forEach(ev => {
+    const evSize = JSON.stringify(ev).length + 1;
+    if (size + evSize > BEACON_LIMIT_BYTES) post();
+    chunk.push(ev);
+    size += evSize;
+  });
+  post();
 }
 
 /* ---------------- Automatic tracking ---------------- */
@@ -212,7 +262,7 @@ function onVisibility() {
     hiddenSince = performance.now();
     hiddenAt = performance.now();
     track('app_hidden', { screen: currentScreen() });
-    flush({ unloading: true });
+    flushOnExit();
   } else {
     const hiddenMs = hiddenAt ? Math.round(performance.now() - hiddenAt) : 0;
     if (screen && hiddenSince !== null) screen.hiddenMs += performance.now() - Math.max(hiddenSince, screen.start);
@@ -235,13 +285,15 @@ function endSession(reason) {
     last_screen: context.screen,
     reason,
   });
-  flush({ unloading: true });
+  flushOnExit();
 }
 
 let started = false;
 export function initAnalytics({ gameFlow } = {}) {
   if (started || !ANALYTICS.enabled) return;
   started = true;
+  // Anything left unsent from a previous visit goes out first
+  if (queue.length) scheduleFlush(1000);
 
   track('session_start', {
     viewport: `${window.innerWidth}x${window.innerHeight}`,

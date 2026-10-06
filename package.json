@@ -13,7 +13,8 @@
     "start": "react-scripts start",
     "electron": "electron .",
     "build": "react-scripts build",
-    "analytics-server": "node analytics-server/server.js"
+    "backend": "npm --prefix backend start",
+    "dashboard": "npm --prefix analytics-dashboard start"
   },
   "devDependencies": {
     "electron": "^27.0.0",

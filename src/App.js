@@ -14,11 +14,8 @@ import { PlayerLookContext } from './utils/playerLook';
 import { startAmbience, stopAmbience } from './ambience';
 import { AMBIENCE } from './config/ambience';
 import { initAnalytics, setContext, track, enterScreen } from './analytics';
-import { isDashboardRoute, openDashboard } from './analytics/route';
-import { ANALYTICS } from './config/analytics';
 
-// Only record a play session when the game itself is open (not the Analytics page)
-if (!isDashboardRoute()) initAnalytics({ gameFlow: GAME_FLOW });
+initAnalytics({ gameFlow: GAME_FLOW });
 
 // Sections that come before the player has been trained (no chef's hat yet)
 const PRE_TRAINING_SECTIONS = ['opening', 'job'];
@@ -120,18 +117,6 @@ function App() {
      <PlayerLookContext.Provider value={{ chefHat }}>
       <div className="app">
         <SoundToggle />
-        {ANALYTICS.showDashboardButton && (
-          <button
-            type="button"
-            className="ad-open-btn"
-            onClick={openDashboard}
-            title="Open the Analytics page (new tab)"
-            aria-label="Open the Analytics page"
-            data-sound="none"
-          >
-            📊
-          </button>
-        )}
         {phase === 'section' && Section && (
           <Section
             onComplete={handleSectionComplete}

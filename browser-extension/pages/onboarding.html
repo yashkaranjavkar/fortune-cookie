@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Personalization Profile - Set up</title>
+  <link rel="icon" href="../icons/icon-48.png">
+  <link rel="stylesheet" href="ui.css">
+  <style>
+    main { max-width: 640px; margin: 0 auto; padding: 32px 16px 48px; display: grid; gap: 20px; }
+    .facts { display: grid; gap: 12px; margin: 0 0 18px; padding: 0; list-style: none; }
+    .facts li { padding-left: 28px; position: relative; }
+    .facts li::before { position: absolute; left: 0; top: 0; font-weight: 700; }
+    .facts .yes::before { content: '✓'; color: var(--good); }
+    .facts .no::before { content: '✕'; color: var(--danger); }
+    .facts .info::before { content: '•'; color: var(--accent); font-size: 20px; line-height: 1; }
+    .facts b { color: var(--text); }
+    .agree { display: flex; gap: 10px; align-items: flex-start; font-weight: 600; cursor: pointer; }
+    .agree input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--accent); }
+    .actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .error { color: var(--danger); font-weight: 600; margin: 0; }
+    fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+    fieldset:disabled { opacity: .5; }
+    .done { text-align: center; }
+    .done img { width: 56px; }
+    .done h2 { margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="brand">
+      <img src="../icons/icon-128.png" alt="">
+      <div><small>Personalization Profile</small><h1>Set up</h1></div>
+    </div>
+
+    <section class="panel" id="consent">
+      <h2>Before you start</h2>
+      <p class="sub">This extension records which websites you use. Games and apps you choose can use this to personalise their content, so you don't have to fill in long questionnaires.</p>
+      <ul class="facts">
+        <li class="yes"><b>What it records:</b> the website's host name (for example <i>github.com</i>), how often you visit it each day, and how long it's the tab in front of you.</li>
+        <li class="no"><b>What it never records:</b> full addresses, page contents, searches, form entries, passwords, or anything in Incognito windows.</li>
+        <li class="info"><b>How long:</b> <span id="duration"></span></li>
+        <li class="info"><b>Where it's kept:</b> only in this browser. Nothing is sent anywhere. You choose when to export it.</li>
+        <li class="info"><b>You're in control:</b> pause at any time, remove any site, or delete everything from the dashboard. Removing the extension deletes all of it.</li>
+      </ul>
+      <label class="agree"><input type="checkbox" id="agree"> I understand what is collected and agree to take part.</label>
+    </section>
+
+    <form class="panel" id="details" novalidate>
+      <fieldset id="details-fields">
+        <h2 id="details-title">Your details</h2>
+        <p class="sub">Shared together with your browsing data when you export it.</p>
+
+        <div class="field">
+          <label class="field-label" for="employeeId">Employee ID <span class="req">*</span></label>
+          <input class="input" id="employeeId" inputmode="numeric" autocomplete="off" placeholder="e.g. 975211" required>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="designation">Designation <span class="req">*</span></label>
+          <input class="input" id="designation" list="designations" autocomplete="off" placeholder="Start typing, or enter your own" required>
+          <datalist id="designations"></datalist>
+        </div>
+
+        <div class="field">
+          <span class="field-label" id="age-label">Age <span class="req">*</span></span>
+          <div class="chips" role="radiogroup" aria-labelledby="age-label" id="age"></div>
+        </div>
+
+        <div class="field">
+          <span class="field-label" id="region-label">Region <span class="req">*</span></span>
+          <div class="chips" role="radiogroup" aria-labelledby="region-label" id="region"></div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" type="submit" id="submit">Start collecting</button>
+          <p class="error" id="error" role="alert"></p>
+        </div>
+      </fieldset>
+    </form>
+
+    <section class="panel done" id="done" hidden>
+      <img src="../icons/icon-128.png" alt="">
+      <h2 id="done-title">You're all set!</h2>
+      <p id="done-text"></p>
+      <div class="actions" style="justify-content:center">
+        <button class="btn" id="close">Close this tab</button>
+        <a href="dashboard.html">Open dashboard</a>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="onboarding.js"></script>
+</body>
+</html>

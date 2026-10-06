@@ -1,8 +1,8 @@
-// The catalogue of every analytics event the game sends - the contract a real backend
-// will implement later. The dummy backend (mockBackend.js) checks incoming events
-// against it and flags any type that isn't listed.
+// The catalogue of every analytics event the game sends - the API contract between
+// the game (client) and this backend. Incoming events are checked against it; types
+// that aren't listed are still stored, but counted as unknown in the ingest response.
 //
-// Every event is wrapped in the same envelope (added by src/analytics/index.js):
+// Every event is wrapped in the same envelope (added by the game client, src/analytics/index.js):
 //   event_id     unique id of this event
 //   type         one of the keys below
 //   ts           ISO timestamp (client clock)
@@ -16,7 +16,7 @@
 // `use` says what each event is for: insight (understand behaviour), difficulty
 // (tune the game), personalization (adapt the game to this player).
 
-export const EVENT_CATALOG = {
+const EVENT_CATALOG = {
   /* ---------- Session & app ---------- */
   session_start: {
     use: 'insight',
@@ -90,3 +90,5 @@ export const EVENT_CATALOG = {
   supervisor_revoke_reason: { use: 'personalization', fields: ['row', 'fortune', 'reason'] },
   supervisor_checklist_submitted: { use: 'personalization', fields: ['decisions', 'revoke_reasons', 'decision_ms'] },
 };
+
+module.exports = { EVENT_CATALOG };

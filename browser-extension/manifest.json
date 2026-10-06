@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Personalization Profile",
+  "short_name": "Personalization",
+  "version": "0.2.0",
+  "description": "Records which websites you use over 2-3 weeks so games and apps you choose can personalise themselves. Host names only, stored on this device.",
+  "icons": { "128": "icons/icon-128.png", "48": "icons/icon-48.png", "16": "icons/icon-16.png" },
+  "action": {
+    "default_title": "Personalization Profile",
+    "default_popup": "pages/popup.html",
+    "default_icon": { "16": "icons/icon-16.png", "48": "icons/icon-48.png" }
+  },
+  "background": { "service_worker": "background.js", "type": "module" },
+  "options_page": "pages/dashboard.html",
+  "permissions": ["tabs", "storage", "alarms", "idle"],
+  "incognito": "not_allowed",
+  "minimum_chrome_version": "116"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "fortunery-analytics-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aggregate analytics dashboard for Fortunery - reads the analytics backend's REST API",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  }
+}

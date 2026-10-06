@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fortunery Analytics</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Mulish:wght@400;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <div>
+        <h1>Fortunery Analytics</h1>
+        <p class="sub" id="sub">Across all players</p>
+      </div>
+      <div class="actions">
+        <button type="button" id="refresh">Refresh</button>
+        <div class="menu">
+          <button type="button" id="download" aria-expanded="false" aria-haspopup="true">Download ▾</button>
+          <div class="menu-list" id="download-menu" hidden>
+            <button type="button" data-path="/export/players.csv"><b>Players (CSV)</b><span>One row per player - opens in Excel / Sheets</span></button>
+            <button type="button" data-path="/export/events.csv"><b>Activity (CSV)</b><span>One row per action</span></button>
+            <button type="button" data-path="/export/all.json"><b>All data (JSON)</b><span>Everything - for developers</span></button>
+          </div>
+        </div>
+        <button type="button" id="signout" hidden>Sign out</button>
+      </div>
+    </div>
+    <form class="filters" id="filters">
+      <label>Period
+        <select name="period">
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+          <option value="90">Last 90 days</option>
+          <option value="all" selected>All time</option>
+        </select>
+      </label>
+      <label>Designation
+        <select name="designation"><option value="">Everyone</option></select>
+      </label>
+      <label>Region
+        <select name="region"><option value="">Everywhere</option></select>
+      </label>
+    </form>
+  </header>
+
+  <main id="main">
+    <div class="panel empty">Loading…</div>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "fortunery-backend",
+  "version": "1.0.0",
+  "description": "Player analytics REST API for the Fortunery game (Node + SQLite, no dependencies)",
+  "main": "src/server.js",
+  "private": true,
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server.js",
+    "dev": "node --disable-warning=ExperimentalWarning --watch src/server.js",
+    "test": "node --disable-warning=ExperimentalWarning test/smoke.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}
