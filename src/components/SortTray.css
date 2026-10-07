@@ -50,6 +50,12 @@
   filter: drop-shadow(0 0 8px color-mix(in srgb, var(--tone) 55%, transparent));
 }
 .sort-tray.ready .sort-tray-well { outline: 3px dashed var(--tone); outline-offset: -8px; }
+/* the carried strip is right over this tray - it'll land here if let go */
+.drop-zone.sort-tray.ready.over {
+  transform: scale(1.08);
+  filter: drop-shadow(0 0 16px color-mix(in srgb, var(--tone) 80%, transparent));
+}
+.sort-tray.ready.over .sort-tray-well { outline-style: solid; }
 
 /* trays keep their own footprint in the truck / instruction phases */
 .drop-zone.sort-tray.centered { margin: 0 auto; position: relative; }

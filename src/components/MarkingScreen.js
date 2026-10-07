@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import TimerDial from './TimerDial';
-import { playSound } from '../sounds';
+import { playSound, startLoop, preloadLoop } from '../sounds';
 import { useMascotTrigger } from '../config/mascotTriggers';
 import { track, startTimer } from '../analytics';
 import './MarkingScreen.css';
@@ -60,6 +60,45 @@ export default function MarkingScreen({ faultyItems, onNext }) {
     return () => clearInterval(interval);
   }, []);
 
+  // Marker sound while the player drags across a fortune: a looping felt-tip-on-paper
+  // rasp that gets louder the faster they move and fades when they hold still, so it
+  // sounds like the stroke itself. It stops when they let go.
+  const stroke = useRef(null);
+  useEffect(() => {
+    preloadLoop('highlight-stroke');
+    return () => stopStroke();
+  }, []); // eslint-disable-line
+
+  const stopStroke = () => {
+    const s = stroke.current;
+    if (!s) return;
+    clearTimeout(s.idle);
+    window.removeEventListener('pointermove', s.move);
+    window.removeEventListener('pointerup', stopStroke);
+    window.removeEventListener('pointercancel', stopStroke);
+    s.loop.stop();
+    stroke.current = null;
+  };
+
+  const startStroke = (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    stopStroke();
+    const s = { loop: startLoop('highlight-stroke'), x: e.clientX, y: e.clientY, t: performance.now(), idle: null };
+    s.move = (ev) => {
+      const now = performance.now();
+      const dt = Math.max(1, now - s.t);
+      const speed = Math.hypot(ev.clientX - s.x, ev.clientY - s.y) / dt; // px per ms
+      s.x = ev.clientX; s.y = ev.clientY; s.t = now;
+      s.loop.setLevel(0.35 + Math.min(0.65, speed / 0.8)); // any movement is audible; faster is louder
+      clearTimeout(s.idle);
+      s.idle = setTimeout(() => s.loop.setLevel(0), 90); // holding still: the marker goes quiet
+    };
+    window.addEventListener('pointermove', s.move);
+    window.addEventListener('pointerup', stopStroke);
+    window.addEventListener('pointercancel', stopStroke);
+    stroke.current = s;
+  };
+
   const handleMouseUp = (index) => {
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed) return;
@@ -82,7 +121,6 @@ export default function MarkingScreen({ faultyItems, onNext }) {
         return newHighlights;
       });
       selection.removeAllRanges();
-      playSound('highlight-mark');
     }
   };
 
@@ -136,6 +174,7 @@ export default function MarkingScreen({ faultyItems, onNext }) {
             <div
               className="fortune-paper"
               ref={el => cardRefs.current[index] = el}
+              onPointerDown={startStroke}
               onMouseUp={() => handleMouseUp(index)}
             >
               <HighlightedText text={faultyItems[index].text} selectedText={highlights[index]} />

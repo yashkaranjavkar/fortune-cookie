@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useScreen, track } from '../analytics';
+import { useStageCursor } from '../utils/cursor';
 
 // Generic runner for a section's ordered step list (see src/config/steps/*.js for the
 // actual configs). Each step is:
-//   { key, skip?: (ctx) => bool, render: (ctx, nav) => JSX }
+//   { key, skip?: (ctx) => bool, cursor?: 'glove' | 'highlighter' | 'torch' | 'pen', render: (ctx, nav) => JSX }
+// `cursor` switches the mouse cursor while that step is on screen (src/utils/cursor.js);
+// without one, the normal arrow is used.
 // `ctx` is whatever the section passes in as `context` - its own local state/setters
 // plus anything from its own props (onComplete, tutorialShown, ...). `nav` exposes
 // next/back/goto so a step's render function moves through the list by name instead
@@ -23,6 +26,7 @@ export default function SectionRunner({ steps, context }) {
 
   const current = steps[index];
   useScreen(current ? current.key : null);
+  useStageCursor(current ? current.cursor : null);
 
   const nav = {
     next: () => {

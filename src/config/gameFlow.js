@@ -27,14 +27,14 @@ export const SECTIONS = {
 // sorting round, set:
 //   export const GAME_FLOW = ['job', 'training', 'level1', 'finalTrays'];
 export const GAME_FLOW = [
-  'opening',
-  'job',
+  //'opening',
+  //'job',
   'training',
   'level1',
   //'level2',
   //'level3',
   //'supervisor',
-  //'finalTrays'
+  'finalTrays'
 ];
 
 // How many trays the tray-sorting minigame runs through - shared by Training's own

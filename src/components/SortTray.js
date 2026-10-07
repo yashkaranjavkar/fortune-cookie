@@ -11,15 +11,16 @@ const CookieChip = ({ broken }) => (
 
 // A sorting tray that fortunes are dragged into.
 // type: 'faulty' | 'approved'; items: one entry per sorted cookie; dragging: a strip is being dragged.
+// over: the carried strip is right above this tray (it'll land here if let go).
+// The tray is a drop target for usePointerDrag via data-drop={type}.
 // children (optional): shown in the well instead of chips - used by the demo, which only ever holds one item and wants its actual text visible.
 // label (optional): overrides the tab text, e.g. "Marked Tray" once the batch has moved past sorting.
-export default function SortTray({ type, items = [], dragging = false, className = '', onDragOver, onDrop, children, label }) {
+export default function SortTray({ type, items = [], dragging = false, over = false, className = '', children, label }) {
   const tabLabel = label || (type === 'faulty' ? 'Faulty Tray' : 'Approved Tray');
   return (
     <div
-      className={`drop-zone ${type}-zone sort-tray sort-tray-${type}${dragging ? ' ready' : ''} ${className}`}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
+      className={`drop-zone ${type}-zone sort-tray sort-tray-${type}${dragging ? ' ready' : ''}${over ? ' over' : ''} ${className}`}
+      data-drop={type}
     >
       <div className="sort-tray-tab">{tabLabel}</div>
       <TrayFrame type={type} />

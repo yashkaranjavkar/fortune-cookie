@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SortTray from './SortTray';
+import usePointerDrag from '../utils/usePointerDrag';
+import FortuneFocus from './FortuneFocus';
 import BalloonCluster from './BalloonCluster';
 import RulesOverlay from './RulesOverlay';
 import InvalidURLExplainer from './InvalidURLExplainer';
@@ -54,7 +56,13 @@ export default function Level2Game({ onComplete, onSkip }) {
     Array.from({ length: TOTAL }, () => ({ status: 'closed' }))
   );
   const [activeDome, setActiveDome] = useState(null);
-  const [dragging, setDragging] = useState(false);
+  // Fortune strips are carried with the pointer (closed-fist cursor) - see usePointerDrag
+  const drag = usePointerDrag({
+    onStart: () => playSound('slip-pickup'),
+    onDrop: (tray) => handleDrop(tray),
+    onMiss: () => handleDragEnd(),
+  });
+  const dragging = drag.dragging;
   const [timer, setTimer] = useState(10);
   const [sortedCount, setSortedCount] = useState(0);
   const [faultyItems, setFaultyItems] = useState([]);
@@ -123,17 +131,9 @@ export default function Level2Game({ onComplete, onSkip }) {
     hoverTimeout.current = null;
   };
 
-  const handleDragStart = (e) => {
-    e.dataTransfer.setData('domeIndex', activeDome);
-    e.dataTransfer.effectAllowed = 'move';
-    setDragging(true);
-    playSound('slip-pickup');
-  };
-
-  const handleDrop = (e, trayType) => {
-    e.preventDefault();
-    setDragging(false);
-    const index = Number(e.dataTransfer.getData('domeIndex'));
+  const handleDrop = (trayType) => {
+    const index = activeDome;
+    if (index === null) return;
     clearInterval(intervalRef.current);
     stats.sorted(index, domes[index].fortune, trayType, timer);
 
@@ -163,7 +163,7 @@ export default function Level2Game({ onComplete, onSkip }) {
   const handleWaste = (index, reason = 'timer') => {
     clearInterval(intervalRef.current);
     stats.timedOut(index, domes[index].fortune, reason);
-    setDragging(false);
+    drag.cancel();
     setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'wasted' } : d));
     setActiveDome(null);
     playSound('time-up');
@@ -180,10 +180,7 @@ export default function Level2Game({ onComplete, onSkip }) {
     }
   };
 
-  const handleDragOver = (e) => e.preventDefault();
-
   const handleDragEnd = () => {
-    setDragging(false);
     if (activeDome !== null && domes[activeDome].status === 'open') {
       handleWaste(activeDome, 'dropped_outside_tray');
     }
@@ -226,7 +223,7 @@ export default function Level2Game({ onComplete, onSkip }) {
           <div className="level1-game-layout">
             {/* Faulty Tray */}
             <SortTray type="faulty" items={faultyItems} dragging={dragging}
-              onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'faulty')} />
+              over={drag.over === 'faulty'} />
 
             {/* 5 Domes Tray */}
             <div className="domes-tray domes-tray-5">
@@ -241,16 +238,10 @@ export default function Level2Game({ onComplete, onSkip }) {
 
                   {dome.status === 'open' && (
                     <>
-                      <div className="timer-display">{timer < 10 ? `0${timer}` : timer}</div>
                       <img src={domeLifted} alt="Dome Lifted" className="dome-img" />
-                      <div
-                        className={`fortune-drag fortune-slip${dragging ? ' dragging' : ''}`}
-                        draggable={true}
-                        onDragStart={handleDragStart}
-                        onDragEnd={handleDragEnd}
-                      >
-                        {dome.fortune.text}
-                      </div>
+                      {/* the fortune itself is shown big in the middle of the screen */}
+                      <FortuneFocus text={dome.fortune.text} timer={timer} dragging={dragging} handleProps={drag.handleProps} />
+                      {drag.ghost(<div className="fortune-drag fortune-slip fortune-focus-slip">{dome.fortune.text}</div>, 'compact')}
                     </>
                   )}
 
@@ -272,7 +263,7 @@ export default function Level2Game({ onComplete, onSkip }) {
 
             {/* Approved Tray */}
             <SortTray type="approved" items={approvedItems} dragging={dragging}
-              onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'approved')} />
+              over={drag.over === 'approved'} />
           </div>
 
           <div className="level1-footer">

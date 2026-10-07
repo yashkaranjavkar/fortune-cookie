@@ -103,26 +103,6 @@ function TrainingFloor() {
   );
 }
 
-function Demo() {
-  return (
-    <Room wall="#FBF0DA" floor="#E8C38F" floorLine="#CFA46B">
-      <rect x={140} y={28} width={320} height={176} rx="12" fill="#2A2116" stroke="#5A2C0C" strokeWidth="8" />
-      {[200, 260, 320, 380].map(cx => <Dome key={cx} cx={cx} base={140} w={22} h={24} />)}
-      <circle cx={420} cy={66} r="18" fill="none" stroke="#F7C948" strokeWidth="4" />
-      <text className="rv-small" x={420} y={72} textAnchor="middle" fill="#F7C948">10</text>
-      <rect x={180} y={160} width={240} height={10} rx="5" fill="#5A4632" />
-      <rect x={180} y={160} width={150} height={10} rx="5" fill="#F7C948" className="rv-progress" />
-      <rect x={110} y={222} width={380} height={18} rx="6" fill="#8A5228" />
-      <rect x={130} y={238} width={14} height={40} fill="#5A2C0C" />
-      <rect x={456} y={238} width={14} height={40} fill="#5A2C0C" />
-      <rect x={244} y={192} width={112} height={32} rx="16" fill="#8E2A37" stroke="#3E0A12" strokeWidth="3" />
-      <circle cx={270} cy={208} r="6" fill="#FFF1DC" />
-      <circle cx={322} cy={204} r="4" fill="#F7C948" />
-      <circle cx={334} cy={212} r="4" fill="#F4A9C0" />
-    </Room>
-  );
-}
-
 function Briefing() {
   return (
     <Room wall="#EDE7D6" floor="#A7BE93" floorLine="#90A97C">
@@ -312,7 +292,6 @@ function Fallback({ icon }) {
 const VIGNETTES = {
   reception: Reception,
   trainingFloor: TrainingFloor,
-  demo: Demo,
   briefing: Briefing,
   line1: makeLine(4, 'LINE 1'),
   line2: makeLine(5, 'LINE 2'),

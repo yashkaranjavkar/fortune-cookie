@@ -43,6 +43,7 @@ export const LEVEL1_STEPS = [
 
   {
     key: 'game',
+    cursor: 'glove',
     render: (ctx, nav) => (
       <Level1Game
         onComplete={(items, approved) => { ctx.setFaultyItems(items); ctx.setApprovedItems(approved); nav.next(); }}
@@ -72,6 +73,7 @@ export const LEVEL1_STEPS = [
 
   {
     key: 'marking',
+    cursor: 'highlighter',
     render: (ctx, nav) => (
       <MarkingScreen faultyItems={ctx.faultyItems} onNext={(data) => { ctx.setMarkedFortunes(data); nav.next(); }} />
     )
@@ -85,6 +87,7 @@ export const LEVEL1_STEPS = [
 
   {
     key: 'torchInspect',
+    cursor: 'glove',
     render: (ctx, nav) => (
       <TorchInspectScreen
         markedFortunes={ctx.markedFortunes}

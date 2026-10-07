@@ -14,6 +14,7 @@ import { PlayerLookContext } from './utils/playerLook';
 import { startAmbience, stopAmbience } from './ambience';
 import { AMBIENCE } from './config/ambience';
 import { initAnalytics, setContext, track, enterScreen } from './analytics';
+import { useStageCursor } from './utils/cursor';
 
 initAnalytics({ gameFlow: GAME_FLOW });
 
@@ -67,6 +68,8 @@ function App() {
     sectionStartRef.current = performance.now();
     track('section_start', { section: sectionKey, index: sectionIndex });
   }, [sectionKey, sectionIndex, phase]);
+  // No cursor while the player walks across the factory map - there's nothing to click
+  useStageCursor(phase === 'walk' ? 'hidden' : null);
   // The walk + "Now entering" card are screens of their own
   useEffect(() => {
     if (phase === 'walk') enterScreen(`walk_to_${toStops ? toStops.start : 'next'}`);
@@ -78,7 +81,11 @@ function App() {
       section: sectionKey,
       duration_ms: sectionStartRef.current ? Math.round(performance.now() - sectionStartRef.current) : null,
     });
+    // Already standing where the next section starts (e.g. Training ends in the
+    // Briefing Room, where Level 1's rules begin) - no walk, no "Now entering" card
+    const alreadyThere = fromStops && toStops && fromStops.end === toStops.start;
     if (!nextSectionKey) setSectionIndex(i => i + 1); // past the end - renders nothing
+    else if (alreadyThere) startNextSection();
     else if (toStops && toStops.walkIn) setPhase('walk');
     else showRoomIntroOrStart();
   };

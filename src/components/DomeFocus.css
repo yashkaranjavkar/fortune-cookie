@@ -25,3 +25,73 @@
 @media (prefers-reduced-motion: reduce) {
   .dome-focus-backdrop { animation: none; }
 }
+
+/* ---- The open fortune, big in the middle of the screen (FortuneFocus.js) ----
+   Sits above the dimmed backdrop, between the two trays, with its countdown on top. */
+.fortune-focus {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 60;
+  width: min(460px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  pointer-events: none; /* only the card itself is grabbable */
+  animation: fortune-focus-in 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+.fortune-focus-timer {
+  font-family: var(--font-sans);
+  font-size: 34px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: #FFE9B0;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(28, 20, 14, 0.88);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+}
+.fortune-focus-timer.urgent { color: #FF6B5B; animation: fortune-timer-pulse 0.5s ease-in-out infinite alternate; }
+
+/* the card: same paper slip as before, just big and easy to read */
+.fortune-drag.fortune-slip.fortune-focus-slip {
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+  z-index: auto;
+  width: 100%;
+  padding: 30px 36px;
+  font-size: 22px;
+  line-height: 1.5;
+  overflow-wrap: anywhere; /* long links wrap instead of spilling out */
+  pointer-events: auto;
+  box-shadow: 0 0 0 1px rgba(255, 230, 180, 0.25), 0 18px 40px rgba(0, 0, 0, 0.55), 0 0 60px rgba(255, 210, 130, 0.18);
+}
+.fortune-drag.fortune-slip.fortune-focus-slip::before { top: 10px; }
+.fortune-drag.fortune-slip.fortune-focus-slip::after { bottom: 10px; }
+/* while it's being carried: a faint "this is where it came from", and out of the way of drops */
+.fortune-drag.fortune-slip.fortune-focus-slip.dragging { opacity: 0.3; pointer-events: none; }
+
+.fortune-focus-hint {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: rgba(255, 240, 215, 0.75);
+}
+
+/* the copy you carry shrinks, so it doesn't hide the trays you're aiming for */
+.drag-ghost.compact { transform: rotate(-3deg) scale(0.55); }
+
+@keyframes fortune-focus-in {
+  from { opacity: 0; transform: translate(-50%, -46%) scale(0.85); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes fortune-timer-pulse { from { transform: scale(1); } to { transform: scale(1.12); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .fortune-focus, .fortune-focus-timer.urgent { animation: none; }
+}

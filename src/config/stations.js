@@ -10,7 +10,6 @@
 export const STOPS = {
   reception: { icon: '💼', label: 'Reception', blurb: 'Where every new inspector checks in.' },
   trainingFloor: { icon: '🧺', label: 'Training Floor', blurb: 'Practice trays - get a feel for the fortunes before the real batches.' },
-  demo: { icon: '🎮', label: 'Demo Table', blurb: 'Try the sorting controls once before you go live.' },
   briefing: { icon: '📋', label: 'Briefing Room', blurb: 'Learn the rules for this batch before you touch a single cookie.' },
   line1: { icon: '🍪', label: 'Production Line 1', blurb: 'Four domes. Sort each fortune before its timer runs out.' },
   line2: { icon: '🍪', label: 'Production Line 2', blurb: 'Five domes, and now the context matters too.' },
@@ -29,6 +28,9 @@ export const STOPS = {
 //   roomIntroIn - "Now entering" card for the `start` room
 // Comment either line out (or set it to false) to skip that screen for that section.
 // The first section in GAME_FLOW never plays them - there's nothing to arrive from.
+// When a section starts in the same room the previous one ended in (e.g. Training ends
+// in the Briefing Room and Level 1's rules start there), both screens are skipped -
+// the player is already there.
 // A section with no entry here (like 'opening', the title screen) isn't on the map, so
 // a walk leaving it starts from the middle of the corridor - i.e. walking in.
 // (Transitions INSIDE a section are steps in src/config/steps/*.js instead.)
@@ -39,7 +41,7 @@ export const SECTION_STOPS = {
     roomIntroIn: true,
   },
   training: {
-    start: 'trainingFloor', end: 'demo', title: 'Training',
+    start: 'trainingFloor', end: 'briefing', title: 'Training',
     walkIn: true,
     roomIntroIn: true,
   },

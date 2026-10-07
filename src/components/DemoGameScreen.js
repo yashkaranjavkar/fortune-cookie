@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SortTray from './SortTray';
+import usePointerDrag from '../utils/usePointerDrag';
 import { playSound } from '../sounds';
 import { track } from '../analytics';
 import { useMascotTrigger } from '../config/mascotTriggers';
@@ -40,8 +41,14 @@ export default function DemoGameScreen({ onComplete }) {
   const [timer, setTimer] = useState(DEMO_SECONDS);
   const [fortuneText, setFortuneText] = useState('');
   const [placedIn, setPlacedIn] = useState(null); // 'approved' | 'faulty'
-  const [dragging, setDragging] = useState(false);
   const [attempts, setAttempts] = useState(1);
+  // The strip is carried with the pointer (closed-fist cursor) - see usePointerDrag.
+  // Letting go outside a tray just puts it back.
+  const drag = usePointerDrag({
+    onStart: () => playSound('slip-pickup'),
+    onDrop: (tray) => handleDrop(tray),
+  });
+  const dragging = drag.dragging;
   const hoverTimeout = useRef(null);
   const intervalRef = useRef(null);
   const revealedAt = useRef(null);
@@ -72,6 +79,7 @@ export default function DemoGameScreen({ onComplete }) {
       setTimer(prev => {
         if (prev <= 1) {
           clearInterval(intervalRef.current);
+          drag.cancel(); // time's up - the strip is gone, so let go of it
           setPhase('wasted');
           playSound('time-up');
           playSound('cookie-break');
@@ -87,18 +95,9 @@ export default function DemoGameScreen({ onComplete }) {
 
   useEffect(() => () => clearTimeout(hoverTimeout.current), []);
 
-  const handleDragStart = (e) => {
-    e.dataTransfer.setData('text/plain', 'fortune');
-    e.dataTransfer.effectAllowed = 'move';
-    setDragging(true);
-    playSound('slip-pickup');
-  };
-
-  const handleDrop = (e, tray) => {
-    e.preventDefault();
-    clearInterval(intervalRef.current);
-    setDragging(false);
+  const handleDrop = (tray) => {
     if (phase !== 'revealed') return;
+    clearInterval(intervalRef.current);
     track('demo_fortune_sorted', {
       tray,
       fortune: fortuneText,
@@ -116,7 +115,7 @@ export default function DemoGameScreen({ onComplete }) {
     clearTimeout(hoverTimeout.current);
     setTimer(DEMO_SECONDS);
     setPlacedIn(null);
-    setDragging(false);
+    drag.cancel();
     setAttempts(prev => prev + 1);
     setPhase('idle');
   };
@@ -152,12 +151,11 @@ export default function DemoGameScreen({ onComplete }) {
             <img src={domeLifted} alt="Lifted Dome" className="dome-img" />
             <div
               className={`demo-fortune-strip draggable${dragging ? ' dragging' : ''}`}
-              draggable="true"
-              onDragStart={handleDragStart}
-              onDragEnd={() => setDragging(false)}
+              {...drag.handleProps}
             >
               {fortuneText}
             </div>
+            {drag.ghost(<div className="demo-fortune-strip">{fortuneText}</div>)}
           </div>
         )}
 
@@ -183,8 +181,7 @@ export default function DemoGameScreen({ onComplete }) {
               key={type}
               type={type}
               dragging={dragging}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => handleDrop(e, type)}
+              over={drag.over === type}
             >
               {placedIn === type && strip}
             </SortTray>

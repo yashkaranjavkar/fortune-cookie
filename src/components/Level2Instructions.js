@@ -88,7 +88,8 @@ export function TorchInspectScreen({ markedFortunes, onNext }) {
   const [torchValue, setTorchValue] = useState(0);
   const [totalScore, setTotalScore] = useState(0);
   const isRevealed = torchValue >= 95;
-  const torchStarted = useRef(false);
+  // Each slide of the torch (a new grab or press on the rail) makes one card-swipe sound
+  const swipePlayed = useRef(false);
   const currency = useCurrency();
 
   const fortunes = (markedFortunes && markedFortunes.length > 0)
@@ -104,7 +105,7 @@ export function TorchInspectScreen({ markedFortunes, onNext }) {
 
   useEffect(() => {
     setTorchValue(0);
-    torchStarted.current = false;
+    swipePlayed.current = false;
   }, [currentIndex]);
 
   const currentFortune = fortunes[currentIndex];
@@ -138,6 +139,44 @@ export function TorchInspectScreen({ markedFortunes, onNext }) {
     }
   };
 
+  const setTorch = (value) => {
+    if (value !== torchValue && !swipePlayed.current) {
+      swipePlayed.current = true;
+      playSound('torch-swipe');
+    }
+    setTorchValue(value);
+  };
+
+  // The torch itself can be grabbed anywhere and slid along the rail (closed-fist
+  // cursor while held). The rail underneath still works too, including the keyboard.
+  const railRef = useRef(null);
+  const stopTorchDrag = useRef(null);
+  useEffect(() => () => stopTorchDrag.current && stopTorchDrag.current(), []);
+  const grabTorch = (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault();
+    swipePlayed.current = false;
+    const railWidth = railRef.current.getBoundingClientRect().width;
+    const startX = e.clientX;
+    const startValue = torchValue;
+    const move = (ev) => {
+      const value = startValue + ((ev.clientX - startX) / railWidth) * 100;
+      setTorch(Math.round(Math.max(0, Math.min(100, value))));
+    };
+    const stop = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', stop);
+      window.removeEventListener('pointercancel', stop);
+      document.body.classList.remove('is-grabbing');
+      stopTorchDrag.current = null;
+    };
+    document.body.classList.add('is-grabbing');
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', stop);
+    window.addEventListener('pointercancel', stop);
+    stopTorchDrag.current = stop;
+  };
+
   // The strip is only lit up to where the torch has swept, with a soft glow at the leading edge.
   const litTo = Math.min(torchValue + 6, 100);
   const revealMask = `linear-gradient(to right, #000 0%, #000 ${torchValue}%, transparent ${litTo}%)`;
@@ -151,24 +190,35 @@ export function TorchInspectScreen({ markedFortunes, onNext }) {
       </div>
 
       <div className="ti-scene">
-        <div className="torch-slider-wrapper">
+        <div className="torch-slider-wrapper" ref={railRef}>
           <input
             type="range"
             min="0"
             max="100"
             value={torchValue}
-            onChange={(e) => {
-              const value = Number(e.target.value);
-              if (value > 0 && !torchStarted.current) {
-                torchStarted.current = true;
-                playSound('torch-on');
-              }
-              setTorchValue(value);
-            }}
+            onChange={(e) => setTorch(Number(e.target.value))}
+            onPointerDown={() => { swipePlayed.current = false; }}
             className="torch-slider"
+            aria-label="Slide the torch"
           />
           <div className="torch-handle-container" style={{ left: `${torchValue}%` }}>
-            <img src={torch} alt="Torch" className="ti-torch-img" />
+            <img
+              src={torch}
+              alt="Torch"
+              className="ti-torch-img"
+              draggable={false}
+              onPointerDown={grabTorch}
+            />
+            {/* "Slide me" hint - chevrons that light up one after another, left to right */}
+            {!isRevealed && (
+              <div className="ti-torch-arrows" aria-hidden="true">
+                {[0, 1, 2].map(i => (
+                  <svg key={i} viewBox="0 0 12 20" width="12" height="20" style={{ animationDelay: `${i * 0.18}s` }}>
+                    <path d="M2 2l8 8-8 8" />
+                  </svg>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

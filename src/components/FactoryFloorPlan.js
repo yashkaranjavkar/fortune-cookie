@@ -28,7 +28,6 @@ export const ROOMS = {
 const STOP_SPOTS = {
   reception:     { room: 'reception',  spot: [125, 225] },
   trainingFloor: { room: 'training',   spot: [300, 215] },
-  demo:          { room: 'training',   spot: [455, 212] },
   briefing:      { room: 'briefing',   spot: [620, 228] },
   line1:         { room: 'production', spot: [815, 85] },
   line2:         { room: 'production', spot: [815, 165] },
@@ -118,6 +117,43 @@ function Crate({ x, y, s = 32 }) {
   );
 }
 
+// Wooden floorboards seen from above: long, narrow boards laid in rows. Each row's
+// butt joints fall at different points (so it reads as a floor, not a brick wall),
+// with a slight colour difference between boards and a faint lengthwise grain.
+const PLANK_W = 288;
+const PLANK_ROW = 12;
+const PLANK_JOINTS = [[64, 232], [150], [22, 196], [108, 270], [40, 178], [124, 250]];
+
+function PlankPattern({ id, tones, seam, grain }) {
+  const parts = [];
+  PLANK_JOINTS.forEach((joints, r) => {
+    const y = r * PLANK_ROW;
+    const edges = [0, ...joints, PLANK_W];
+    for (let i = 0; i < edges.length - 1; i++) {
+      const x = edges[i];
+      const w = edges[i + 1] - x;
+      // The last board runs off the tile's edge into the first board of the next tile,
+      // so both pieces share a colour
+      const last = i === edges.length - 2;
+      const tone = tones[((last ? 0 : i) + r * 2) % tones.length];
+      parts.push(<rect key={`b${r}-${i}`} x={x} y={y} width={w} height={PLANK_ROW} fill={tone} />);
+      if (w > 30) {
+        const gy = y + (i % 2 ? 4 : 7.5);
+        parts.push(
+          <path key={`g${r}-${i}`} d={`M${x + 6} ${gy} q${w / 3} -1.6 ${w - 14} 0.4`} stroke={grain} strokeWidth="0.7" fill="none" opacity="0.55" />
+        );
+      }
+    }
+    parts.push(<rect key={`s${r}`} y={y + PLANK_ROW - 1} width={PLANK_W} height="1" fill={seam} />);
+    joints.forEach(j => parts.push(<rect key={`j${r}-${j}`} x={j} y={y} width="1" height={PLANK_ROW} fill={seam} />));
+  });
+  return (
+    <pattern id={id} width={PLANK_W} height={PLANK_ROW * PLANK_JOINTS.length} patternUnits="userSpaceOnUse">
+      {parts}
+    </pattern>
+  );
+}
+
 function Defs() {
   return (
     <defs>
@@ -126,19 +162,17 @@ function Defs() {
         <rect width="14" height="14" fill="#F3DEB6" />
         <rect x="14" y="14" width="14" height="14" fill="#F3DEB6" />
       </pattern>
-      <pattern id="fp-planks" width="96" height="36" patternUnits="userSpaceOnUse">
-        <rect width="96" height="36" fill="#C98B4E" />
-        <rect y="17" width="96" height="1.5" fill="#A86E38" />
-        <rect y="35" width="96" height="1.5" fill="#A86E38" />
-        <rect x="30" width="1.5" height="18" fill="#A86E38" />
-        <rect x="78" y="18" width="1.5" height="18" fill="#A86E38" />
-      </pattern>
-      <pattern id="fp-planks-light" width="96" height="36" patternUnits="userSpaceOnUse">
-        <rect width="96" height="36" fill="#E8C38F" />
-        <rect y="17" width="96" height="1.5" fill="#CFA46B" />
-        <rect y="35" width="96" height="1.5" fill="#CFA46B" />
-        <rect x="30" width="1.5" height="18" fill="#CFA46B" />
-        <rect x="78" y="18" width="1.5" height="18" fill="#CFA46B" />
+      <PlankPattern id="fp-planks" tones={['#C98B4E', '#C2844A', '#D09457', '#BD8046']} seam="#94592B" grain="#A66C37" />
+      <PlankPattern id="fp-planks-light" tones={['#E8C38F', '#E1BA84', '#EDCB9B', '#DCB47D']} seam="#BF9660" grain="#C9A06A" />
+      {/* Corridor: smooth sealed factory floor with an expansion joint every few metres */}
+      <pattern id="fp-corridor" width="150" height="70" y="320" patternUnits="userSpaceOnUse">
+        <rect width="150" height="70" fill="#D9CFBC" />
+        <ellipse cx="50" cy="28" rx="46" ry="16" fill="#E2D9C7" opacity="0.35" />
+        <ellipse cx="115" cy="50" rx="34" ry="11" fill="#D1C6B1" opacity="0.25" />
+        <circle cx="20" cy="54" r="1.2" fill="#BFB39C" />
+        <circle cx="96" cy="17" r="1" fill="#BFB39C" />
+        <circle cx="131" cy="61" r="1.3" fill="#BFB39C" />
+        <rect x="0" width="1.5" height="70" fill="#BDB19A" />
       </pattern>
       <pattern id="fp-carpet" width="18" height="18" patternUnits="userSpaceOnUse">
         <rect width="18" height="18" fill="#A7BE93" />
@@ -199,16 +233,13 @@ function Furnishings() {
       <rect x={46} y={262} width={26} height={22} rx="5" fill="#8E2A37" />
       <rect x={80} y={262} width={26} height={22} rx="5" fill="#8E2A37" />
 
-      {/* Training floor: three tray tables + the demo table */}
+      {/* Training floor: three tray tables */}
       {[258, 343, 428].map(x => (
         <g key={x}>
           <Counter x={x} y={62} w={70} h={44} />
           {[16, 35, 54].map(dx => <circle key={dx} cx={x + dx} cy={82} r="7" fill="#DE8F33" stroke="#7A3E12" strokeWidth="1.5" />)}
         </g>
       ))}
-      <Counter x={412} y={240} w={86} h={46} fill="#8A5228" lip="#5A2C0C" />
-      <rect x={428} y={247} width={54} height={24} rx="3" fill="#2A2116" />
-      <ellipse cx={455} cy={260} rx={10} ry={7} fill="#D9D3C4" />
 
       {/* Briefing room: whiteboard + rows of chairs */}
       <rect x={560} y={34} width={120} height={18} rx="3" fill="#FFFFFF" stroke="#8C877A" strokeWidth="2" />
@@ -337,7 +368,7 @@ function FactoryFloorPlan({ destRoom }) {
       <Defs />
       <Grounds />
 
-      <rect x={20} y={320} width={1160} height={70} fill="url(#fp-planks)" />
+      <rect x={20} y={320} width={1160} height={70} fill="url(#fp-corridor)" />
       <line x1={20} y1={333} x2={1180} y2={333} stroke="#F7C948" strokeWidth="2.5" strokeDasharray="14 10" opacity="0.7" />
       <line x1={20} y1={377} x2={1180} y2={377} stroke="#F7C948" strokeWidth="2.5" strokeDasharray="14 10" opacity="0.7" />
 

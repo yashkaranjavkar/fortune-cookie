@@ -19,7 +19,7 @@ import { walkStep, roomIntroStep } from './transitionSteps';
 // from their first screen) use nav.goto('key') so they keep working no matter where
 // those steps end up in the array.
 export const TRAINING_STEPS = [
-  { key: 'traySorting', render: (ctx, nav) => <TraySortingSection trayCount={TRAY_COUNT} onComplete={nav.next} /> },
+  { key: 'traySorting', cursor: 'glove', render: (ctx, nav) => <TraySortingSection trayCount={TRAY_COUNT} onComplete={nav.next} /> },
 
   { key: 'trainingComplete', render: (ctx, nav) => <TrainingCompleteScreen onNext={nav.next} /> },
 
@@ -33,9 +33,7 @@ export const TRAINING_STEPS = [
   { key: 'timerQuestion', render: (ctx, nav) => <TimerQuestionScreen onNext={nav.next} onBack={nav.back} stepIndex={4} totalSteps={6} /> },
   { key: 'timerEnd', render: (ctx, nav) => <TimerEndScreen onReplay={() => nav.goto('objective')} onNext={nav.next} onBack={nav.back} stepIndex={5} totalSteps={6} /> },
 
-  walkStep('walkToDemo', 'briefing', 'demo', 'Training'),
-  roomIntroStep('enterDemo', 'demo', 'Training'),
-
+  // The demonstration happens right here in the Briefing Room - no walk.
   // Terminal step: hands off to the section's own onComplete instead of nav.next().
-  { key: 'demoGame', render: (ctx) => <DemoGameScreen onComplete={ctx.onComplete} /> },
+  { key: 'demoGame', cursor: 'glove', render: (ctx) => <DemoGameScreen onComplete={ctx.onComplete} /> },
 ];

@@ -61,24 +61,18 @@ export default function TraySelectionScreen({ trayNumber, totalTrays = 3, broken
             <TrayFrame type="baking" />
             {/* Left bunch */}
             <div
-              className="bunch"
+              className={'bunch' + (isBunch0Broken ? ' opened' : '')}
               onClick={() => { if (!isBunch0Broken) { playSound('cookie-crack'); onSelectBunch(0); } }}
-              style={{
-                cursor: isBunch0Broken ? 'default' : 'pointer',
-                opacity: isBunch0Broken ? 0.35 : 1
-              }}
+              style={{ opacity: isBunch0Broken ? 0.35 : 1 }}
             >
               <CookieBunch broken={isBunch0Broken} />
             </div>
 
             {/* Right bunch */}
             <div
-              className="bunch"
+              className={'bunch' + (isBunch1Broken ? ' opened' : '')}
               onClick={() => { if (!isBunch1Broken) { playSound('cookie-crack'); onSelectBunch(1); } }}
-              style={{
-                cursor: isBunch1Broken ? 'default' : 'pointer',
-                opacity: isBunch1Broken ? 0.35 : 1
-              }}
+              style={{ opacity: isBunch1Broken ? 0.35 : 1 }}
             >
               <CookieBunch broken={isBunch1Broken} />
             </div>

@@ -14,6 +14,7 @@ export const SUPERVISOR_STEPS = [
   { key: 'instructions', render: (ctx, nav) => <SupervisionInstructionsScreen onNext={nav.next} stepIndex={1} totalSteps={2} /> },
   {
     key: 'checklist',
+    cursor: 'pen',
     render: (ctx, nav) => (
       <SupervisionChecklistScreen
         onNext={() => nav.next()} // decisions are recorded by analytics (supervisor_checklist_submitted)

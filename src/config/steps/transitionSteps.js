@@ -17,6 +17,7 @@ export function walkStep(key, fromKey, toKey, subtitle) {
   return {
     key,
     passThrough: true,
+    cursor: 'hidden', // nothing to click while the player walks across the map
     render: (ctx, nav) => (
       <StationTransitionScreen fromKey={fromKey} toKey={toKey} subtitle={subtitle} onNext={nav.next} />
     ),

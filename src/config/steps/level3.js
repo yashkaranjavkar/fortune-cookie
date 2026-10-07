@@ -44,6 +44,7 @@ export const LEVEL3_STEPS = [
 
   {
     key: 'game',
+    cursor: 'glove',
     render: (ctx, nav) => (
       <Level3Game
         onComplete={(items, approved) => { ctx.setFaultyItems(items); ctx.setApprovedItems(approved); nav.next(); }}
@@ -58,6 +59,7 @@ export const LEVEL3_STEPS = [
   { key: 'startMarking', render: (ctx, nav) => <StartMarkingScreen faultyCount={ctx.faultyItems.length} onNext={nav.next} /> },
   {
     key: 'marking',
+    cursor: 'highlighter',
     render: (ctx, nav) => (
       <MarkingScreen faultyItems={ctx.faultyItems} onNext={(data) => { ctx.setMarkedFortunes(data); nav.next(); }} />
     )
@@ -76,7 +78,7 @@ export const LEVEL3_STEPS = [
     )
   },
 
-  { key: 'torchInspect', render: (ctx, nav) => <TorchInspectScreen markedFortunes={ctx.markedFortunes} onNext={nav.next} /> },
+  { key: 'torchInspect', cursor: 'glove', render: (ctx, nav) => <TorchInspectScreen markedFortunes={ctx.markedFortunes} onNext={nav.next} /> },
   walkStep('walkToDispatch', 'inspection', 'results', 'Level 3'),
   roomIntroStep('enterDispatch', 'results', 'Level 3'),
   { key: 'checkSamples', render: (ctx, nav) => <CheckSamplesScreen onNext={nav.next} /> },

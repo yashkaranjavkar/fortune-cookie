@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import FactoryFloorPlan, { MAP_VIEWBOX, routeBetween, stopRoom } from './FactoryFloorPlan';
 import { STOPS } from '../config/stations';
 import { PlayerLookContext } from '../utils/playerLook';
+import { playSound } from '../sounds';
 import './StationTransitionScreen.css';
 
 const SPEED = 190;        // map units per second
@@ -10,6 +11,8 @@ const HOLD_MS = 1300;     // beat on arrival before the next screen
 const FADE_OUT_MS = 450;  // map fades out over the end of the arrival beat
 const MIN_WALK_MS = 2400;
 const MAX_WALK_MS = 5000;
+const STRIDE = 9;            // map units per radian of the leg swing (Player's `phase`)
+const MIN_STEP_GAP_MS = 120; // footsteps never closer than this, even at full speed
 
 function measure(points) {
   const segLens = [];
@@ -142,6 +145,20 @@ export default function StationTransitionScreen({ fromKey, toKey, subtitle, onNe
   else if (pos.dx < -0.5) facingRef.current = -1;
 
   const walking = progress > 0 && progress < 1;
+
+  // Cartoon footsteps: a woodblock "tik"/"tok" each time a foot lands (every half
+  // swing of the legs), alternating between the left and right foot's pitch
+  const footRef = useRef({ step: 0, at: -Infinity });
+  const step = Math.floor(dist / STRIDE / Math.PI);
+  useEffect(() => {
+    const foot = footRef.current;
+    if (!walking || step <= foot.step) return;
+    foot.step = step;
+    const now = performance.now();
+    if (now - foot.at < MIN_STEP_GAP_MS) return;
+    foot.at = now;
+    playSound(step % 2 ? 'step-a' : 'step-b');
+  }, [step, walking]);
   const arrived = progress >= 1;
   const from = STOPS[fromKey] || { icon: '📍', label: 'Corridor' };
   const to = STOPS[toKey] || { icon: '📍', label: 'Corridor' };
@@ -194,7 +211,7 @@ export default function StationTransitionScreen({ fromKey, toKey, subtitle, onNe
             )}
           </g>
 
-          <Player x={pos.x} y={pos.y} phase={dist / 9} walking={walking} facing={facingRef.current} chefHat={chefHat} />
+          <Player x={pos.x} y={pos.y} phase={dist / STRIDE} walking={walking} facing={facingRef.current} chefHat={chefHat} />
         </svg>
       </div>
     </div>

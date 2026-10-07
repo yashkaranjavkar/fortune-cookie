@@ -1,0 +1,178 @@
+/* Stage cursors - see src/utils/cursor.js. body[data-cursor] is set by the step being
+   shown (`cursor` in src/config/steps/*.js); with no value, the default hand is used.
+
+   Hand cursors (src/assets/cursors, made from the drawings in src/assets/Drawings):
+     hand            the default everywhere in the game (any screen without a stage cursor)
+     finger-pointer  the gloved hand in hands-on stages, and on buttons there
+     open-hand       hovering a dome or a fortune that can be picked up
+     fist-hand       holding and dragging (a fortune, the inspection torch)
+     highlighter     the marking stage (tip at the top-left; 56px, bigger than the hands)
+   Each is a 40px image with an @2x copy for sharp edges on high-resolution screens.
+   The numbers after each image are its hotspot (the exact point that clicks). */
+
+/* Default: the hand, on every screen that has no stage cursor (job application, rules,
+   results, walks...). The second selector outranks the components' own pointer rules,
+   so buttons and links show the hand too. */
+html,
+body,
+body *,
+body:not([data-cursor]) .app,
+body:not([data-cursor]) .app * {
+  cursor: url('./assets/cursors/hand.png') 4 1, pointer;
+  cursor: -webkit-image-set(url('./assets/cursors/hand.png') 1x, url('./assets/cursors/hand@2x.png') 2x) 4 1, pointer;
+}
+/* ...except where the player types: the text cursor shows where the letters will go */
+body:not([data-cursor]) .app input:not([type]),
+body:not([data-cursor]) .app input[type='text'],
+body:not([data-cursor]) .app input[type='email'],
+body:not([data-cursor]) .app input[type='number'],
+body:not([data-cursor]) .app input[type='search'],
+body:not([data-cursor]) .app textarea {
+  cursor: text;
+}
+body:not([data-cursor]) .app :disabled {
+  cursor: not-allowed;
+}
+
+body[data-cursor='glove'] .app,
+body[data-cursor='glove'] .app * {
+  cursor: url('./assets/cursors/finger-pointer.png') 6 2, pointer;
+  cursor: -webkit-image-set(url('./assets/cursors/finger-pointer.png') 1x, url('./assets/cursors/finger-pointer@2x.png') 2x) 6 2, pointer;
+}
+
+body[data-cursor='highlighter'] .app,
+body[data-cursor='highlighter'] .app * {
+  cursor: url('./assets/cursors/highlighter.png') 3 3, text;
+  cursor: -webkit-image-set(url('./assets/cursors/highlighter.png') 1x, url('./assets/cursors/highlighter@2x.png') 2x) 3 3, text;
+}
+
+body[data-cursor='pen'] .app,
+body[data-cursor='pen'] .app * {
+  cursor: url('./assets/cursors/pen.svg') 9 31, pointer;
+}
+
+/* With a tool in hand (highlighter, pen), buttons still show the finger pointer, so
+   it stays obvious what can be clicked */
+body[data-cursor='highlighter'] .app button,
+body[data-cursor='highlighter'] .app [role='button'],
+body[data-cursor='pen'] .app button,
+body[data-cursor='pen'] .app [role='button'] {
+  cursor: url('./assets/cursors/finger-pointer.png') 6 2, pointer;
+  cursor: -webkit-image-set(url('./assets/cursors/finger-pointer.png') 1x, url('./assets/cursors/finger-pointer@2x.png') 2x) 6 2, pointer;
+}
+
+body[data-cursor] .app :disabled {
+  cursor: not-allowed;
+}
+
+/* Open hand: over the domes (hovering one lifts it), the training tray's fortune
+   bunches that haven't been opened yet, and anything that can be picked up
+   (usePointerDrag) */
+.app [data-grab],
+body[data-cursor] .app [data-grab],
+body[data-cursor] .app .tray-container .bunch:not(.opened),
+body[data-cursor] .app .tray-container .bunch:not(.opened) *,
+body[data-cursor] .app .dome-slot,
+body[data-cursor] .app .dome-slot *,
+body[data-cursor] .app .demo-stage,
+body[data-cursor] .app .demo-stage * {
+  cursor: url('./assets/cursors/open-hand.png') 17 20, grab;
+  cursor: -webkit-image-set(url('./assets/cursors/open-hand.png') 1x, url('./assets/cursors/open-hand@2x.png') 2x) 17 20, grab;
+}
+
+/* Fist: hovering the inspection torch (ready to slide it), and a slider being held
+   (e.g. the torch's rail) */
+body[data-cursor] .app .ti-torch-img,
+body[data-cursor] .app input[type='range']:active {
+  cursor: url('./assets/cursors/fist-hand.png') 20 19, grabbing;
+  cursor: -webkit-image-set(url('./assets/cursors/fist-hand.png') 1x, url('./assets/cursors/fist-hand@2x.png') 2x) 20 19, grabbing;
+}
+
+/* Pressed: while the mouse button is down (body.is-pressing, see installPressTilt in
+   src/utils/cursor.js) each cursor swaps to a copy tilted 15 degrees, pivoting on its
+   lower part (the wrist, or the back of the highlighter) so the tip swings while the
+   base stays put. The click still lands exactly where the pointer is. */
+body.is-pressing,
+body.is-pressing *,
+body.is-pressing:not([data-cursor]) .app,
+body.is-pressing:not([data-cursor]) .app * {
+  cursor: url('./assets/cursors/hand-press.png') 14 4, pointer;
+  cursor: -webkit-image-set(url('./assets/cursors/hand-press.png') 1x, url('./assets/cursors/hand-press@2x.png') 2x) 14 4, pointer;
+}
+
+body.is-pressing[data-cursor='glove'] .app,
+body.is-pressing[data-cursor='glove'] .app *,
+body.is-pressing[data-cursor='highlighter'] .app button,
+body.is-pressing[data-cursor='highlighter'] .app [role='button'],
+body.is-pressing[data-cursor='pen'] .app button,
+body.is-pressing[data-cursor='pen'] .app [role='button'] {
+  cursor: url('./assets/cursors/finger-pointer-press.png') 16 5, pointer;
+  cursor: -webkit-image-set(url('./assets/cursors/finger-pointer-press.png') 1x, url('./assets/cursors/finger-pointer-press@2x.png') 2x) 16 5, pointer;
+}
+
+/* (the highlighter doesn't tilt - it marks text rather than clicking) */
+
+body.is-pressing[data-cursor='pen'] .app,
+body.is-pressing[data-cursor='pen'] .app *:not(button):not([role='button']) {
+  cursor: url('./assets/cursors/pen-press.svg') 9 31, pointer;
+}
+
+body.is-pressing .app [data-grab],
+body.is-pressing[data-cursor] .app [data-grab],
+body.is-pressing[data-cursor] .app .tray-container .bunch:not(.opened),
+body.is-pressing[data-cursor] .app .tray-container .bunch:not(.opened) *,
+body.is-pressing[data-cursor] .app .dome-slot,
+body.is-pressing[data-cursor] .app .dome-slot *,
+body.is-pressing[data-cursor] .app .demo-stage,
+body.is-pressing[data-cursor] .app .demo-stage * {
+  cursor: url('./assets/cursors/open-hand-press.png') 27 23, grab;
+  cursor: -webkit-image-set(url('./assets/cursors/open-hand-press.png') 1x, url('./assets/cursors/open-hand-press@2x.png') 2x) 27 23, grab;
+}
+
+/* Typing fields and disabled controls keep their usual cursors when pressed */
+body.is-pressing:not([data-cursor]) .app input:not([type]),
+body.is-pressing:not([data-cursor]) .app input[type='text'],
+body.is-pressing:not([data-cursor]) .app input[type='email'],
+body.is-pressing:not([data-cursor]) .app input[type='number'],
+body.is-pressing:not([data-cursor]) .app input[type='search'],
+body.is-pressing:not([data-cursor]) .app textarea {
+  cursor: text;
+}
+body.is-pressing .app :disabled {
+  cursor: not-allowed;
+}
+
+/* Fist: while something is being carried or slid, everywhere on screen */
+body.is-grabbing,
+body.is-grabbing * {
+  cursor: url('./assets/cursors/fist-hand.png') 20 19, grabbing !important;
+  cursor: -webkit-image-set(url('./assets/cursors/fist-hand.png') 1x, url('./assets/cursors/fist-hand@2x.png') 2x) 20 19, grabbing !important;
+  user-select: none;
+}
+
+/* The copy of the fortune that travels with the fist */
+.drag-ghost {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  transform: rotate(-3deg) scale(1.04);
+  filter: drop-shadow(0 10px 14px rgba(54, 32, 28, 0.35));
+}
+/* nothing in the carried copy may catch the pointer - the drop target underneath must */
+.drag-ghost,
+.drag-ghost * {
+  pointer-events: none !important;
+}
+.drag-ghost > * {
+  position: static !important;
+  transform: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+}
+
+/* Hidden: no cursor at all while the player walks across the factory map */
+body[data-cursor='hidden'],
+body[data-cursor='hidden'] * {
+  cursor: none !important;
+}

@@ -175,6 +175,38 @@
   height: 62px;
   object-fit: contain;
   filter: drop-shadow(0 0 26px rgba(255, 214, 140, 0.55));
+  /* grabbable anywhere (its container lets clicks through to the rail) */
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+}
+
+/* Chevrons beside the torch showing which way it slides; they light up in turn,
+   left to right, like a light sweeping along */
+.ti-torch-arrows {
+  position: absolute;
+  top: 16px;
+  left: 30px;
+  display: flex;
+  gap: 2px;
+  pointer-events: none;
+}
+.ti-torch-arrows svg {
+  fill: none;
+  stroke: #F7C948;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.25;
+  animation: ti-arrow-sweep 1.3s ease-in-out infinite;
+}
+@keyframes ti-arrow-sweep {
+  0%, 100% { opacity: 0.25; filter: none; }
+  30% { opacity: 1; filter: drop-shadow(0 0 3px #F7C948) drop-shadow(0 0 7px rgba(247, 201, 72, 0.8)); }
+  60% { opacity: 0.25; filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ti-torch-arrows svg { animation: none; opacity: 0.8; }
 }
 
 .ti-main-content { justify-content: center; margin-top: 16px; }
