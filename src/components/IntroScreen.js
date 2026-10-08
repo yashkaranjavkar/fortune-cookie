@@ -1,5 +1,5 @@
 import React from 'react';
-import cookie from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-whole.svg';
+import cookie from '../assets/Drawings/fortune cookie.png';
 import FactoryFront, { Ledger, LedgerButton, SEAL_ICONS } from './FactoryFront';
 
 // Storyboard: graduate -> applies to the factory -> the Inspector role

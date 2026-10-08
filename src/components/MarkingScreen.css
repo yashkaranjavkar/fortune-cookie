@@ -31,3 +31,17 @@
   text-align: center;
 }
 .marking-instruction-icon { flex-shrink: 0; color: var(--orange-deep); }
+
+/* "Mark every fortune to continue · 1 of 2 marked" - just above the locked Next button */
+.marking-progress {
+  position: absolute;
+  bottom: 108px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  white-space: nowrap;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ff-cream-text, #F2CF7A);
+}

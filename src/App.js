@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 //import './design-system/tokens.css';
 import './assets/wisecrack-ui-kit/wisecrack-ui-kit/wisecrack-colors.css';
 import './App.css';
+import './theme.css'; // the Fortunery design language, shared by every screen
 import { CurrencyContext, currencyFor } from './utils/currency';
 import { SECTIONS, GAME_FLOW } from './config/gameFlow';
 import { preloadSounds, playSound } from './sounds';
@@ -18,8 +19,12 @@ import { useStageCursor } from './utils/cursor';
 
 initAnalytics({ gameFlow: GAME_FLOW });
 
+// Sections shown before the game itself: plain screens, with no sound button and no
+// click sounds (no music either - see src/config/ambience.js)
+const PLAIN_SECTIONS = ['playerDetails'];
+
 // Sections that come before the player has been trained (no chef's hat yet)
-const PRE_TRAINING_SECTIONS = ['opening', 'job'];
+const PRE_TRAINING_SECTIONS = ['playerDetails', 'opening', 'appointment', 'job'];
 
 // Runs whichever sections GAME_FLOW names, in that order (see src/config/gameFlow.js).
 // Sections are self-contained - the only things that ever need to cross a section
@@ -110,7 +115,7 @@ function App() {
     // or opt out entirely with data-sound="none" (the sound toggle itself does this).
     const handleClick = (e) => {
       const button = e.target.closest('button');
-      if (!button) return;
+      if (!button || document.body.dataset.cursor === 'plain') return;
       const override = button.dataset.sound;
       if (override === 'none') return;
       playSound(override || 'button-press');
@@ -123,7 +128,7 @@ function App() {
     <CurrencyContext.Provider value={currencyFor(region)}>
      <PlayerLookContext.Provider value={{ chefHat }}>
       <div className="app">
-        <SoundToggle />
+        {!PLAIN_SECTIONS.includes(sectionKey) && <SoundToggle />}
         {phase === 'section' && Section && (
           <Section
             onComplete={handleSectionComplete}

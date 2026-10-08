@@ -1,0 +1,90 @@
+/* The player-details form (PlayerDetailsScreen.js): a plain, neutral form with nothing
+   from the game's look - system font, greys, no art. */
+.pd-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: #F3F4F6;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: #1F2937;
+  overflow-y: auto;
+}
+
+.pd-card {
+  width: min(440px, 100%);
+  padding: 32px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.pd-title { margin: 0; font-size: 22px; font-weight: 600; }
+.pd-sub { margin: 4px 0 24px; font-size: 14px; color: #6B7280; }
+
+.pd-field { margin-bottom: 18px; }
+.pd-label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 500; color: #374151; }
+
+.pd-input,
+.pd-screen .dropdown-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  background: #FFFFFF;
+  font: inherit;
+  font-size: 15px;
+  color: inherit;
+  box-shadow: none;
+}
+.pd-screen .dropdown-input { display: flex; align-items: center; }
+.pd-screen .dropdown-input input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+}
+.pd-screen .dropdown-input .arrow { font-size: 10px; color: #9CA3AF; }
+.pd-input:focus,
+.pd-screen .dropdown-input:focus-within {
+  outline: none;
+  border-color: #6B7280;
+  box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.18);
+}
+
+.pd-screen .dropdown-list {
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  background: #FFFFFF;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  font-size: 15px;
+}
+.pd-screen .dropdown-item { font-size: 15px; }
+.pd-screen .dropdown-item:hover,
+.pd-screen .dropdown-item.active { background: #F3F4F6; }
+
+.pd-btn {
+  width: 100%;
+  height: 44px;
+  margin-top: 8px;
+  border: 0;
+  border-radius: 8px;
+  background: #1F2937;
+  color: #FFFFFF;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+}
+.pd-btn:hover:not(:disabled) { background: #111827; }
+.pd-btn:disabled { background: #D1D5DB; color: #6B7280; }

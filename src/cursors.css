@@ -176,3 +176,15 @@ body[data-cursor='hidden'],
 body[data-cursor='hidden'] * {
   cursor: none !important;
 }
+
+/* Plain: the ordinary system cursor (screens before the game starts, e.g. the player
+   details form) - nothing from the game, not even the click tilt */
+body[data-cursor='plain'],
+body[data-cursor='plain'] * {
+  cursor: auto !important;
+}
+body[data-cursor='plain'] button:not(:disabled),
+body[data-cursor='plain'] .dropdown-input,
+body[data-cursor='plain'] .dropdown-item {
+  cursor: pointer !important;
+}

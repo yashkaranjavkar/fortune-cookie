@@ -7,7 +7,7 @@ import { useMascotTrigger } from '../config/mascotTriggers';
 import './DemoGameScreen.css';
 
 import domeClosed from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-covered.svg';
-import domeLifted from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-lifted.svg';
+import domeLifted from '../assets/dome-lifted-cookie.svg';
 import domeSpent from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-spent.svg';
 import brokenCookie from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-broken.svg';
 
@@ -176,7 +176,7 @@ export default function DemoGameScreen({ onComplete }) {
 
       {showTrays && (
         <div className="demo-drop-zones">
-          {['approved', 'faulty'].map(type => (
+          {['faulty', 'approved'].map(type => (
             <SortTray
               key={type}
               type={type}

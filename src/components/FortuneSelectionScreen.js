@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { playSound } from '../sounds';
 import { track } from '../analytics';
-import cookieIntact from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-whole.svg';
-import cookieBroken from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-cracked.svg';
+import cookieIntact from '../assets/Drawings/fortune cookie.png';
+import cookieBroken from '../assets/Drawings/fortune break.png';
 
 export default function FortuneSelectionScreen({ trayNumber, bunchNumber, fortunes, onSubmit }) {
   const [phase, setPhase] = useState('breaking'); // breaking -> cracked -> fortunes

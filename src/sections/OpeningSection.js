@@ -1,8 +1,10 @@
 import React, { useRef } from 'react';
 import OpeningScreen from '../components/OpeningScreen';
-import { useScreen, track, startTimer } from '../analytics';
+import { useScreen, track, startTimer, startGameClock } from '../analytics';
+import { ACTIVE_FLOW } from '../config/gameFlow';
 
 // The title screen, as its own section so it can be switched on/off in GAME_FLOW.
+// Pressing Start is when the game itself begins: the analytics game clock starts here.
 export default function OpeningSection({ onComplete }) {
   useScreen('title');
   const timer = useRef(startTimer());
@@ -15,6 +17,7 @@ export default function OpeningSection({ onComplete }) {
       time_on_title_ms: timer.current(),
       via: e && e.type === 'click' ? 'button' : 'enter_key',
     });
+    startGameClock({ flow: ACTIVE_FLOW });
     onComplete();
   };
 

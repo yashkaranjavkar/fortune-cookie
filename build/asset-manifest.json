@@ -1,27 +1,28 @@
 {
   "files": {
-    "main.css": "/static/css/main.e0fb3637.css",
-    "main.js": "/static/js/main.d7a827e8.js",
+    "main.css": "/static/css/main.faf722de.css",
+    "main.js": "/static/js/main.5332e7ae.js",
     "static/media/Opening screen.jpg": "/static/media/Opening screen.0fbaef5a3052aceb73d8.jpg",
+    "static/media/fortune sabo.png": "/static/media/fortune sabo.3bd6108b69c6705e99c0.png",
+    "static/media/fortune break.png": "/static/media/fortune break.97c9ddae53f952945244.png",
+    "static/media/dome-lifted-cookie.svg": "/static/media/dome-lifted-cookie.3a291a19fbfc3faf9893875f622944a5.svg",
+    "static/media/fortune cookie.png": "/static/media/fortune cookie.138c27534ad70cc18522.png",
     "static/media/balloons-3-left.svg": "/static/media/balloons-3-left.b77d49d9034c82bb9e2bb6bcd2482e92.svg",
     "static/media/balloons-popped.svg": "/static/media/balloons-popped.0b0c2e343a30128d116876843e6f80c2.svg",
-    "static/media/dome-lifted.svg": "/static/media/dome-lifted.bc49bc4941f952410ab204ab8736d785.svg",
     "static/media/pen-press.svg": "/static/media/pen-press.a870b2ea449cef35c717.svg",
     "static/media/pen.svg": "/static/media/pen.66b0da33958c7ffde766.svg",
     "static/media/dome-hover.svg": "/static/media/dome-hover.ef3314488956b60379288fbadc3fa55e.svg",
     "static/media/dome-covered.svg": "/static/media/dome-covered.186d47926f3c2ccdc3944616c6435133.svg",
-    "static/media/cookie-cracked.svg": "/static/media/cookie-cracked.ed52f2bf7f0874dec8d5f1c6e0bb942b.svg",
     "static/media/balloons-docked.svg": "/static/media/balloons-docked.6eeb025fc009c111fa37f65e4aaad8b6.svg",
-    "static/media/cookie-whole.svg": "/static/media/cookie-whole.aa199c1b6dbe5ab2bf635b206b76917c.svg",
     "static/media/cookie-broken.svg": "/static/media/cookie-broken.fc0e8fa68af7ac8cc18baaa691b08959.svg",
     "index.html": "/index.html",
     "static/media/dome-spent.svg": "/static/media/dome-spent.cfa4094ed7bf9257b9e481e559a2f9ce.svg",
     "static/media/balloons-none-left.svg": "/static/media/balloons-none-left.3624cca258b22dd2a28ac089be9e568a.svg",
-    "main.e0fb3637.css.map": "/static/css/main.e0fb3637.css.map",
-    "main.d7a827e8.js.map": "/static/js/main.d7a827e8.js.map"
+    "main.faf722de.css.map": "/static/css/main.faf722de.css.map",
+    "main.5332e7ae.js.map": "/static/js/main.5332e7ae.js.map"
   },
   "entrypoints": [
-    "static/css/main.e0fb3637.css",
-    "static/js/main.d7a827e8.js"
+    "static/css/main.faf722de.css",
+    "static/js/main.5332e7ae.js"
   ]
 }

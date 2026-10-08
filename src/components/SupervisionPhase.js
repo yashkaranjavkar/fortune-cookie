@@ -1,15 +1,14 @@
 import React, { useState, useRef } from 'react';
 import { playSound } from '../sounds';
 import { track, startTimer } from '../analytics';
+import { StoryScreen, SEAL_ICONS } from './FactoryFront';
 import './SupervisionPhase.css';
 import './ObjectiveScreen.css';
 
 export function SupervisionIntroScreen({ onNext, stepIndex = 0, totalSteps = 2 }) {
   return (
-    <div className="instruction-screen">
-      <div className="instruction-card">
-        <div className="title">Supervision</div>
-        <div className="l2-content-area">
+    <StoryScreen kicker="Supervisor" title="Supervision" icon={SEAL_ICONS.clipboard} centered step={stepIndex} steps={totalSteps} onNext={onNext}>
+        <div className="story-content">
           <p className="obj-lead">You&rsquo;ve been <strong>promoted to Supervisor</strong> for your performance.</p>
 
           <ol className="obj-steps">
@@ -34,21 +33,14 @@ export function SupervisionIntroScreen({ onNext, stepIndex = 0, totalSteps = 2 }
             </li>
           </ol>
         </div>
-        <button className="instruction-next-btn" onClick={onNext}>Next &gt;&gt;&gt;</button>
-      </div>
-      <div className="instruction-progress-bar">
-        <div className="progress-fill" style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}></div>
-      </div>
-    </div>
+    </StoryScreen>
   );
 }
 
 export function SupervisionInstructionsScreen({ onNext, stepIndex = 1, totalSteps = 2 }) {
   return (
-    <div className="instruction-screen">
-      <div className="instruction-card">
-        <div className="title">Ready, Supervisor?</div>
-        <div className="l2-content-area">
+    <StoryScreen kicker="Supervisor" title="Ready, Supervisor?" icon={SEAL_ICONS.clipboard} centered step={stepIndex} steps={totalSteps} onNext={onNext}>
+        <div className="story-content">
           <p className="obj-lead">Here&rsquo;s what your review will look like.</p>
 
           <ol className="obj-steps">
@@ -73,12 +65,7 @@ export function SupervisionInstructionsScreen({ onNext, stepIndex = 1, totalStep
             </li>
           </ol>
         </div>
-        <button className="instruction-next-btn" onClick={onNext}>Next &gt;&gt;&gt;</button>
-      </div>
-      <div className="instruction-progress-bar">
-        <div className="progress-fill" style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}></div>
-      </div>
-    </div>
+    </StoryScreen>
   );
 }
 
@@ -330,10 +317,8 @@ export function SupervisionChecklistScreen({ onNext }) {
 
 export function SupervisionGreatWorkScreen({ onNext }) {
   return (
-    <div className="instruction-screen">
-      <div className="instruction-card">
-        <div className="title">Great work, Supervisor!</div>
-        <div className="l2-content-area">
+    <StoryScreen kicker="Supervisor" title="Great work, Supervisor!" icon={SEAL_ICONS.star} centered onNext={onNext}>
+        <div className="story-content">
           <div className="sc-praise">
             <svg className="sc-praise-star" viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
               <path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9 6.8 19.7l1-5.9L3.5 9.7l5.9-.8z" fill="var(--yellow-base)" stroke="var(--yellow-deep)" strokeWidth="1" strokeLinejoin="round" />
@@ -341,18 +326,14 @@ export function SupervisionGreatWorkScreen({ onNext }) {
             <p className="sc-praise-text">Overturning a colleague&rsquo;s call isn&rsquo;t easy; you handled it like a pro.</p>
           </div>
         </div>
-        <button className="instruction-next-btn" onClick={onNext}>Next &gt;&gt;&gt;</button>
-      </div>
-    </div>
+    </StoryScreen>
   );
 }
 
 export function SupervisionLastBatchScreen({ onNext }) {
   return (
-    <div className="instruction-screen">
-      <div className="instruction-card">
-        <div className="title">Oh no!</div>
-        <div className="l2-content-area">
+    <StoryScreen kicker="Supervisor" title="Oh no!" icon={SEAL_ICONS.clock} centered onNext={onNext} nextLabel="I am ready">
+        <div className="story-content">
           <div className="sc-urgent">
             <svg className="sc-urgent-icon" viewBox="0 0 16 16" width="22" height="22" aria-hidden="true">
               <path d="M8 1.5 L15 14.5 H1 Z" fill="var(--pink-light)" stroke="var(--error)" strokeWidth="1.2" strokeLinejoin="round" />
@@ -365,8 +346,6 @@ export function SupervisionLastBatchScreen({ onNext }) {
             One last batch still needs sorting <strong>today</strong>, and there&rsquo;s no one else to do it.
           </p>
         </div>
-        <button className="instruction-next-btn" onClick={onNext}>I am Ready</button>
-      </div>
-    </div>
+    </StoryScreen>
   );
 }

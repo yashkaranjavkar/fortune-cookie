@@ -1,0 +1,88 @@
+/* "Connecting you to the game..." loader (ConnectingScreen.js). Same night-blue as the
+   title screen it hands over to, so the fade into the title feels continuous. */
+.connecting-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  background: radial-gradient(ellipse at 50% 45%, #22294a 0%, #13182b 70%);
+  color: #FBF0D8;
+  animation: connecting-in 0.4s ease-out;
+}
+
+.connecting-orbit {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+.connecting-cookie {
+  position: absolute;
+  inset: 22px;
+  width: 76px;
+  height: 76px;
+  animation: connecting-bob 1.4s ease-in-out infinite;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45)) drop-shadow(0 0 18px rgba(247, 201, 72, 0.35));
+}
+.connecting-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: #F7C948;
+  animation: connecting-orbit 1.6s linear infinite;
+}
+.connecting-dot.d2 { animation-delay: -0.53s; background: #F4A9C0; }
+.connecting-dot.d3 { animation-delay: -1.06s; background: #FFFFFF; }
+
+.connecting-text {
+  margin: 0;
+  font-family: var(--font-display), 'Fredoka', sans-serif;
+  font-size: 26px;
+  letter-spacing: 0.01em;
+}
+.connecting-ellipsis::after {
+  content: '';
+  display: inline-block;
+  width: 1.2em;
+  text-align: left;
+  animation: connecting-dots 1.2s steps(4, end) infinite;
+}
+
+.connecting-bar {
+  width: min(280px, 70vw);
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(251, 240, 216, 0.15);
+  overflow: hidden;
+}
+.connecting-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #F7C948, #F4A9C0);
+  transform-origin: left;
+  animation: connecting-fill linear forwards;
+}
+
+@keyframes connecting-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes connecting-bob { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-8px) rotate(4deg); } }
+@keyframes connecting-orbit {
+  from { transform: rotate(0deg) translateX(56px); }
+  to { transform: rotate(360deg) translateX(56px); }
+}
+@keyframes connecting-dots {
+  0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75%, 100% { content: '...'; }
+}
+@keyframes connecting-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .connecting-cookie, .connecting-dot { animation: none; }
+  .connecting-dot { display: none; }
+}

@@ -22,7 +22,9 @@ const EVENT_CATALOG = {
     use: 'insight',
     fields: ['viewport', 'screen', 'device_pixel_ratio', 'user_agent', 'language', 'timezone', 'reduced_motion', 'sound_muted', 'referrer', 'game_flow', 'returning_player', 'sessions_before'],
   },
-  session_end: { use: 'insight', fields: ['duration_ms', 'active_ms', 'events_sent', 'last_screen', 'reason'] },
+  // duration_ms counts from page load; game_ms from the Start button (null if the game never started)
+  session_end: { use: 'insight', fields: ['duration_ms', 'game_ms', 'active_ms', 'events_sent', 'last_screen', 'reason'] },
+  game_started: { use: 'insight', fields: ['pre_game_ms', 'flow'] },
   app_hidden: { use: 'insight', fields: ['screen'] },
   app_visible: { use: 'insight', fields: ['screen', 'hidden_ms'] },
   client_error: { use: 'insight', fields: ['message', 'source', 'line'] },
@@ -45,6 +47,8 @@ const EVENT_CATALOG = {
   /* ---------- Onboarding ---------- */
   opening_start_pressed: { use: 'insight', fields: ['time_on_title_ms', 'via'] },
   player_clock_in: { use: 'personalization', fields: ['employee_id', 'designation', 'designation_is_custom', 'decision_ms'] },
+  // quickStart flow: the three details asked before the game starts
+  player_details_submitted: { use: 'personalization', fields: ['employee_id', 'designation', 'designation_is_custom', 'region', 'decision_ms'] },
   application_submitted: {
     use: 'personalization',
     fields: ['age_group', 'region', 'interests', 'interest_count', 'custom_interests', 'suggestions_added', 'decision_ms'],

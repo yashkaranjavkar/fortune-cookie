@@ -6,7 +6,8 @@ import { playSound } from '../sounds';
 // Single-select dropdown with type-to-filter.
 // allowAdd: typed text that isn't in the list can be added as a new option.
 // storageKey: remembers added options so they appear in the list next time.
-export default function SearchableDropdown({ options, value = '', placeholder, onSelect, allowAdd, storageKey }) {
+// silent: no "select" sound (e.g. on the plain player-details form, before the game starts)
+export default function SearchableDropdown({ options, value = '', placeholder, onSelect, allowAdd, storageKey, silent = false }) {
   const [query, setQuery] = useState(value);
   const [isOpen, setIsOpen] = useState(false);
   const [custom, setCustom] = useState(() => (allowAdd ? loadCustomOptions(storageKey) : []));
@@ -26,7 +27,7 @@ export default function SearchableDropdown({ options, value = '', placeholder, o
     onSelect(option);
     setQuery(option);
     setIsOpen(false);
-    playSound('select');
+    if (!silent) playSound('select');
   };
 
   const addNew = () => {
@@ -35,7 +36,7 @@ export default function SearchableDropdown({ options, value = '', placeholder, o
     onSelect(item, true);
     setQuery(item);
     setIsOpen(false);
-    playSound('select');
+    if (!silent) playSound('select');
   };
 
   // Clicking away commits an exact match; otherwise the field reverts to the chosen value

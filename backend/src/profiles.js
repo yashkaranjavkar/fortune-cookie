@@ -53,8 +53,17 @@ function applyEvent(profile, ev) {
       profile.traits.sound_muted = d.sound_muted;
       break;
     case 'session_end':
-      profile.time.total_ms += d.duration_ms || 0;
+      // play time counts from the Start button when the game reported it
+      profile.time.total_ms += (d.game_ms ?? d.duration_ms) || 0;
       profile.time.active_ms += d.active_ms || 0;
+      break;
+    case 'game_started':
+      profile.time.pre_game_ms = (profile.time.pre_game_ms || 0) + (d.pre_game_ms || 0);
+      break;
+    case 'player_details_submitted':
+      profile.traits.employee_id = d.employee_id;
+      profile.traits.designation = d.designation;
+      profile.traits.region = d.region;
       break;
     case 'player_identified':
       Object.assign(profile.traits, d.traits);

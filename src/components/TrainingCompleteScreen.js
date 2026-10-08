@@ -1,4 +1,5 @@
 import React from 'react';
+import { StoryScreen, SEAL_ICONS } from './FactoryFront';
 import './TrainingCompleteScreen.css';
 
 // Shown right after the tray/fortune training zone, before the sorting instructions begin.
@@ -53,22 +54,14 @@ function CompleteScene() {
 
 export default function TrainingCompleteScreen({ onNext }) {
   return (
-    <div className="flow-screen">
-      <div className="flow-card tc-card">
-        <div className="flow-body centered tc-body">
-          <div className="tc-scene">
-            <CompleteScene />
-          </div>
-
-          <div className="title">Good job!</div>
-          <p>
-            You have completed your training at the Fortune Cookie Bakery.<br />
-            You&rsquo;re now ready to move to the sorting floor for your first shift.
-          </p>
-        </div>
-
-        <button className="next-btn" onClick={onNext}>Continue</button>
+    <StoryScreen kicker="Training" title="Good job!" icon={SEAL_ICONS.hat} centered onNext={onNext} nextLabel="Continue">
+      <div className="ff-scene tc-scene">
+        <CompleteScene />
       </div>
-    </div>
+      <p className="ff-text">
+        You have completed your training at Fortunery. You&rsquo;re now ready to move to
+        the sorting floor for your first shift.
+      </p>
+    </StoryScreen>
   );
 }

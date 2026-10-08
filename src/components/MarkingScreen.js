@@ -134,9 +134,10 @@ export default function MarkingScreen({ faultyItems, onNext }) {
     playSound('highlight-remove');
   };
 
-  // Marking is a judgement call, not a requirement - a fortune that isn't actually
-  // phishy is correctly left unmarked, so submitting doesn't force every item to have
-  // a highlight. Whatever's marked (or not) gets sent through as-is for inspection.
+  // Next stays locked until every fortune has a mark. If the timer runs out first,
+  // whatever is marked (or not) is sent through as-is for inspection.
+  const markedCount = highlights.filter(Boolean).length;
+  const allMarked = markedCount === itemCount;
   const handleSubmit = (autoSubmitted = false) => {
     const data = faultyItems.map((fortune, i) => ({
       fullText: fortune.text,
@@ -188,7 +189,12 @@ export default function MarkingScreen({ faultyItems, onNext }) {
         ))}
       </div>
 
-      <button className="next-btn enabled" onClick={handleSubmit}>
+      {!allMarked && (
+        <p className="marking-progress" aria-live="polite">
+          Mark every fortune to continue &middot; {markedCount} of {itemCount} marked
+        </p>
+      )}
+      <button className={`next-btn${allMarked ? ' enabled' : ''}`} onClick={handleSubmit} disabled={!allMarked}>
         Next
       </button>
 

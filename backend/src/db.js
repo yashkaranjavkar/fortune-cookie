@@ -144,7 +144,8 @@ class Store {
           $session_id: ev.session_id,
           $player_id: ev.player_id,
           $ts: ev.ts,
-          $duration_ms: ev.type === 'session_end' && ev.data ? ev.data.duration_ms || null : null,
+          // play time from the Start button when the game reported it, else from page load
+          $duration_ms: ev.type === 'session_end' && ev.data ? (ev.data.game_ms ?? ev.data.duration_ms) || null : null,
           $section: ctx.section || null,
           $screen: ctx.screen || null,
         });

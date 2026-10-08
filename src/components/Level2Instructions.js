@@ -6,36 +6,21 @@ import { diffFortuneMarking, gradeFortuneMarking, gradeApprovedSort, gradeSort, 
 import SortTray from './SortTray';
 import TimerDial from './TimerDial';
 import torch from '../assets/instructions/torch.png';
+import { StoryScreen, SEAL_ICONS } from './FactoryFront';
 import './Level2Instructions.css';
 import './SampleFortune.css';
 
-// Shared layout for light background screens
-const LightLayout = ({ title, onBack, onNext, children }) => (
-  <div className="instruction-screen">
-    {onBack && <button className="back-btn" onClick={onBack}>←</button>}
-    
-    <div className="instruction-card">
-      <div className="title">{title}</div>
-      <div className="level2-content">
-        {children}
-      </div>
-    </div>
-
-    {onNext && <button className="instruction-next-btn" onClick={onNext}>Next &gt;&gt;&gt;</button>}
-  </div>
-);
-
-const DarkLayout = ({ children }) => (
-  <div className="inspection-room-screen">
-    <div className="inspection-title">INSPECTION ROOM</div>
-    {children}
-  </div>
+// Info screens of the marking + inspection stage: the Fortunery storefront + ledger card
+const LightLayout = ({ title, kicker = 'Marking', icon = SEAL_ICONS.marker, onBack, onNext, nextLabel, children }) => (
+  <StoryScreen kicker={kicker} title={title} icon={icon} centered onBack={onBack} onNext={onNext} nextLabel={nextLabel}>
+    <div className="story-content level2-content">{children}</div>
+  </StoryScreen>
 );
 
 export function ThirtySecondsScreen({ onNext, onBack, faultyCount = 2 }) {
   const faultyPreview = Array.from({ length: faultyCount });
   return (
-    <LightLayout title="You will get 30 seconds to mark all faulty fortunes" onNext={onNext} onBack={onBack}>
+    <LightLayout title="You will get 30 seconds to mark all faulty fortunes" icon={SEAL_ICONS.clock} onNext={onNext} onBack={onBack}>
       <div className="timer-thirty-layout">
         <SortTray type="faulty" items={faultyPreview} />
         <TimerDial value={30} />
@@ -50,29 +35,19 @@ export function ThirtySecondsScreen({ onNext, onBack, faultyCount = 2 }) {
 
 export function InspectionIntroScreen({ onNext, onBack, markedFortunes }) {
   return (
-    <div className="instruction-screen">
-      {onBack && <button className="back-btn" onClick={onBack}>←</button>}
-      
-      <div className="instruction-card">
-        <div className="title" style={{ textAlign: 'center' }}>
-          Once you send your marked fortunes, it goes in the inspection room
-        </div>
-        
-        <div className="level2-content">
-          <div className="inspection-machine" style={{ marginTop: '20px' }}>
-            <button className="machine-button torch-button" onClick={onNext} aria-label="Press the red button">
-              <img src={torch} alt="Torch" className="torch-asset-img" />
-            </button>
-            <span className="machine-arrow">←</span>
-            <span className="machine-text">Press this <b>RED</b> button</span>
-          </div>
-
-          <div className="sample-fortune" style={{ marginTop: '30px' }}>
-            Your favorite artist has uploaded their new album on <span className="invalid-url">http://www.youtube.com/</span>
-          </div>
-        </div>
+    <LightLayout kicker="Inspection" icon={SEAL_ICONS.torch} title="Your marked fortunes go to the inspection room" onBack={onBack}>
+      <div className="inspection-machine">
+        <button className="machine-button torch-button" onClick={onNext} aria-label="Press the red button">
+          <img src={torch} alt="Torch" className="torch-asset-img" />
+        </button>
+        <span className="machine-arrow">←</span>
+        <span className="machine-text">Press this <b>RED</b> button</span>
       </div>
-    </div>
+
+      <div className="sample-fortune">
+        Your favorite artist has uploaded their new album on <span className="invalid-url">http://www.youtube.com/</span>
+      </div>
+    </LightLayout>
   );
 }
 
@@ -286,53 +261,49 @@ const INSPECTION_REWARD_CASES = [
 export function PaymentInspectionScreen({ onNext }) {
   const currency = useCurrency();
   return (
-    <div className="payment-dark-screen ti-reward-screen">
-      <div className="ti-reward-hero">
-        <div className={`reward-coin${currency.length > 1 ? ' wide' : ''}`} aria-hidden="true">{currency}</div>
-        <div className="reward-hero-text">
-          <div className="reward-headline">Payment as per inspection</div>
-          <div className="reward-sub">Your accuracy under the torch decides the payout.</div>
+    <LightLayout kicker="Inspection" icon={SEAL_ICONS.coin} title="Payment as per inspection" onNext={onNext} nextLabel="Let's start!">
+      <div className="reward-screen">
+        <div className="reward-hero">
+          <div className={`reward-coin${currency.length > 1 ? ' wide' : ''}`} aria-hidden="true">{currency}</div>
+          <div className="reward-hero-text">
+            <div className="reward-headline">Your accuracy under the torch decides the payout</div>
+            <div className="reward-sub">Each marked fortune is checked in the inspection room.</div>
+          </div>
+        </div>
+
+        <div className="reward-list">
+          {INSPECTION_REWARD_CASES.map((c, i) => (
+            <div key={c.key} className={`reward-card reward-${c.kind} no-icons`} style={{ animationDelay: `${0.12 + i * 0.1}s` }}>
+              <div className="reward-info">
+                <div className="reward-title">{c.title}</div>
+                <div className="reward-note">{c.note}</div>
+              </div>
+              <div className="reward-amount">{c.amount} {currency}{c.value}</div>
+            </div>
+          ))}
         </div>
       </div>
-
-      <div className="ti-reward-list">
-        {INSPECTION_REWARD_CASES.map((c, i) => (
-          <div key={c.key} className={`ti-reward-card ti-reward-${c.kind}`} style={{ animationDelay: `${0.12 + i * 0.1}s` }}>
-            <div className="ti-reward-info">
-              <div className="ti-reward-title">{c.title}</div>
-              <div className="ti-reward-note">{c.note}</div>
-            </div>
-            <div className="ti-reward-amount">{c.amount} {currency}{c.value}</div>
-          </div>
-        ))}
-      </div>
-
-      <button className="let-start-btn" onClick={onNext}>Let's Start !</button>
-    </div>
+    </LightLayout>
   );
 }
 
 export function StartMarkingScreen({ onNext, faultyCount = 2 }) {
   const faultyPreview = Array.from({ length: faultyCount });
   return (
-    <div className="start-marking-screen">
+    <LightLayout title="Time to mark the faulty fortunes" onNext={onNext} nextLabel="Start marking">
       <div className="start-marking-tray-wrapper">
         <SortTray type="faulty" items={faultyPreview} />
       </div>
-      <button className="let-start-btn" onClick={onNext}>Start Marking</button>
-    </div>
+      <p className="ff-text">Highlight the part of each fortune in the Faulty tray that makes it faulty.</p>
+    </LightLayout>
   );
 }
 
 export function CheckSamplesScreen({ onNext }) {
   return (
-    <div className="inspection-room-screen">
-      <div className="inspection-title">INSPECTION ROOM</div>
-
-      <button className="check-samples-btn" onClick={onNext}>
-        Check the Delivered Samples
-      </button>
-    </div>
+    <LightLayout kicker="Dispatch" icon={SEAL_ICONS.tray} title="The samples are back from delivery" onNext={onNext} nextLabel="Check the delivered samples">
+      <p className="ff-text">See how your sorting and marking did, and what you earned for it.</p>
+    </LightLayout>
   );
 }
 
@@ -370,9 +341,7 @@ export function ResultsScreen({ markedFortunes, approvedItems, onNext }) {
   }, []);
 
   return (
-    <div className="inspection-room-screen sr-screen">
-      <div className="inspection-title">INSPECTION ROOM</div>
-
+    <StoryScreen kicker="Dispatch" icon={SEAL_ICONS.torch} title="Inspection results" onNext={onNext}>
       <div className="sr-trays">
         <div className="sr-tray-col">
           <div className="sr-tray-label faulty">Faulty Tray</div>
@@ -424,69 +393,116 @@ export function ResultsScreen({ markedFortunes, approvedItems, onNext }) {
           </div>
         </div>
       </div>
-
-      <button className="results-next-btn" onClick={onNext}>
-        Next &gt;&gt;&gt;
-      </button>
-    </div>
+    </StoryScreen>
   );
 }
 
-// Tallies the separate "Payment for sorting" score (see PaymentScreen) across every
-// fortune from this round - reward purely for landing in the right tray, independent
-// of the marking-accuracy score already totaled on the inspection screen. Shown right
-// after the results reveal so the player sees where this number comes from before it's
-// added into the level's final incentive.
-export function SortingResultsScreen({ faultyItems, approvedItems, onNext }) {
+// "Your batch payout": the sorting and marking results for every fortune of the round,
+// on one screen, kept deliberately simple - one line per fortune: which tray it went
+// to, a tick or cross for how it was sorted and (Faulty tray only - the Approved tray
+// isn't marked) how it was marked, and what it earned in total. The totals bar shows
+// sorting + marking = the level's incentive. Calls onNext(sortingTotal); the marking
+// total was already recorded by the torch inspection.
+const RESULT_ICON = {
+  correct: { mark: '✓', label: 'right', className: 'ok' },
+  partial: { mark: '½', label: 'partly right', className: 'half' },
+  wrong: { mark: '✗', label: 'wrong', className: 'bad' },
+};
+
+export function BatchResultsScreen({ markedFortunes, approvedItems, onNext }) {
   const currency = useCurrency();
-  const faulty = faultyItems || [];
-  const approved = approvedItems || [];
+  const faulty = (markedFortunes && markedFortunes.length > 0) ? markedFortunes : FALLBACK_FAULTY;
+  const approved = (approvedItems && approvedItems.length > 0) ? approvedItems : FALLBACK_APPROVED;
 
   const rows = [
-    ...faulty.map(f => ({ text: f.text, tier: gradeSort(f, 'faulty') })),
-    ...approved.map(f => ({ text: f.text, tier: gradeSort(f, 'approved') })),
+    ...faulty.map(f => {
+      const sortTier = gradeSort(f, 'faulty');
+      const markTier = gradeFortuneMarking(f.fullText, f, f.markedText);
+      return {
+        tray: 'faulty',
+        text: f.fullText,
+        sortTier,
+        sorted: sortTier === 'correct' ? 'correct' : 'wrong',
+        marked: markTier,
+        sort: SORT_REWARD_AMOUNT[sortTier],
+        mark: REWARD_AMOUNT[markTier],
+      };
+    }),
+    ...approved.map(f => {
+      const sortTier = gradeSort(f, 'approved');
+      return {
+        tray: 'approved',
+        text: f.text,
+        sortTier,
+        sorted: sortTier === 'correct' ? 'correct' : 'wrong',
+        marked: null, // the Approved tray isn't marked
+        sort: SORT_REWARD_AMOUNT[sortTier],
+        mark: 0,
+      };
+    }),
   ];
-  const total = rows.reduce((sum, r) => sum + SORT_REWARD_AMOUNT[r.tier], 0);
+  const sortTotal = rows.reduce((n, r) => n + r.sort, 0);
+  const markTotal = rows.reduce((n, r) => n + r.mark, 0);
+  const total = sortTotal + markTotal;
 
   useEffect(() => {
     playSound('coin-gain');
   }, []);
 
+  const money = (n) => (n === 0 ? `${currency}0` : `${n > 0 ? '+' : '−'} ${currency}${Math.abs(n)}`);
+  const tone = (n) => (n > 0 ? 'gain' : n < 0 ? 'loss' : 'zero');
+  const icon = (tier, what) => {
+    if (!tier) return <span className="br-icon none" title={`Not ${what} - the Approved tray isn't marked`}>–</span>;
+    const i = RESULT_ICON[tier];
+    return <span className={`br-icon ${i.className}`} title={`${what}: ${i.label}`} aria-label={`${what} ${i.label}`}>{i.mark}</span>;
+  };
+
+  const handleNext = () => {
+    const tiers = {};
+    rows.forEach(r => { tiers[r.sortTier] = (tiers[r.sortTier] || 0) + 1; });
+    track('sorting_scored', { total_points: sortTotal, tiers });
+    onNext(sortTotal);
+  };
+
   return (
-    <div className="inspection-room-screen sr-screen">
-      <div className="inspection-title">Payment for sorting</div>
-
-      <div className="sr-strip-list sorting-totals-list">
-        {rows.map((row, index) => {
-          const amount = SORT_REWARD_AMOUNT[row.tier];
-          const cssTier = row.tier === 'correct' ? 'correct' : 'wrong';
-          return (
-            <div key={index} className="sr-strip fortune-paper">
-              <div className="fortune-text-content">{row.text}</div>
-              <div className={`sr-strip-amount sr-strip-amount-${cssTier}`}>
-                {amount > 0 ? `+ ${currency}${amount}` : `− ${currency}${Math.abs(amount)}`}
-              </div>
-            </div>
-          );
-        })}
+    <StoryScreen
+      kicker="Dispatch"
+      icon={SEAL_ICONS.coin}
+      title="Your batch payout"
+      onNext={handleNext}
+    >
+      <div className="br-table" role="table" aria-label="Payout per fortune">
+        <div className="br-row br-head" role="row">
+          <span role="columnheader">Fortune</span>
+          <span role="columnheader">Sorted</span>
+          <span role="columnheader">Marked</span>
+          <span role="columnheader">Earned</span>
+        </div>
+        {rows.map((r, i) => (
+          <div key={i} className="br-row" role="row">
+            <span className="br-fortune" role="cell" title={r.text}>
+              <span className={`br-dot ${r.tray}`} title={r.tray === 'faulty' ? 'Faulty tray' : 'Approved tray'} />
+              <span className="br-text">{r.text}</span>
+            </span>
+            <span role="cell">{icon(r.sorted, 'Sorted')}</span>
+            <span role="cell">{icon(r.marked, 'Marked')}</span>
+            <span className={`br-amt ${tone(r.sort + r.mark)}`} role="cell">{money(r.sort + r.mark)}</span>
+          </div>
+        ))}
+        <div className="br-key" aria-hidden="true">
+          <span><i className="br-dot faulty" /> Faulty tray</span>
+          <span><i className="br-dot approved" /> Approved tray</span>
+        </div>
       </div>
 
-      <div className="sorting-total-row">
-        <span className="sorting-total-label">Total</span>
-        <span className={`sorting-total-amount ${total >= 0 ? 'positive' : 'negative'}`}>
-          {total >= 0 ? '+' : '−'} {currency}{Math.abs(total)}
-        </span>
+      <div className="br-totals">
+        <div className="br-total"><span>Sorting</span><b className={tone(sortTotal)}>{money(sortTotal)}</b></div>
+        <span className="br-plus" aria-hidden="true">+</span>
+        <div className="br-total"><span>Marking</span><b className={tone(markTotal)}>{money(markTotal)}</b></div>
+        <span className="br-plus" aria-hidden="true">=</span>
+        <div className="br-total br-grand"><span>Total payout</span><b className={tone(total)}>{money(total)}</b></div>
       </div>
-
-      <button className="results-next-btn" onClick={() => {
-        const tiers = {};
-        rows.forEach(r => { tiers[r.tier] = (tiers[r.tier] || 0) + 1; });
-        track('sorting_scored', { total_points: total, tiers });
-        onNext(total);
-      }}>
-        Next &gt;&gt;&gt;
-      </button>
-    </div>
+    </StoryScreen>
   );
 }
 

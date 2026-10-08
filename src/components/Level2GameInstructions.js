@@ -1,38 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import InvalidURLExplainer from './InvalidURLExplainer';
-import NavRoundButton from './NavRoundButton';
-import { playSound } from '../sounds';
-import balloons3Left from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/balloons-3-left.svg';
-import balloonsPopped from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/balloons-popped.svg';
+import { RulesLayout, BalloonRefresherScreen } from './RulesScreens';
 import './EventScreen.css';
 import './Level2GameInstructions.css';
 
-// Back/Forward round-icon buttons flank the card (same pattern as LevelOneInstructions.js's
-// LevelOneLayout) instead of a top-left back arrow + a Next button inside the card - kept
-// consistent across every level's rules flow. A spacer takes a missing button's place so
-// the card never shifts sideways depending on whether that screen has a Back.
+// Level 2 rules screens: the Fortunery storefront + ledger card (RulesScreens.js)
 const L2Layout = ({ stepIndex, totalSteps, onBack, onNext, title, children }) => (
-  <div className="instruction-screen">
-    <div className="level-card-row">
-      {onBack && stepIndex > 0
-        ? <NavRoundButton direction="back" onClick={onBack} label="Back" />
-        : <span className="nav-round-spacer" aria-hidden="true" />}
-
-      <div className="instruction-card">
-        {title && <div className="title">{title}</div>}
-        <div className="l2-content-area">
-          {children}
-        </div>
-      </div>
-
-      {onNext
-        ? <NavRoundButton direction="forward" onClick={onNext} label="Forward" dataSound="progress-munch" />
-        : <span className="nav-round-spacer" aria-hidden="true" />}
-    </div>
-    <div className="instruction-progress-bar">
-      <div className="progress-fill" style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}></div>
-    </div>
-  </div>
+  <RulesLayout level={2} title={title} step={stepIndex} steps={totalSteps} onBack={stepIndex > 0 ? onBack : undefined} onNext={onNext}>
+    {children}
+  </RulesLayout>
 );
 
 // Same balloons-over-crates scene as Level 1's Event screen, just with 5 crates for
@@ -199,30 +175,5 @@ export function InvalidUrlMeaningScreen({ onBack, onNext, stepIndex, totalSteps 
 }
 
 export function BalloonsTwoScreen({ onReplay, onNext }) {
-  const [popped, setPopped] = useState(false);
-
-  const handlePop = () => {
-    setPopped(true);
-    playSound('balloon-pop');
-    setTimeout(() => onReplay(), 500);
-  };
-
-  return (
-    <div className="balloon-full-screen">
-      <button
-        type="button"
-        className="balloon-container"
-        onClick={handlePop}
-        aria-label="Pop the balloons"
-        data-sound="none"
-      >
-        <img src={popped ? balloonsPopped : balloons3Left} alt="" className="balloon-cluster-img" />
-      </button>
-      <p className="balloon-text">
-        You will get <strong>three chances</strong> to go through these instructions<br/>
-        again if you need, by popping these three balloons
-      </p>
-      <button className="orange-btn" onClick={onNext}>Next</button>
-    </div>
-  );
+  return <BalloonRefresherScreen level={2} onReplay={onReplay} onNext={onNext} />;
 }

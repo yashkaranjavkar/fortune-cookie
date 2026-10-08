@@ -3,10 +3,12 @@
 
 .l1-balloons-wrap {
   position: absolute;
-  top: 16px;
-  left: 16px;
-  width: 96px;
+  top: 18px;
+  left: 18px;
   z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .l1-balloons-btn {
@@ -16,20 +18,46 @@
   padding: 0;
   cursor: pointer;
   display: block;
-  width: 100%;
+  width: 150px;
+  flex-shrink: 0;
   animation: l1-bob 3.6s ease-in-out infinite;
 }
 .l1-balloons-btn:hover { transform: scale(1.05); }
 .l1-balloons-btn:active { transform: scale(0.94); }
 
 .l1-balloons-img { width: 100%; height: auto; display: block; }
+/* with none left, the faded outlines take the same space */
+.l1-balloons-wrap > .l1-balloons-img { width: 150px; flex-shrink: 0; }
+
+/* the note beside the balloons: a slip of ledger paper */
+.l1-balloons-note {
+  width: 210px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--ff-paper, #FBF5E6);
+  border: 3px solid var(--ff-gold, #D29A2E);
+  border-radius: 12px;
+  box-shadow: 0 5px 0 rgba(20, 6, 8, 0.45);
+  font-family: var(--font-sans);
+  color: var(--ff-ink, #36201C);
+}
+.l1-balloons-note-title {
+  font-family: var(--ff-title-font, Georgia, serif);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--ff-maroon-deep, #561923);
+}
+.l1-balloons-note-text { font-size: 13px; line-height: 1.4; color: var(--ff-ink-soft, #6A5144); }
 
 .l1-balloons-count {
-  margin-top: 4px;
+  margin-top: 2px;
   font-family: var(--font-sans);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ff-gold-deep, #B07E1E);
 }
 
 @keyframes l1-bob {
@@ -39,4 +67,65 @@
 
 @media (prefers-reduced-motion: reduce) {
   .l1-balloons-btn { animation: none; }
+}
+
+/* The note's spot beside the balloons: the note when open, a small "i" button when
+   tucked away. The note shrinks towards the "i" as it hides, and grows out of it. */
+.l1-balloons-info {
+  position: relative;
+  width: 210px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.l1-balloons-info-btn {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 38px;
+  height: 38px;
+  margin-top: -19px;
+  border-radius: 50%;
+  border: 3px solid var(--ff-gold, #D29A2E);
+  background: var(--ff-sign, #F0C75E);
+  color: var(--ff-maroon-deep, #561923);
+  font-family: var(--ff-title-font, Georgia, serif);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 20px;
+  line-height: 1;
+  box-shadow: 0 4px 0 rgba(20, 6, 8, 0.45);
+  cursor: pointer;
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.5s ease 0.35s, transform 0.5s ease 0.35s;
+  animation: l1-info-pulse 2.4s ease-in-out 1;
+}
+.l1-balloons-info-btn:hover { filter: brightness(1.06); }
+.l1-balloons-info .l1-balloons-note {
+  position: relative;
+  transform-origin: 19px 50%; /* the centre of the "i" */
+  opacity: 0;
+  transform: scale(0.15);
+  pointer-events: none;
+  transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.5, 0, 0.3, 1);
+}
+.l1-balloons-info.open .l1-balloons-note {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+  transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.15);
+}
+.l1-balloons-info.open .l1-balloons-info-btn {
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+@keyframes l1-info-pulse {
+  0%, 100% { box-shadow: 0 4px 0 rgba(20, 6, 8, 0.45), 0 0 0 0 rgba(240, 199, 94, 0.6); }
+  50% { box-shadow: 0 4px 0 rgba(20, 6, 8, 0.45), 0 0 0 10px rgba(240, 199, 94, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .l1-balloons-info .l1-balloons-note,
+  .l1-balloons-info-btn { transition-duration: 0.01s; animation: none; }
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useCurrency } from '../utils/currency';
-import NavRoundButton from './NavRoundButton';
+import { StoryScreen, SEAL_ICONS } from './FactoryFront';
+import sabotagedCookie from '../assets/Drawings/fortune sabo.png';
 import './ObjectiveScreen.css';
 import './EventScreen.css';
 import './TimerEndScreen.css';
@@ -9,109 +10,90 @@ import './SortingFortunesScreen.css';
 // How-to Interact Assets - the same covered/hover/lifted dome states used in the games
 import step1 from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-covered.svg';
 import step2 from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-hover.svg';
-import step3 from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-lifted.svg';
+import step3 from '../assets/dome-lifted-cookie.svg';
 import domeSpent from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/dome-spent.svg';
 import cookieBroken from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-broken.svg';
 
 // Countdown illustration shared by the three timer-explainer screens below: the same
 // dome art used everywhere else in the game, with a live LED-style readout, instead of
 // one flat baked-together image per screen.
-function TimerDomeScene({ label, value, wasted }) {
+// `extra`: anything else to show under the caption (e.g. what a spoilt cookie costs)
+function TimerDomeScene({ label, value, wasted, compact, extra }) {
   return (
-    <div className="tds-scene">
-      <div className="tds-caption">
-        {wasted && (
-          <svg className="tds-hand" viewBox="0 0 20 20" aria-hidden="true">
-            <circle cx="10" cy="10" r="9" fill="var(--pink-light)" stroke="var(--error)" strokeWidth="1.2" />
-            <path d="M10 5.5v6M7 9l3 3 3-3" fill="none" stroke="var(--maroon-deep)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        )}
-        <span className="tds-caption-text">{label}</span>
-      </div>
-
+    <div className={`tds-scene${compact ? ' compact' : ''}${wasted ? ' wasted' : ''}`}>
       <div className="tds-dome-col">
         <img src={wasted ? domeSpent : step1} alt="" className="tds-dome-img" />
-        <div className="tds-led">{value}</div>
+        <div className="tds-led" aria-label={`Timer: ${value}`}>{value}</div>
+      </div>
+
+      <div className="tds-caption">
+        {wasted && <span className="tds-badge">Time's up</span>}
+        <span className="tds-caption-text">{label}</span>
         {wasted && (
-          <div className="tds-shelf">
+          <div className="tds-shelf" aria-label="Spoilt cookies">
             <img src={cookieBroken} alt="" className="tds-shelf-cookie" />
             <img src={cookieBroken} alt="" className="tds-shelf-cookie" />
+            <span className="tds-shelf-label">spoilt</span>
           </div>
         )}
+        {extra}
       </div>
     </div>
   );
 }
 
-// Shared Layout Component (Supports Green Bar & Left Replay Button)
-// - First screen (stepIndex 0): a single Next button, nothing else.
-// - Middle screens: the top-left back arrow is dropped in favour of a
-//   Back/Forward round-icon pair (wisecrack kit style) at the bottom right.
-// - Final screen (isFinal): unchanged - Next + Replay, top-left back arrow kept.
-const InstructionLayout = ({ stepIndex, totalSteps, onBack, onNext, onReplay, children, isFinal }) => {
-  const isFirst = stepIndex === 0;
-  const showNavPair = !isFirst && !isFinal;
-
-  return (
-  <div className="instruction-screen">
-    {!showNavPair && onBack && stepIndex > 0 && <button className="back-btn" onClick={onBack}>←</button>}
-
-    <div className="instruction-card-row">
-      {showNavPair && <NavRoundButton direction="back" onClick={onBack} label="Back" />}
-
-      <div className="instruction-card">
-        {children}
-      </div>
-
-      {showNavPair && <NavRoundButton direction="forward" onClick={onNext} label="Forward" dataSound="progress-munch" />}
-    </div>
-
-    {!showNavPair && (
-      <button className="instruction-next-btn" onClick={onNext} data-sound="progress-munch">Next</button>
-    )}
-
-    {/* Replay Button (Bottom Left - Outside the card) */}
-    {onReplay && (
-      <button className="instruction-replay-btn" onClick={onReplay}>Replay</button>
-    )}
-
-    {/* Progress Bar */}
-    <div className="instruction-progress-bar">
-      <div className={`progress-fill ${isFinal ? 'green' : ''}`} style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}></div>
-    </div>
-  </div>
-  );
-};
+// Shared layout for the training explainer screens: the Fortunery storefront + ledger
+// card (StoryScreen), with step dots and Back / Next (and Replay on the last one).
+const InstructionLayout = ({ stepIndex, totalSteps, onBack, onNext, onReplay, title, icon, children }) => (
+  <StoryScreen
+    kicker="Training"
+    title={title}
+    icon={icon}
+    centered
+    step={stepIndex}
+    steps={totalSteps}
+    onBack={stepIndex > 0 ? onBack : undefined}
+    onReplay={onReplay}
+    onNext={onNext}
+  >
+    <div className="story-content">{children}</div>
+  </StoryScreen>
+);
 
 export function ObjectiveScreen({ onNext, onBack, stepIndex, totalSteps }) {
   return (
-    <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext}>
-      <div className="title">Objective</div>
-      <p className="obj-lead">
-        Your factory has been sabotaged &mdash; some fortune cookies were doped with <strong>malicious fortunes</strong>.
-      </p>
+    <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext} title="Objective" icon={SEAL_ICONS.magnifier}>
+      <div className="obj-layout">
+        {/* a sabotaged fortune cookie: broken open, with a warning slip inside */}
+        <img src={sabotagedCookie} alt="A fortune cookie broken open with a warning-red fortune inside" className="obj-art" />
+        <div className="obj-text">
+          <p className="obj-lead">
+            Your factory has been sabotaged &mdash; some fortune cookies were doped with <strong>malicious fortunes</strong>.
+          </p>
 
-      <ol className="obj-steps">
-        <li className="obj-step">
-          <span className="obj-step-marker">
-            <span className="obj-step-num">1</span>
-            <span className="obj-step-line" aria-hidden="true" />
-          </span>
-          <span className="obj-step-text">
-            <span className="obj-step-title">Inspect</span>
-            <span className="obj-step-desc">Check today's samples for doped fortunes</span>
-          </span>
-        </li>
-        <li className="obj-step">
-          <span className="obj-step-marker">
-            <span className="obj-step-num">2</span>
-          </span>
-          <span className="obj-step-text">
-            <span className="obj-step-title">Approve</span>
-            <span className="obj-step-desc">Clear the clean batches for delivery</span>
-          </span>
-        </li>
-      </ol>
+          <ol className="obj-steps">
+            <li className="obj-step">
+              <span className="obj-step-marker">
+                <span className="obj-step-num">1</span>
+                <span className="obj-step-line" aria-hidden="true" />
+              </span>
+              <span className="obj-step-text">
+                <span className="obj-step-title">Inspect</span>
+                <span className="obj-step-desc">Check today's samples for doped fortunes</span>
+              </span>
+            </li>
+            <li className="obj-step">
+              <span className="obj-step-marker">
+                <span className="obj-step-num">2</span>
+              </span>
+              <span className="obj-step-text">
+                <span className="obj-step-title">Approve</span>
+                <span className="obj-step-desc">Clear the clean batches for delivery</span>
+              </span>
+            </li>
+          </ol>
+        </div>
+      </div>
     </InstructionLayout>
   );
 }
@@ -153,8 +135,7 @@ function EventScene() {
 
 export function EventScreen({ onNext, onBack, stepIndex, totalSteps }) {
   return (
-    <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext}>
-      <div className="title">Event - Office Birthday Party</div>
+    <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext} title="Event - Office Birthday Party" icon={SEAL_ICONS.party}>
 
       <div className="evt-scene">
         <EventScene />
@@ -181,8 +162,7 @@ export function EventScreen({ onNext, onBack, stepIndex, totalSteps }) {
 
 export function HowToInteractScreen({ onNext, onBack, stepIndex, totalSteps }) {
   return (
-    <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext}>
-      <div className="title">How to interact with the cookie?</div>
+    <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext} title="How to interact with the cookie?" icon={SEAL_ICONS.dome}>
       
       <div className="how-to-grid">
         <div className="instruction-step">
@@ -212,11 +192,10 @@ export function HowToInteractScreen({ onNext, onBack, stepIndex, totalSteps }) {
 // both trays' rules and outcomes are shown together since they're really one idea.
 export function SortingIntroScreen({ onNext, onBack, stepIndex, totalSteps }) {
   return (
-    <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext}>
-      <div className="title">Sorting Fortunes</div>
+    <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext} title="Sorting Fortunes" icon={SEAL_ICONS.tray}>
 
       <div className="sorting-content">
-        <TimerDomeScene label={<>10 sec timer<br />to verify and sort</>} value="10" />
+        <TimerDomeScene label={<>10 sec timer<br />to verify and sort</>} value="10" compact />
 
         <p className="sf-lead">Drag each fortune into the tray that matches your decision.</p>
 
@@ -247,8 +226,7 @@ export function SortingIntroScreen({ onNext, onBack, stepIndex, totalSteps }) {
 /* NEW: First Timer Screen */
 export function TimerQuestionScreen({ onNext, onBack, stepIndex, totalSteps }) {
   return (
-    <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext}>
-      <div className="title">Timer Ends</div>
+    <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext} title="Timer Ends" icon={SEAL_ICONS.clock}>
       
       <div className="sorting-content">
         <TimerDomeScene label={<>What if the timer<br />ends before sorting?</>} value="00" />
@@ -257,31 +235,36 @@ export function TimerQuestionScreen({ onNext, onBack, stepIndex, totalSteps }) {
   );
 }
 
-/* NEW: Final Timer Screen (with Green Bar and Replay) */
+/* Final timer screen - the last training explainer, with Replay */
 export function TimerEndScreen({ onNext, onReplay, onBack, stepIndex, totalSteps }) {
   const currency = useCurrency();
   return (
-    <InstructionLayout 
-      stepIndex={stepIndex} 
-      totalSteps={totalSteps} 
-      onBack={onBack} 
-      onNext={onNext} 
-      onReplay={onReplay} // Passed here now
-      isFinal={true}
+    <InstructionLayout
+      stepIndex={stepIndex}
+      totalSteps={totalSteps}
+      onBack={onBack}
+      onNext={onNext}
+      onReplay={onReplay}
+      title="Timer Ends"
+      icon={SEAL_ICONS.clock}
     >
-      <div className="title">Timer Ends</div>
-      
+
       <div className="sorting-content">
-        <TimerDomeScene label="Timer ends" value="00" wasted />
+        <TimerDomeScene
+          label={<>The timer ran out<br />before sorting</>}
+          value="00"
+          wasted
+          extra={(
+            <div className="tme-cost">
+              <span className="tme-cost-num">&minus; {currency}800</span>
+              <span className="tme-cost-label">per unsorted cookie</span>
+            </div>
+          )}
+        />
 
         <p className="tme-lead">
           If a sample isn&rsquo;t sorted before the timer runs out, it&rsquo;s spoilt &mdash; that batch won&rsquo;t go out for delivery.
         </p>
-
-        <div className="tme-cost">
-          <span className="tme-cost-num">{currency}800</span>
-          <span className="tme-cost-label">Lost per unsorted cookie</span>
-        </div>
       </div>
     </InstructionLayout>
   );

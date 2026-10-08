@@ -70,3 +70,33 @@
   color: var(--ink-soft);
   margin-top: 2px;
 }
+
+/* Objective: the sabotaged-cookie drawing (assets/Drawings/fortune sabo.png) beside the
+   briefing text */
+.obj-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(20px, 3vw, 40px);
+  width: 100%;
+  text-align: left;
+}
+.obj-art {
+  width: clamp(130px, 22vh, 210px);
+  height: auto;
+  flex-shrink: 0;
+  filter: drop-shadow(0 8px 10px rgba(54, 32, 28, 0.25));
+  animation: obj-art-wobble 4s ease-in-out infinite;
+  transform-origin: 50% 80%;
+}
+.obj-text { min-width: 0; max-width: 420px; }
+.obj-layout .obj-lead { text-align: left; }
+@keyframes obj-art-wobble {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+@media (prefers-reduced-motion: reduce) { .obj-art { animation: none; } }
+@media (max-width: 640px) {
+  .obj-layout { flex-direction: column; text-align: center; }
+}
+.obj-layout .obj-steps { margin-left: 0; margin-right: 0; }

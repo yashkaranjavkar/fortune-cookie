@@ -11,8 +11,7 @@ import {
   PaymentInspectionScreen,
   StartMarkingScreen,
   CheckSamplesScreen,
-  ResultsScreen,
-  SortingResultsScreen
+  BatchResultsScreen
 } from '../../components/Level2Instructions';
 import {
   EventTwoScreen,
@@ -102,17 +101,12 @@ export const LEVEL2_STEPS = [
   walkStep('walkToDispatch', 'inspection', 'results', 'Level 2'),
   roomIntroStep('enterDispatch', 'results', 'Level 2'),
   { key: 'checkSamples', render: (ctx, nav) => <CheckSamplesScreen onNext={nav.next} /> },
+  // sorting + marking scores for the whole batch, on one screen
   {
     key: 'results',
     render: (ctx, nav) => (
-      <ResultsScreen markedFortunes={ctx.markedFortunes} approvedItems={ctx.approvedItems} onNext={nav.next} />
-    )
-  },
-  {
-    key: 'sortingResults',
-    render: (ctx, nav) => (
-      <SortingResultsScreen
-        faultyItems={ctx.faultyItems}
+      <BatchResultsScreen
+        markedFortunes={ctx.markedFortunes}
         approvedItems={ctx.approvedItems}
         onNext={(finalSortingScore) => { ctx.setSortingScore(finalSortingScore); nav.next(); }}
       />

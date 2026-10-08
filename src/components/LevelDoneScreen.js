@@ -3,6 +3,7 @@ import { useCurrency } from '../utils/currency';
 import { playSound } from '../sounds';
 import { track } from '../analytics';
 import { useMascotTrigger } from '../config/mascotTriggers';
+import { StoryScreen, SEAL_ICONS } from './FactoryFront';
 import './LevelDoneScreen.css';
 
 const StarIcon = ({ size }) => (
@@ -26,46 +27,34 @@ export default function LevelDoneScreen({ batchName, sorted, total, incentive, o
   }, []);
 
   return (
-    <div className="level-done-screen">
-      <div className="ld-frame">
-        <div className="ld-plaque">Level done</div>
+    <StoryScreen
+      kicker="Level done"
+      title={batchName}
+      subtitle="Great job, Inspector!"
+      icon={SEAL_ICONS.star}
+      centered
+      onReplay={() => { track('level_replay', { batch: batchName }); onReplay(); }}
+      onNext={onNext}
+      nextLabel="Next level"
+    >
+      <div className="ld-stars">
+        <StarIcon size={44} />
+        <StarIcon size={58} />
+        <StarIcon size={44} />
+      </div>
 
-        <div className="ld-board">
-          <div className="ld-stars">
-            <StarIcon size={44} />
-            <StarIcon size={58} />
-            <StarIcon size={44} />
-          </div>
-
-          <div className="ld-heading">
-            <p className="ld-batch-name">{batchName}</p>
-            <p className="ld-subtext">Great job, Inspector!</p>
-          </div>
-
-          <div className="ld-stats">
-            <div className="ld-stat">
-              <span className="ld-stat-label">Samples sorted</span>
-              <span className="ld-stat-value">{sorted} / {total}</span>
-            </div>
-            <div className="ld-stat">
-              <span className="ld-stat-label">Incentive earned</span>
-              <span className={`ld-stat-value ${incentive < 0 ? 'lost' : 'earned'}`}>
-                {incentive < 0 ? '−' : '+'} {currency}{Math.abs(incentive)}
-              </span>
-            </div>
-          </div>
-
-          <div className="ld-actions">
-            <button className="ld-replay-btn" onClick={() => { track('level_replay', { batch: batchName }); onReplay(); }} aria-label="Replay level">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" />
-                <path d="M4.5 4.5v4.2h4.2" />
-              </svg>
-            </button>
-            <button className="ld-next-btn" onClick={onNext}>Next level</button>
-          </div>
+      <div className="ld-stats">
+        <div className="ld-stat">
+          <span className="ld-stat-label">Samples sorted</span>
+          <span className="ld-stat-value">{sorted} / {total}</span>
+        </div>
+        <div className="ld-stat">
+          <span className="ld-stat-label">Incentive earned</span>
+          <span className={`ld-stat-value ${incentive < 0 ? 'lost' : 'earned'}`}>
+            {incentive < 0 ? '−' : '+'} {currency}{Math.abs(incentive)}
+          </span>
         </div>
       </div>
-    </div>
+    </StoryScreen>
   );
 }

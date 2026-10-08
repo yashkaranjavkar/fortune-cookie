@@ -7,7 +7,11 @@
   z-index: 50;
   overflow: hidden;
   background: #13182b;
+  /* fades in from the night-blue of the "Connecting..." loader before it */
+  animation: op-fade-in 1.2s ease-out both;
 }
+@keyframes op-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .opening-screen { animation-duration: 0.3s; } }
 
 /* ---- Living background ---- */
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import './SortTray.css';
 import TrayFrame from './TrayFrame';
-import cookieWhole from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-whole.svg';
+import cookieWhole from '../assets/Drawings/fortune cookie.png';
 import cookieBroken from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-broken.svg';
 
 // Small cookie chips that stack up inside a tray as fortunes are sorted into it

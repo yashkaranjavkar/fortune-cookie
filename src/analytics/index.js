@@ -6,6 +6,8 @@
 //   enterScreen(name, meta)  start timing a screen (ends + reports the previous one)
 //   useScreen(name, meta)    React hook form of enterScreen
 //   startTimer() -> () => ms  measure how long a decision took
+//   startGameClock()          the game itself starts now (Start on the title screen) -
+//                             play time is counted from here, not from page load
 //
 // Events are batched and POSTed to the analytics backend's REST API (backend/, address
 // in src/config/analytics.js). Unsent events are kept in an outbox in localStorage
@@ -50,6 +52,9 @@ let sent = 0;
 let flushTimer = null;
 let inFlight = false;
 let retryDelay = 0;
+// When the game itself started (Start on the title screen). Anything before it - the
+// player's details, the loader, the title screen - isn't counted as play time.
+let gameStart = null;
 
 // Events not yet confirmed by the backend, oldest first. Persisted so they survive a
 // reload or a backend outage.
@@ -151,6 +156,13 @@ export function track(type, data = {}) {
 
 export function identify(traits) {
   track('player_identified', { traits });
+}
+
+// Called when the player presses Start on the title screen. Only the first call counts.
+export function startGameClock(data = {}) {
+  if (!ANALYTICS.enabled || gameStart !== null) return;
+  gameStart = performance.now();
+  track('game_started', { pre_game_ms: Math.round(gameStart - sessionStart), ...data });
 }
 
 export function startTimer() {
@@ -280,6 +292,8 @@ function endSession(reason) {
   accrueActive();
   track('session_end', {
     duration_ms: Math.round(performance.now() - sessionStart),
+    // play time from the Start button (null if the game never started)
+    game_ms: gameStart === null ? null : Math.round(performance.now() - gameStart),
     active_ms: Math.round(activeTotal),
     events_sent: sent + queue.length + 1,
     last_screen: context.screen,

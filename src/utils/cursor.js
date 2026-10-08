@@ -6,10 +6,11 @@ import { useEffect } from 'react';
 //   'highlighter' marker - marking the faulty part of each fortune
 //   'pen'         pen - the supervisor's checklist
 //   'hidden'      no cursor at all - the factory-map walks between rooms
+//   'plain'       the ordinary system cursor - screens before the game starts
 // Which step uses which is set by `cursor` on the steps in src/config/steps/*.js.
 // Anything draggable (see usePointerDrag) shows an open glove, and anything being
 // carried or slid (body.is-grabbing) a closed fist.
-export const STAGE_CURSORS = ['glove', 'highlighter', 'pen', 'hidden'];
+export const STAGE_CURSORS = ['glove', 'highlighter', 'pen', 'hidden', 'plain'];
 
 // Click feedback: while the mouse button is down, every clicking cursor swaps to a
 // slightly tilted copy of itself (the "-press" images, styled by body.is-pressing in

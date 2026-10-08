@@ -1,36 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import InvalidURLExplainer from './InvalidURLExplainer';
-import NavRoundButton from './NavRoundButton';
+import { RulesLayout, BalloonRefresherScreen } from './RulesScreens';
 import { useCurrency } from '../utils/currency';
-import { playSound } from '../sounds';
-import cookieIntact from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-whole.svg';
+import cookieIntact from '../assets/Drawings/fortune cookie.png';
 import cookieBroken from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-broken.svg';
-import balloons3Left from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/balloons-3-left.svg';
-import balloonsPopped from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/balloons-popped.svg';
 
-// Shared Level 1 Layout - Back/Forward round-icon buttons flank the card
-// (wisecrack kit style), instead of the old inline text links inside its footer.
-// A blank spacer takes a missing button's place so the card never shifts sideways
-// depending on whether that particular screen has a Back (or, in principle, a Next).
+// Level 1 rules screens: the Fortunery storefront + ledger card (RulesScreens.js)
 const LevelOneLayout = ({ title, onBack, onNext, children }) => (
-  <div className="level-one-screen">
-    <div className="level-one-card-row">
-      {onBack
-        ? <NavRoundButton direction="back" onClick={onBack} label="Back" />
-        : <span className="nav-round-spacer" aria-hidden="true" />}
-
-      <div className="level-one-card">
-        <div className="level-one-title">{title}</div>
-        <div className="level-one-content">
-          {children}
-        </div>
-      </div>
-
-      {onNext
-        ? <NavRoundButton direction="forward" onClick={onNext} label="Forward" dataSound="progress-munch" />
-        : <span className="nav-round-spacer" aria-hidden="true" />}
-    </div>
-  </div>
+  <RulesLayout level={1} title={title} onBack={onBack} onNext={onNext}>
+    {children}
+  </RulesLayout>
 );
 
 // Screen 1: Payment for sorting - rewards explainer
@@ -185,34 +164,5 @@ export function ValidVsFaultyScreen({ onBack, onNext }) {
 
 // Screen 8: Balloons
 export function BalloonScreen({ onReplay, onNext }) {
-  const [popped, setPopped] = useState(false);
-
-  const handlePop = () => {
-    setPopped(true);
-    playSound('balloon-pop');
-    setTimeout(() => {
-      onReplay();
-    }, 500);
-  };
-
-  return (
-    <div className="balloon-full-screen">
-      <button
-        type="button"
-        className="balloon-container"
-        onClick={handlePop}
-        aria-label="Pop the balloons"
-        data-sound="none"
-      >
-        <img src={popped ? balloonsPopped : balloons3Left} alt="" className="balloon-cluster-img" />
-      </button>
-
-      <p className="balloon-text">
-        You will get <strong>three chances</strong> to go through these instructions<br/>
-        again if you need, by popping these three balloons
-      </p>
-
-      <button className="orange-btn" onClick={onNext}>Next</button>
-    </div>
-  );
+  return <BalloonRefresherScreen level={1} onReplay={onReplay} onNext={onNext} />;
 }

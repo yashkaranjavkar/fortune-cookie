@@ -1,8 +1,8 @@
 import React from 'react';
-import { playSound } from '../sounds';
 import TrayFrame from './TrayFrame';
-import cookieWhole from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-whole.svg';
-import cookieBroken from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-broken.svg';
+import cookieWhole from '../assets/Drawings/fortune cookie.png';
+// an opened bunch shows broken-open fortune cookies with their slips showing
+import cookieBroken from '../assets/Drawings/fortune break.png';
 
 // A "bunch" is 4 individual cookies clustered together, not one big cookie
 const CookieBunch = ({ broken, className = '' }) => (
@@ -62,7 +62,7 @@ export default function TraySelectionScreen({ trayNumber, totalTrays = 3, broken
             {/* Left bunch */}
             <div
               className={'bunch' + (isBunch0Broken ? ' opened' : '')}
-              onClick={() => { if (!isBunch0Broken) { playSound('cookie-crack'); onSelectBunch(0); } }}
+              onClick={() => { if (!isBunch0Broken) onSelectBunch(0); }}
               style={{ opacity: isBunch0Broken ? 0.35 : 1 }}
             >
               <CookieBunch broken={isBunch0Broken} />
@@ -71,7 +71,7 @@ export default function TraySelectionScreen({ trayNumber, totalTrays = 3, broken
             {/* Right bunch */}
             <div
               className={'bunch' + (isBunch1Broken ? ' opened' : '')}
-              onClick={() => { if (!isBunch1Broken) { playSound('cookie-crack'); onSelectBunch(1); } }}
+              onClick={() => { if (!isBunch1Broken) onSelectBunch(1); }}
               style={{ opacity: isBunch1Broken ? 0.35 : 1 }}
             >
               <CookieBunch broken={isBunch1Broken} />

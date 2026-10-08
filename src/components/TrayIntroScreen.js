@@ -1,5 +1,5 @@
 import React from 'react';
-import cookieWhole from '../assets/wisecrack-ui-kit/wisecrack-ui-kit/svg/cookie-whole.svg';
+import cookieWhole from '../assets/Drawings/fortune cookie.png';
 import './TrayIntroScreen.css';
 
 export default function TrayIntroScreen({ trayNumber, onNext }) {

@@ -9,13 +9,13 @@
 
 const AGG_TYPES = [
   'session_start', 'session_end', 'client_error', 'nav_back', 'level_replay',
-  'player_clock_in', 'player_identified', 'application_submitted', 'websites_submitted',
+  'player_clock_in', 'player_details_submitted', 'player_identified', 'application_submitted', 'websites_submitted',
   'section_start', 'section_complete', 'screen_exit',
   'tray_fortunes_selected', 'fortune_sorted', 'fortune_timed_out', 'rules_help_opened',
   'marking_submitted', 'inspection_revealed', 'level_complete',
   'supervisor_decision', 'supervisor_revoke_reason',
 ];
-const TRAIT_TYPES = ['player_clock_in', 'player_identified', 'application_submitted'];
+const TRAIT_TYPES = ['player_clock_in', 'player_details_submitted', 'player_identified', 'application_submitted'];
 
 /* ---------------- small helpers ---------------- */
 
@@ -93,7 +93,9 @@ function buildInsights(db, filters = {}) {
       const d = JSON.parse(row.data);
       const t = traits.get(row.player_id) || {};
       if (row.type === 'player_clock_in') { t.designation = d.designation; t.employee_id = d.employee_id; }
+      if (row.type === 'player_details_submitted') { t.designation = d.designation; t.employee_id = d.employee_id; t.region = d.region; }
       if (row.type === 'player_identified' && d.traits && d.traits.designation) t.designation = d.traits.designation;
+      if (row.type === 'player_identified' && d.traits && d.traits.region) t.region = d.traits.region;
       if (row.type === 'application_submitted') { t.region = d.region; t.age_group = d.age_group; t.interests = d.interests; }
       traits.set(row.player_id, t);
     });
@@ -164,7 +166,8 @@ function buildInsights(db, filters = {}) {
         languages.add(d.language);
         break;
       }
-      case 'session_end': if (d.duration_ms) sessionLengths.set(ev.session_id, d.duration_ms); break;
+      // play time from the Start button when reported, else from page load
+      case 'session_end': if (d.game_ms ?? d.duration_ms) sessionLengths.set(ev.session_id, d.game_ms ?? d.duration_ms); break;
       case 'client_error': errors += 1; break;
       case 'nav_back': backNav += 1; break;
       case 'level_replay': replays += 1; break;

@@ -32,7 +32,8 @@ const PENNANTS = Array.from({ length: 9 }, (_, i) => {
 
 const TRAY_COOKIES = [162, 190, 218, 246];
 
-function WorkstationScene() {
+// Shared with the appointment screen (AppointmentScreen.js)
+export function WorkstationScene() {
   return (
     <svg className="welcome-svg" viewBox="0 0 400 230" role="img"
          aria-label="A welcome banner over an inspector's workstation with a tray of cookies, a food dome and an inspection torch">
@@ -80,6 +81,23 @@ function WorkstationScene() {
   );
 }
 
+// Training -> Workstation, with Training highlighted (also used by AppointmentScreen.js)
+export function TrainingPath() {
+  return (
+    <div className="welcome-path" aria-hidden="true">
+      <div className="welcome-node active">
+        <span className="welcome-node-icon"><ChefHatIcon /></span>
+        <span className="welcome-node-label">Training</span>
+      </div>
+      <span className="welcome-path-line" />
+      <div className="welcome-node">
+        <span className="welcome-node-icon"><DomeIcon /></span>
+        <span className="welcome-node-label">Workstation</span>
+      </div>
+    </div>
+  );
+}
+
 export default function WelcomeScreen({ onReady }) {
   return (
     <FactoryFront>
@@ -99,17 +117,7 @@ export default function WelcomeScreen({ onReady }) {
           You will be undergoing your training before moving on to your posting at your workstation.
         </p>
 
-        <div className="welcome-path" aria-hidden="true">
-          <div className="welcome-node active">
-            <span className="welcome-node-icon"><ChefHatIcon /></span>
-            <span className="welcome-node-label">Training</span>
-          </div>
-          <span className="welcome-path-line" />
-          <div className="welcome-node">
-            <span className="welcome-node-icon"><DomeIcon /></span>
-            <span className="welcome-node-label">Workstation</span>
-          </div>
-        </div>
+        <TrainingPath />
       </Ledger>
     </FactoryFront>
   );
