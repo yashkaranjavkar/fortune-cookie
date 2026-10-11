@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { useScreenCovered, ScreenCoveredContext, PopupContext } from '../utils/screenCover';
 import { useScreen, track } from '../analytics';
 import { useStageCursor } from '../utils/cursor';
 
@@ -8,10 +9,18 @@ import { useStageCursor } from '../utils/cursor';
 // `cursor` switches the mouse cursor while that step is on screen (src/utils/cursor.js);
 // without one, the normal arrow is used.
 // `ctx` is whatever the section passes in as `context` - its own local state/setters
-// plus anything from its own props (onComplete, tutorialShown, ...). `nav` exposes
+// plus anything from its own props (onComplete, ...). `nav` exposes
 // next/back/goto so a step's render function moves through the list by name instead
 // of a hardcoded index - reordering, inserting, or deleting entries in the steps
 // array never requires touching any other step's render function.
+//
+// `revealsNext: true` (the "Now entering" room cards) also loads the step after it
+// underneath, so the card can open up into it; that step then simply stays on screen
+// (same instance - nothing restarts) once the card hands over.
+//
+// `popupOverNext: true` does the same, but the step itself is shown as a pop-up (just
+// its card) over that next screen, which waits underneath - its timers don't start -
+// until the pop-up is dismissed.
 //
 // Analytics: each step is its own screen (time on it is measured automatically), and
 // Back / jumps are recorded.
@@ -25,17 +34,18 @@ export default function SectionRunner({ steps, context }) {
   });
 
   const current = steps[index];
+  const covered = useScreenCovered();
   useScreen(current ? current.key : null);
   useStageCursor(current ? current.cursor : null);
 
+  const nextIndex = (i) => {
+    let n = i + 1;
+    while (n < steps.length && isSkipped(n)) n++;
+    return n < steps.length ? n : i;
+  };
+
   const nav = {
-    next: () => {
-      setIndex(i => {
-        let n = i + 1;
-        while (n < steps.length && isSkipped(n)) n++;
-        return n < steps.length ? n : i;
-      });
-    },
+    next: () => setIndex(nextIndex),
     // Back also passes over `passThrough` steps (the factory-walk transitions) -
     // stepping back onto one would just replay the walk and bounce forward again.
     back: () => {
@@ -62,5 +72,20 @@ export default function SectionRunner({ steps, context }) {
   };
 
   if (!current) return null;
-  return current.render(context, nav);
+  const under = (current.revealsNext || current.popupOverNext) ? nextIndex(index) : index;
+  // the same wrapper either way, so the step underneath carries straight on (same
+  // instance) once it's the current step - it just stops being "covered"
+  const show = (i, isCovered, isPopup) => (
+    <React.Fragment key={steps[i].key}>
+      <ScreenCoveredContext.Provider value={isCovered}>
+        <PopupContext.Provider value={isPopup}>{steps[i].render(context, nav)}</PopupContext.Provider>
+      </ScreenCoveredContext.Provider>
+    </React.Fragment>
+  );
+  return (
+    <>
+      {under !== index && show(under, true, false)}
+      {show(index, covered, !!current.popupOverNext)}
+    </>
+  );
 }

@@ -1,5 +1,4 @@
 import React from 'react';
-import InspectionTutorialStep from '../../sections/InspectionTutorialStep';
 import Level3Game from '../../components/Level3Game';
 import MarkingScreen from '../../components/MarkingScreen';
 import LoaderScreen from '../../components/LoaderScreen';
@@ -48,7 +47,6 @@ export const LEVEL3_STEPS = [
     render: (ctx, nav) => (
       <Level3Game
         onComplete={(items, approved) => { ctx.setFaultyItems(items); ctx.setApprovedItems(approved); nav.next(); }}
-        onSkip={(items, approved) => { ctx.setFaultyItems(items); ctx.setApprovedItems(approved); nav.goto('marking'); }}
       />
     )
   },
@@ -56,7 +54,7 @@ export const LEVEL3_STEPS = [
   walkStep('walkToMarking', 'line3', 'marking', 'Level 3'),
   roomIntroStep('enterMarking', 'marking', 'Level 3'),
 
-  { key: 'startMarking', render: (ctx, nav) => <StartMarkingScreen faultyCount={ctx.faultyItems.length} onNext={nav.next} /> },
+  { key: 'startMarking', popupOverNext: true, render: (ctx, nav) => <StartMarkingScreen faultyCount={ctx.faultyItems.length} onNext={nav.next} /> },
   {
     key: 'marking',
     cursor: 'highlighter',
@@ -70,13 +68,6 @@ export const LEVEL3_STEPS = [
   //{ key: 'loader', render: (ctx, nav) => <LoaderScreen faultyItems={ctx.faultyItems} onComplete={nav.next} /> },
   walkStep('walkToInspection', 'marking', 'inspection', 'Level 3'),
   roomIntroStep('enterInspection', 'inspection', 'Level 3'),
-  {
-    key: 'tutorial',
-    skip: (ctx) => ctx.tutorialShown,
-    render: (ctx, nav) => (
-      <InspectionTutorialStep onBack={nav.back} onComplete={() => { ctx.onTutorialShown(); nav.next(); }} />
-    )
-  },
 
   { key: 'torchInspect', cursor: 'glove', render: (ctx, nav) => <TorchInspectScreen markedFortunes={ctx.markedFortunes} onNext={nav.next} /> },
   walkStep('walkToDispatch', 'inspection', 'results', 'Level 3'),

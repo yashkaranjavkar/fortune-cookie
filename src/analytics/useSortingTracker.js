@@ -47,8 +47,5 @@ export default function useSortingTracker(level) {
     roundComplete(faulty, approved) {
       track('sorting_round_complete', { level, faulty: faulty.length, approved: approved.length, ...tally.current });
     },
-    skippedMarkingIntro() {
-      track('marking_intro_skipped', { level });
-    },
   };
 }

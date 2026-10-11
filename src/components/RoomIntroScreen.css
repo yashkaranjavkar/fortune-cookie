@@ -1,43 +1,45 @@
-/* "Now entering" room card - fades in, holds, fades out (timed off --ri-duration so the
-   fade always finishes exactly when the screen hands off). Card styling matches the
-   game's cream cards with yellow-deep borders. */
+/* "Now entering" room card. It covers the next screen (already loaded underneath), and
+   its window is a hole cut through it (clip-path, set every frame in RoomIntroScreen.js)
+   looking onto that screen; at the end the hole grows until the card is gone. Card
+   styling matches the game's cream cards with yellow-deep borders. */
 .room-intro-screen {
-  width: 100%;
-  min-height: 100vh;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px 16px;
   box-sizing: border-box;
-  opacity: 0;
-  animation: ri-fade var(--ri-duration, 3400ms) ease-in-out forwards;
+  background: #1a1a1a; /* the page's own dark - continues straight on from the map walk */
+  transition: opacity var(--ri-fade, 400ms) ease;
 }
-@keyframes ri-fade {
-  0%   { opacity: 0; }
-  18%  { opacity: 1; }
-  82%  { opacity: 1; }
-  100% { opacity: 0; }
-}
+.room-intro-screen.ri-fading { opacity: 0; } /* reduced motion: fade off the next screen */
+.ri-blocker { position: fixed; inset: 0; z-index: 999; }
 
 .ri-card {
-  width: min(92vw, 720px);
+  /* placed and sized from introLayout() (utils/roomHandoff.js) so the window sits
+     exactly in the middle of the screen */
+  position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 26px 30px 24px;
   background: var(--beige-elevated);
-  border: 5px solid var(--yellow-deep);
+  border-style: solid;
+  border-color: var(--yellow-deep);
   border-radius: 28px;
   box-shadow: 0 6px 0 var(--biscuit-lip), 0 22px 44px -16px rgba(58, 26, 8, 0.5);
   box-sizing: border-box;
-  animation: ri-rise var(--ri-duration, 3400ms) ease-out forwards;
+  animation: ri-rise 0.6s ease-out both;
 }
 @keyframes ri-rise {
-  0%   { transform: translateY(18px) scale(0.97); }
-  25%  { transform: translateY(0) scale(1); }
-  100% { transform: translateY(-6px) scale(1); }
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
 }
+/* arriving from the map: the card builds around the room as it flies in, and holds
+   still so the window is where the room is heading */
+.ri-handoff .ri-card { animation: ri-appear 0.45s ease-out both; }
+@keyframes ri-appear { from { opacity: 0; } to { opacity: 1; } }
 
 .ri-kicker {
   display: flex;
@@ -71,33 +73,61 @@
 }
 .ri-title-icon { font-size: 34px; }
 
+.ri-head {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
 .ri-art {
-  width: 100%;
+  flex: none;
+  box-sizing: border-box;
   border-radius: 18px;
   overflow: hidden;
-  border: 4px solid var(--biscuit-lip);
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+  border-style: solid;
+  border-color: var(--biscuit-lip);
+  background: #2A1A10; /* only seen before the window opens */
 }
-.rv-svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  animation: ri-zoom var(--ri-duration, 3400ms) ease-out forwards;
-  transform-origin: 50% 60%;
-}
-@keyframes ri-zoom {
-  from { transform: scale(1.08); }
-  to   { transform: scale(1); }
-}
+/* the window itself - the part cut out to show the next screen */
+.ri-window { width: 100%; height: 100%; }
 
 .ri-blurb {
-  margin: 2px 0 0;
+  flex: none;
+  margin: 0;
+  overflow: hidden;
+  line-height: 1.3;
   font-family: var(--font-sans);
   font-size: 17px;
   font-weight: 700;
   color: var(--ink-soft);
   text-align: center;
 }
+
+/* ---- Arriving from the map walk (RoomFromMap) ----
+   The room flies from where the walk left it into the window, then swipes away to
+   show the next screen through it. */
+.ri-from-map {
+  position: fixed;
+  z-index: 1001;
+  overflow: hidden;
+  pointer-events: none;
+  transition:
+    left var(--ri-fly) cubic-bezier(0.65, 0, 0.35, 1),
+    top var(--ri-fly) cubic-bezier(0.65, 0, 0.35, 1),
+    width var(--ri-fly) cubic-bezier(0.65, 0, 0.35, 1),
+    height var(--ri-fly) cubic-bezier(0.65, 0, 0.35, 1),
+    border-radius var(--ri-fly) ease;
+}
+.ri-from-map svg { display: block; width: 100%; height: 100%; }
+/* the swipe: the room slides out of the window to the left (the window itself stays
+   put and clips it), uncovering the next screen from the right */
+.ri-from-map svg {
+  transition: transform var(--ri-swipe) cubic-bezier(0.7, 0, 0.3, 1);
+  filter: drop-shadow(10px 0 12px rgba(20, 6, 4, 0.45)); /* its trailing edge, over the screen */
+}
+.ri-from-map.swiping svg { transform: translateX(-105%); }
 
 /* ---- Illustration details (RoomVignettes.js) ---- */
 .rv-plaque {
@@ -179,7 +209,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .room-intro-screen { animation: none; opacity: 1; }
+  .ri-handoff .ri-card { animation: none; }
   .ri-card, .rv-svg, .rv-belt, .rv-highlight, .rv-beam, .rv-bob, .rv-truck, .rv-stamp, .rv-pointer, .rv-progress {
     animation: none;
   }

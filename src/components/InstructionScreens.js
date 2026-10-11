@@ -166,21 +166,15 @@ export function HowToInteractScreen({ onNext, onBack, stepIndex, totalSteps }) {
       
       <div className="how-to-grid">
         <div className="instruction-step">
-          <img src={step1} alt="Food Dome" />
-          <p>Food Dome covers the food and helps it to keep hot</p>
+          <img src={step2} alt="Dome Lifting" />
+          <p>Each fortune cookie sits under a food dome. Hover over the dome to lift it.</p>
           <span className="step-num">(i)</span>
         </div>
-        
-        <div className="instruction-step">
-          <img src={step2} alt="Dome Lifting" />
-          <p>Food Dome lifts as you hover over it. There is a fortune cookie under it.</p>
-          <span className="step-num">(ii)</span>
-        </div>
-        
+
         <div className="instruction-step">
           <img src={step3} alt="Fortune Open" />
-          <p>Hovering over it will open the fortune cookie with a fortune inside.</p>
-          <span className="step-num">(iii)</span>
+          <p>Keep hovering and the cookie cracks open to show the fortune inside.</p>
+          <span className="step-num">(ii)</span>
         </div>
       </div>
     </InstructionLayout>
@@ -224,18 +218,8 @@ export function SortingIntroScreen({ onNext, onBack, stepIndex, totalSteps }) {
 }
 
 /* NEW: First Timer Screen */
-export function TimerQuestionScreen({ onNext, onBack, stepIndex, totalSteps }) {
-  return (
-    <InstructionLayout stepIndex={stepIndex} totalSteps={totalSteps} onBack={onBack} onNext={onNext} title="Timer Ends" icon={SEAL_ICONS.clock}>
-      
-      <div className="sorting-content">
-        <TimerDomeScene label={<>What if the timer<br />ends before sorting?</>} value="00" />
-      </div>
-    </InstructionLayout>
-  );
-}
-
-/* Final timer screen - the last training explainer, with Replay */
+/* Timer screen - what happens when the timer runs out before sorting (the last
+   training explainer, with Replay) */
 export function TimerEndScreen({ onNext, onReplay, onBack, stepIndex, totalSteps }) {
   const currency = useCurrency();
   return (
@@ -251,7 +235,7 @@ export function TimerEndScreen({ onNext, onReplay, onBack, stepIndex, totalSteps
 
       <div className="sorting-content">
         <TimerDomeScene
-          label={<>The timer ran out<br />before sorting</>}
+          label="What if the timer ends before sorting?"
           value="00"
           wasted
           extra={(

@@ -1,5 +1,4 @@
 import React from 'react';
-import InspectionTutorialStep from '../../sections/InspectionTutorialStep';
 import Level1Game from '../../components/Level1Game';
 import MarkingScreen from '../../components/MarkingScreen';
 import LoaderScreen from '../../components/LoaderScreen';
@@ -25,9 +24,6 @@ import { walkStep, roomIntroStep } from './transitionSteps';
 // Level 1's screen order: rules -> 4-cookie sorting game -> mark -> inspect -> results.
 // Reorder, insert, or remove entries here to change the flow - nothing else references
 // a step by position, only by its `key`.
-//
-// 'tutorial' is skipped once the one-time inspection walkthrough has already played in
-// an earlier level this run (see ctx.tutorialShown, set from src/sections/App-level state).
 export const LEVEL1_STEPS = [
   { key: 'urlsPart', render: (ctx, nav) => <URLsPartScreen onNext={nav.next} /> },
   { key: 'validRule', render: (ctx, nav) => <ValidRuleScreen onBack={nav.back} onNext={nav.next} /> },
@@ -59,15 +55,8 @@ export const LEVEL1_STEPS = [
       <ThirtySecondsScreen faultyCount={ctx.faultyItems.length} onNext={nav.next} onBack={nav.back} />
     )
   },
-  /*{
-    key: 'tutorial',
-    skip: (ctx) => ctx.tutorialShown,
-    render: (ctx, nav) => (
-      <InspectionTutorialStep onBack={nav.back} onComplete={() => { ctx.onTutorialShown(); nav.next(); }} />
-    )
-  },*/
 
-  { key: 'paymentInspection', render: (ctx, nav) => <PaymentInspectionScreen onNext={nav.next} /> },
+  { key: 'paymentInspection', popupOverNext: true, render: (ctx, nav) => <PaymentInspectionScreen onNext={nav.next} /> },
   //{ key: 'startMarking', render: (ctx, nav) => <StartMarkingScreen faultyCount={ctx.faultyItems.length} onNext={nav.next} /> },
 
   {

@@ -1,5 +1,5 @@
 import React from 'react';
-import InspectionTutorialStep from '../../sections/InspectionTutorialStep';
+import { track } from '../../analytics';
 import Level2Game from '../../components/Level2Game';
 import MarkingScreen from '../../components/MarkingScreen';
 import LoaderScreen from '../../components/LoaderScreen';
@@ -27,9 +27,8 @@ import { walkStep, roomIntroStep } from './transitionSteps';
 // Reorder, insert, or remove entries here to change the flow - nothing else references
 // a step by position, only by its `key`.
 //
-// 'tutorial' is skipped once the one-time inspection walkthrough has already played in
-// an earlier level this run. The sorting game's "Skip" button jumps straight to
-// 'marking', bypassing the timer/tutorial/payment-rules/start screens in between.
+// The 30-seconds screen's "Skip" button jumps straight to 'marking', bypassing the
+// payment-rules/start screens in between.
 export const LEVEL2_STEPS = [
   { key: 'eventTwo', render: (ctx, nav) => <EventTwoScreen onNext={nav.next} stepIndex={0} totalSteps={5} /> },
   { key: 'fortuneElements', render: (ctx, nav) => <FortuneElementsScreen onBack={nav.back} onNext={nav.next} stepIndex={1} totalSteps={5} /> },
@@ -49,7 +48,6 @@ export const LEVEL2_STEPS = [
     render: (ctx, nav) => (
       <Level2Game
         onComplete={(items, approved) => { ctx.setFaultyItems(items); ctx.setApprovedItems(approved); nav.next(); }}
-        onSkip={(items, approved) => { ctx.setFaultyItems(items); ctx.setApprovedItems(approved); nav.goto('marking'); }}
       />
     )
   },
@@ -60,19 +58,19 @@ export const LEVEL2_STEPS = [
   {
     key: 'thirtySeconds',
     render: (ctx, nav) => (
-      <ThirtySecondsScreen faultyCount={ctx.faultyItems.length} onNext={nav.next} onBack={nav.back} />
-    )
-  },
-  {
-    key: 'tutorial',
-    skip: (ctx) => ctx.tutorialShown,
-    render: (ctx, nav) => (
-      <InspectionTutorialStep onBack={nav.back} onComplete={() => { ctx.onTutorialShown(); nav.next(); }} />
+      <ThirtySecondsScreen
+        faultyCount={ctx.faultyItems.length}
+        instruction="You have to mark whatever makes the fortune faulty - a fake URL, or context that doesn't match a real one - before sending it for inspection."
+        sample={<>You will make your <span className="invalid-url">payments safer</span> with the help of https://www.youtube.com/ 🖊️</>}
+        onNext={nav.next}
+        onBack={nav.back}
+        onSkip={() => { track('marking_intro_skipped', { level: 'level2' }); nav.goto('marking'); }}
+      />
     )
   },
 
   { key: 'paymentInspection', render: (ctx, nav) => <PaymentInspectionScreen onNext={nav.next} /> },
-  { key: 'startMarking', render: (ctx, nav) => <StartMarkingScreen faultyCount={ctx.faultyItems.length} onNext={nav.next} /> },
+  { key: 'startMarking', popupOverNext: true, render: (ctx, nav) => <StartMarkingScreen faultyCount={ctx.faultyItems.length} onNext={nav.next} /> },
 
   {
     key: 'marking',

@@ -53,10 +53,10 @@ export const GAME_FLOWS = {
     //'opening',
     //'appointment',
     //'training',
-    'level1',
-    //'level2',
-    //'level3',
-    //'supervisor',
+    //'level1',
+    'level2',
+    'level3',
+    'supervisor',
     'finalTrays'
   ],
 };
@@ -68,4 +68,4 @@ export const GAME_FLOW = GAME_FLOWS[ACTIVE_FLOW];
 
 // How many trays the tray-sorting minigame runs through - shared by Training's own
 // round and the standalone "final trays" round, since they're the same minigame.
-export const TRAY_COUNT = 1;
+export const TRAY_COUNT = 2;

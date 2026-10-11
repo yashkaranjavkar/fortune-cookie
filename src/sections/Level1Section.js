@@ -4,9 +4,7 @@ import { LEVEL1_STEPS } from '../config/steps/level1';
 
 // Level 1: rules -> 4-cookie sorting game -> mark -> inspect -> results. The actual
 // screen order lives in src/config/steps/level1.js.
-// tutorialShown/onTutorialShown: the one-time inspection walkthrough shows here only if
-// no earlier section in this run has already shown it (see InspectionTutorialStep).
-export default function Level1Section({ onComplete, tutorialShown, onTutorialShown }) {
+export default function Level1Section({ onComplete }) {
   const [faultyItems, setFaultyItems] = useState([]);
   const [approvedItems, setApprovedItems] = useState([]);
   const [markedFortunes, setMarkedFortunes] = useState([]);
@@ -14,7 +12,7 @@ export default function Level1Section({ onComplete, tutorialShown, onTutorialSho
   const [sortingScore, setSortingScore] = useState(0);
 
   const context = {
-    onComplete, tutorialShown, onTutorialShown,
+    onComplete,
     faultyItems, setFaultyItems,
     approvedItems, setApprovedItems,
     markedFortunes, setMarkedFortunes,

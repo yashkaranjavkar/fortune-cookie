@@ -88,3 +88,6 @@
 }
 .pd-btn:hover:not(:disabled) { background: #111827; }
 .pd-btn:disabled { background: #D1D5DB; color: #6B7280; }
+
+/* required-field marker */
+.pd-req { color: #DC2626; font-weight: 700; }

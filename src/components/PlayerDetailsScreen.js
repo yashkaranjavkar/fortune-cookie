@@ -32,13 +32,15 @@ export default function PlayerDetailsScreen({
     <div className="pd-screen">
       <form className="pd-card" onSubmit={handleSubmit}>
         <h1 className="pd-title">Enter your details</h1>
-        <p className="pd-sub">All three are required.</p>
+        <p className="pd-sub">Fields marked <span className="pd-req">*</span> are required.</p>
 
         <div className="pd-field">
-          <label className="pd-label" htmlFor="pd-emp-id">TCS Employee ID</label>
+          <label className="pd-label" htmlFor="pd-emp-id">TCS Employee ID <span className="pd-req" aria-hidden="true">*</span></label>
           <input
             id="pd-emp-id"
             className="pd-input"
+            required
+            aria-required="true"
             type="text"
             inputMode="numeric"
             value={employeeId}
@@ -49,7 +51,7 @@ export default function PlayerDetailsScreen({
         </div>
 
         <div className="pd-field">
-          <span className="pd-label">Designation</span>
+          <span className="pd-label">Designation <span className="pd-req" aria-hidden="true">*</span></span>
           <SearchableDropdown
             options={designations}
             value={designation}
@@ -62,7 +64,7 @@ export default function PlayerDetailsScreen({
         </div>
 
         <div className="pd-field">
-          <span className="pd-label">Region</span>
+          <span className="pd-label">Region <span className="pd-req" aria-hidden="true">*</span></span>
           <SearchableDropdown
             options={regions}
             value={region}

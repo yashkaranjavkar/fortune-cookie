@@ -14,12 +14,36 @@ import { createPortal } from 'react-dom';
 // the pointer; drag.cancel() - drop it without a target (e.g. when the timer runs out).
 // A press only becomes a drag once the pointer moves a few pixels, so a plain click
 // never counts as dropping the strip somewhere.
+//
+// Side drops: if the screen marks its middle area with data-drop-center, letting go
+// anywhere to the left or right of it counts as dropping into the tray on that side -
+// over the tray or not - and letting go over the middle itself does nothing at all
+// (no onDrop, no onMiss: the strip just goes back). data-drop-center="box" means only
+// the element's own box is "the middle"; otherwise its whole column is (any height).
+//
+// drag.proxyProps('.selector') - handle props for something else that picks up the
+// same thing (e.g. the lifted dome picks up its fortune); the ghost takes the size of
+// the element the selector finds, centred under the pointer.
 const START_DISTANCE = 5;
+const CENTER = '__center__'; // dropTargetAt: let go over the middle area
 
 function dropTargetAt(x, y) {
   const el = document.elementFromPoint(x, y);
   const zone = el && el.closest('[data-drop]');
-  return zone ? zone.getAttribute('data-drop') : null;
+  if (zone) return zone.getAttribute('data-drop');
+
+  const center = document.querySelector('[data-drop-center]');
+  if (!center) return null;
+  const c = center.getBoundingClientRect();
+  const boxOnly = center.getAttribute('data-drop-center') === 'box';
+  const inMiddle = x >= c.left && x <= c.right && (!boxOnly || (y >= c.top && y <= c.bottom));
+  if (inMiddle) return CENTER;
+  const trays = Array.from(document.querySelectorAll('[data-drop]'))
+    .map(t => ({ id: t.getAttribute('data-drop'), x: t.getBoundingClientRect().left + t.getBoundingClientRect().width / 2 }));
+  if (!trays.length) return null;
+  trays.sort((a, b) => a.x - b.x);
+  const midX = c.left + c.width / 2;
+  return (x < midX ? trays[0] : trays[trays.length - 1]).id;
 }
 
 export default function usePointerDrag({ onStart, onDrop, onMiss } = {}) {
@@ -46,8 +70,12 @@ export default function usePointerDrag({ onStart, onDrop, onMiss } = {}) {
     e.preventDefault(); // no text selection while dragging
     cancel();
 
-    const rect = e.currentTarget.getBoundingClientRect();
-    const grab = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    const proxy = e.currentTarget.getAttribute('data-grab-proxy');
+    const proxyEl = proxy && document.querySelector(proxy);
+    const rect = (proxyEl || e.currentTarget).getBoundingClientRect();
+    const grab = proxyEl
+      ? { x: rect.width / 2, y: rect.height / 2 }
+      : { x: e.clientX - rect.left, y: e.clientY - rect.top };
     const startX = e.clientX;
     const startY = e.clientY;
     const s = { started: false };
@@ -65,14 +93,14 @@ export default function usePointerDrag({ onStart, onDrop, onMiss } = {}) {
         width: rect.width,
         grabX: grab.x,
         grabY: grab.y,
-        over: dropTargetAt(ev.clientX, ev.clientY),
+        over: (t => (t === CENTER ? null : t))(dropTargetAt(ev.clientX, ev.clientY)),
       });
     };
     s.up = (ev) => {
       const started = s.started;
       const target = started ? dropTargetAt(ev.clientX, ev.clientY) : null;
       cancel();
-      if (!started) return;
+      if (!started || target === CENTER) return;
       if (target) callbacks.current.onDrop && callbacks.current.onDrop(target);
       else callbacks.current.onMiss && callbacks.current.onMiss();
     };
@@ -103,11 +131,13 @@ export default function usePointerDrag({ onStart, onDrop, onMiss } = {}) {
     );
   };
 
+  const handleProps = { onPointerDown, 'data-grab': '', style: { touchAction: 'none' } };
   return {
     dragging: Boolean(drag),
     over: drag ? drag.over : null,
     cancel,
     ghost,
-    handleProps: { onPointerDown, 'data-grab': '', style: { touchAction: 'none' } },
+    handleProps,
+    proxyProps: (selector) => ({ ...handleProps, 'data-grab-proxy': selector }),
   };
 }

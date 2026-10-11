@@ -10,6 +10,8 @@
 //                       loop - played while the player drags to mark (marking)
 //   torch-swipe.wav     a quick card-swipe "shhk" (sliding the inspection torch)
 //   step-a/step-b.wav   cartoon woodblock "tik-tok" footsteps, left/right (map walks)
+//   truck-start.wav     the delivery truck getting ready: an electronic "beep-beep"
+//   truck-drive.wav     the truck driving off: a soft engine whoosh as it zooms past
 //
 // The random generator is seeded, so the same settings always give the same file.
 const fs = require('fs');
@@ -215,9 +217,56 @@ function cartoonStep(pitchHz, seed) {
   return normalize(out, 0.85);
 }
 
+// A pitched tone: freq(t) Hz, amp(t), made of harmonics [[ratio, gain]], with an
+// optional lowpass(t) Hz to soften it
+function voice(out, at, seconds, { freq, amp, harmonics = [[1, 1]], lowpass }) {
+  const lp = biquad();
+  const start = Math.round(at * SR);
+  let phase = 0;
+  for (let i = 0; i < Math.round(seconds * SR) && start + i < out.length; i++) {
+    const t = i / SR;
+    phase += freq(t) / SR;
+    let v = 0;
+    harmonics.forEach(([ratio, gain]) => { v += Math.sin(2 * Math.PI * phase * ratio) * gain; });
+    if (lowpass) { lp.set('lowpass', lowpass(t), 0.8); v = lp.run(v); }
+    out[start + i] += v * amp(t);
+  }
+}
+
+// The truck getting ready to go: a cheerful electronic "beep-beep", like a delivery
+// van's warning beeper.
+function truckStart() {
+  const out = buffer(0.55);
+  const beep = (t) => (t < 0.005 ? t / 0.005 : t < 0.115 ? 1 : Math.max(0, 1 - (t - 0.115) / 0.02));
+  [0, 0.22].forEach((at) => voice(out, at, 0.14, { freq: () => 1150, amp: beep, harmonics: [[1, 1], [3, 0.2]] }));
+  return normalize(out, 0.6);
+}
+
+// The truck driving off: a soft whoosh of air that swells and sweeps up as it zooms
+// past and away, over a light engine hum that rises then drops off.
+function truckDrive() {
+  const random = rng(31);
+  const out = buffer(1.5);
+  const band = biquad();
+  for (let i = 0; i < out.length; i++) {
+    const t = i / SR;
+    band.set('bandpass', 250 + 900 * Math.sin(Math.PI * Math.min(1, t / 1.3)), 0.9);
+    out[i] += band.run(random() * 2 - 1) * Math.sin(Math.PI * Math.min(1, t / 1.45)) ** 1.5 * 2;
+  }
+  voice(out, 0, 1.4, {
+    freq: (t) => 90 + 70 * Math.min(1, t / 0.7) - 30 * Math.max(0, t - 0.7),
+    amp: (t) => 0.25 * Math.sin(Math.PI * Math.min(1, t / 1.4)),
+    harmonics: [[1, 1], [2, 0.5]],
+    lowpass: () => 500,
+  });
+  return normalize(out, 0.8);
+}
+
 fs.mkdirSync(OUT, { recursive: true });
 writeWav('cookie-crack.wav', cookieCrack());
 writeWav('highlight-stroke.wav', markerLoop());
 writeWav('torch-swipe.wav', cardSwipe());
 writeWav('step-a.wav', cartoonStep(1050, 41));
 writeWav('step-b.wav', cartoonStep(820, 42));
+writeWav('truck-start.wav', truckStart());
+writeWav('truck-drive.wav', truckDrive());

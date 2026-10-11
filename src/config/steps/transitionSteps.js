@@ -28,6 +28,8 @@ export function roomIntroStep(key, stopKey, subtitle) {
   return {
     key,
     passThrough: true,
+    revealsNext: true, // the next step loads underneath; the card opens up into it
+    cursor: 'hidden', // the card plays on its own - nothing to click
     render: (ctx, nav) => <RoomIntroScreen stopKey={stopKey} subtitle={subtitle} onDone={nav.next} />,
   };
 }

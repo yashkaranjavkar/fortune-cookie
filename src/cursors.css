@@ -171,7 +171,11 @@ body.is-grabbing * {
   opacity: 1 !important;
 }
 
-/* Hidden: no cursor at all while the player walks across the factory map */
+/* Hidden: no cursor at all while the player walks across the factory map. The veil
+   (useCursorVeil) does the same on top of whatever stage cursor is set, e.g. while the
+   "Now entering" card covers the next screen, which has already set its own cursor. */
+body.cursor-veiled,
+body.cursor-veiled *,
 body[data-cursor='hidden'],
 body[data-cursor='hidden'] * {
   cursor: none !important;

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SortTray from './SortTray';
+import DeliveryTransition, { DELIVERY_MS } from './DeliveryTransition';
 import usePointerDrag from '../utils/usePointerDrag';
 import FortuneFocus from './FortuneFocus';
 import InvalidURLExplainer from './InvalidURLExplainer';
@@ -67,7 +68,7 @@ export default function Level1Game({ onComplete }) {
   const dragging = drag.dragging;
   const [timer, setTimer] = useState(10);
   const [sortedCount, setSortedCount] = useState(0);
-  const [phase, setPhase] = useState('sorting'); // sorting, transition, instruction
+  const [phase, setPhase] = useState('sorting'); // sorting, then transition (the delivery truck)
   
   const [faultyItems, setFaultyItems] = useState([]);
   const [approvedItems, setApprovedItems] = useState([]);
@@ -193,7 +194,7 @@ export default function Level1Game({ onComplete }) {
   const handleSortingNext = () => {
     stats.roundComplete(faultyItems, approvedItems);
     setPhase('transition');
-    setTimeout(() => setPhase('instruction'), 2000); // Truck leaves in 2s, then show instruction
+    setTimeout(() => onComplete(faultyItems, approvedItems), DELIVERY_MS); // the truck drives off, then on to marking
   };
 
   const isComplete = sortedCount === 4;
@@ -227,7 +228,7 @@ export default function Level1Game({ onComplete }) {
           <SortTray type="faulty" items={faultyItems} dragging={dragging}
               over={drag.over === 'faulty'} />
 
-          <div className="domes-tray">
+          <div className="domes-tray" data-drop-center>
             {domes.map((dome, index) => (
               <div 
                 key={index} 
@@ -238,7 +239,7 @@ export default function Level1Game({ onComplete }) {
                 {dome.status === 'closed' && <img src={domeClosed} alt="Dome" className="dome-img" />}
                 {dome.status === 'open' && (
                   <>
-                    <img src={domeLifted} alt="Dome Lifted" className="dome-img" />
+                    <img src={domeLifted} alt="Dome Lifted" className="dome-img" draggable={false} {...drag.proxyProps('.fortune-focus-slip')} />
                     {/* the fortune itself is shown big in the middle of the screen */}
                     <FortuneFocus text={dome.fortune.text} timer={timer} dragging={dragging} handleProps={drag.handleProps} />
                     {drag.ghost(<div className="fortune-drag fortune-slip fortune-focus-slip">{dome.fortune.text}</div>, 'compact')}
@@ -265,41 +266,9 @@ export default function Level1Game({ onComplete }) {
 
       {/* 2. TRANSITION PHASE (Approved turns into truck and leaves) */}
       {phase === 'transition' && (
-        <div className="level1-transition-layout">
-          {/* Faulty Tray moves to center, Approved becomes truck */}
-          <SortTray type="faulty" items={faultyItems} className="moving-center" />
-
-          {/* CSS Truck Placeholder (Remove this and use <img src={truck} className="truck-img" /> if you have the truck.png) */}
-          <div className="truck-shipping">
-            <div className="truck-box">Out for Delivery</div>
-            <div className="truck-wheels">
-              <div className="wheel"></div>
-              <div className="wheel"></div>
-              <div className="wheel"></div>
-            </div>
-          </div>
-        </div>
+        <DeliveryTransition faultyItems={faultyItems} approvedItems={approvedItems} domes={4} />
       )}
 
-      {/* 3. INSTRUCTION PHASE */}
-      {phase === 'instruction' && (
-        <div className="level1-instruction-layout">
-          {/* Faulty tray now perfectly centered INSIDE the golden box */}
-          <div className="instruction-card">
-            
-            <SortTray type="faulty" items={faultyItems} className="centered" />
-            
-            <p className="instruction-text">
-              You have to mark the invalid part in the URL of the fortune before sending for inspection
-            </p>
-            <div className="sample-fortune">
-              Your favorite artist has uploaded their new album on <span className="invalid-url">https://www.youttube.com/</span> 🔒
-            </div>
-            <button className="next-btn" onClick={() => onComplete(faultyItems, approvedItems)}>Next</button>
-
-          </div>
-        </div>
-      )}
 
       {/* Footer for Sorting Phase */}
       {phase === 'sorting' && (

@@ -4,7 +4,7 @@ import { LEVEL2_STEPS } from '../config/steps/level2';
 
 // Level 2: rules -> 5-cookie sorting game -> mark -> inspect -> results. The actual
 // screen order lives in src/config/steps/level2.js.
-export default function Level2Section({ onComplete, tutorialShown, onTutorialShown }) {
+export default function Level2Section({ onComplete }) {
   const [faultyItems, setFaultyItems] = useState([]);
   const [approvedItems, setApprovedItems] = useState([]);
   const [markedFortunes, setMarkedFortunes] = useState([]);
@@ -12,7 +12,7 @@ export default function Level2Section({ onComplete, tutorialShown, onTutorialSho
   const [sortingScore, setSortingScore] = useState(0);
 
   const context = {
-    onComplete, tutorialShown, onTutorialShown,
+    onComplete,
     faultyItems, setFaultyItems,
     approvedItems, setApprovedItems,
     markedFortunes, setMarkedFortunes,

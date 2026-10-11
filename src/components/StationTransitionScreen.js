@@ -1,14 +1,23 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import FactoryFloorPlan, { MAP_VIEWBOX, routeBetween, stopRoom } from './FactoryFloorPlan';
+import FactoryFloorPlan, { Doors, MAP_VIEWBOX, ROOMS, routeBetween, stopRoom } from './FactoryFloorPlan';
 import { STOPS } from '../config/stations';
 import { PlayerLookContext } from '../utils/playerLook';
 import { playSound } from '../sounds';
+import { leaveRoomHandoff, introLayout, INTRO_CARD } from '../utils/roomHandoff';
 import './StationTransitionScreen.css';
 
 const SPEED = 190;        // map units per second
 const INTRO_MS = 700;     // beat at the start so the player can find themselves on the map
-const HOLD_MS = 1300;     // beat on arrival before the next screen
-const FADE_OUT_MS = 450;  // map fades out over the end of the arrival beat
+// The camera starts zooming into the destination room while the player is still on
+// the way (from ZOOM_FROM of the walk), following them in, and settles on the room
+// just after they arrive. Meanwhile everything around the room sinks into the dark,
+// leaving just the room on screen - the "Now entering" card takes it from there.
+const ZOOM_FROM = 0.45;   // fraction of the walk at which the zoom begins
+const SETTLE_MS = 450;    // the zoom finishes this long after the player arrives
+const HOLD_MS = SETTLE_MS + 150; // everything after the walk, before the next screen
+const REDUCED_HOLD_MS = 1300;    // reduced motion: no zoom, just a beat and a fade
+const FADE_OUT_MS = 450;  // reduced motion: the map fades out over the end of the beat
+const PAGE_BG = '#1a1a1a'; // the dark page behind every screen (App.css)
 const MIN_WALK_MS = 2400;
 const MAX_WALK_MS = 5000;
 const STRIDE = 9;            // map units per radian of the leg swing (Player's `phase`)
@@ -39,11 +48,48 @@ function pointAt(points, segLens, dist) {
   return { x: points[0][0], y: points[0][1], dx: 0 };
 }
 
+const MAP_BOX = MAP_VIEWBOX.split(' ').map(Number); // [x, y, w, h]
+
+// The part of the room the "Now entering" card's window will show: the window's shape
+// (16:9), as big as fits inside the room, centred between the room's middle and where
+// the player stands - and always with the player in it.
+function windowRegion(room, spot) {
+  const aspect = INTRO_CARD.aspect;
+  const w = Math.min(room.w, room.h * aspect);
+  const h = w / aspect;
+  let cx = (room.x + room.w / 2 + spot[0]) / 2;
+  let cy = (room.y + room.h / 2 + spot[1]) / 2;
+  cy = Math.min(Math.max(cy, spot[1] - h / 2 + 14), spot[1] + h / 2 - 54); // feet .. head
+  cx = Math.min(Math.max(cx, room.x + w / 2), room.x + room.w - w / 2);
+  cy = Math.min(Math.max(cy, room.y + h / 2), room.y + room.h - h / 2);
+  return [cx - w / 2, cy - h / 2, w, h];
+}
+
+// The viewBox that puts `region` (map units) exactly on `win` (screen pixels), given
+// where the map's svg sits on screen
+function viewBoxOnto(region, win, box) {
+  const scale = win.width / region[2];
+  return [
+    region[0] - (win.left - box.left) / scale,
+    region[1] - (win.top - box.top) / scale,
+    box.width / scale,
+    box.height / scale,
+  ];
+}
+
+const roundedRect = ([x, y, w, h], r) => {
+  const rr = Math.max(0, Math.min(r, w / 2, h / 2));
+  return `M${x + rr} ${y} H${x + w - rr} A${rr} ${rr} 0 0 1 ${x + w} ${y + rr} V${y + h - rr} `
+    + `A${rr} ${rr} 0 0 1 ${x + w - rr} ${y + h} H${x + rr} A${rr} ${rr} 0 0 1 ${x} ${y + h - rr} `
+    + `V${y + rr} A${rr} ${rr} 0 0 1 ${x + rr} ${y} Z`;
+};
+const lerp = (a, b, k) => a + (b - a) * k;
+
 const easeInOut = t => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
 
 // Top-down factory inspector: plum coat, white cap, gold ring underfoot (the "this is
 // you" marker, same idea as the colored rings under each chef in the references).
-function Player({ x, y, phase, walking, facing, chefHat }) {
+export function Player({ x, y, phase, walking, facing, chefHat }) {
   const swing = walking ? Math.sin(phase) : 0;
   const bob = walking ? Math.abs(Math.sin(phase)) * 2.5 : 0;
   return (
@@ -116,15 +162,18 @@ export default function StationTransitionScreen({ fromKey, toKey, subtitle, onNe
     ? 0
     : Math.min(MAX_WALK_MS, Math.max(MIN_WALK_MS, (total / SPEED) * 1000));
 
+  const svgRef = useRef(null);
+  const handoffRef = useRef(null);
   const [elapsed, setElapsed] = useState(0);
   useEffect(() => {
     let raf;
     const start = performance.now();
-    const totalMs = INTRO_MS + walkMs + HOLD_MS;
+    const totalMs = INTRO_MS + walkMs + (reduceMotion ? REDUCED_HOLD_MS : HOLD_MS);
     const tick = (now) => {
       const e = now - start;
       setElapsed(e);
       if (e >= totalMs) {
+        if (handoffRef.current) handoffRef.current();
         onNextRef.current();
         return;
       }
@@ -132,9 +181,9 @@ export default function StationTransitionScreen({ fromKey, toKey, subtitle, onNe
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [walkMs]);
+  }, [walkMs, reduceMotion]);
 
-  const leaving = elapsed >= INTRO_MS + walkMs + HOLD_MS - FADE_OUT_MS;
+  const leaving = reduceMotion && elapsed >= INTRO_MS + walkMs + REDUCED_HOLD_MS - FADE_OUT_MS;
 
   const progress = walkMs === 0
     ? (elapsed >= INTRO_MS ? 1 : 0)
@@ -160,14 +209,70 @@ export default function StationTransitionScreen({ fromKey, toKey, subtitle, onNe
     playSound(step % 2 ? 'step-a' : 'step-b');
   }, [step, walking]);
   const arrived = progress >= 1;
+
+  // The camera zooms from the whole map into the room, starting part-way through the
+  // walk and keeping the player in shot until they're inside
+  const destRoom = ROOMS[stopRoom(toKey)];
+  const zoomStart = INTRO_MS + walkMs * ZOOM_FROM;
+  const zoomEnd = INTRO_MS + walkMs + SETTLE_MS;
+  const zoomT = reduceMotion || !destRoom
+    ? 0
+    : Math.min(1, Math.max(0, (elapsed - zoomStart) / (zoomEnd - zoomStart)));
+  // It ends with the room exactly where the "Now entering" card's window will be
+  // (centred on screen), so the card can take it over without moving it at all.
+  let vb = MAP_BOX;
+  let zoomK = 0;
+  let region = null;
+  let win = null;
+  let cutout = null;
+  if (zoomT > 0 && svgRef.current) {
+    zoomK = easeInOut(zoomT);
+    const box = svgRef.current.getBoundingClientRect();
+    win = introLayout().win;
+    region = windowRegion(destRoom, route[route.length - 1]);
+    const target = viewBoxOnto(region, win, box);
+    const w = lerp(MAP_BOX[2], target[2], zoomK);
+    const h = w * MAP_BOX[3] / MAP_BOX[2];
+    const tx = target[0] + target[2] / 2;
+    const ty = target[1] + target[3] / 2;
+    let cx = lerp(MAP_BOX[0] + MAP_BOX[2] / 2, tx, zoomK);
+    let cy = lerp(MAP_BOX[1] + MAP_BOX[3] / 2, ty, zoomK);
+    // keep the player in shot (with room for their head) while they walk in, easing
+    // off so the very end lands exactly on target
+    const mx = Math.min(70, w * 0.15);
+    const my = Math.min(90, h * 0.2);
+    const fx = Math.min(Math.max(cx, pos.x - w / 2 + mx), pos.x + w / 2 - mx);
+    const fy = Math.min(Math.max(cy, pos.y - h / 2 + my), pos.y + h / 2 - my);
+    const hold = 1 - zoomK * zoomK;
+    cx = lerp(cx, fx, hold);
+    cy = lerp(cy, fy, hold);
+    vb = [cx - w / 2, cy - h / 2, w, h];
+    // the lit area closes in from the whole room to the window's own rounded shape
+    const roomRect = [destRoom.x, destRoom.y, destRoom.w, destRoom.h];
+    const lit = roomRect.map((v, i) => lerp(v, region[i], zoomK));
+    cutout = roundedRect(lit, (14 * region[2] / win.width) * zoomK);
+  }
+  const viewBox = vb.join(' ');
+
+  // At the very end, hand the room over to the "Now entering" card: it's sitting
+  // exactly on the card's window, showing `region` of the map
+  handoffRef.current = (reduceMotion || !destRoom || !region) ? null : () => {
+    leaveRoomHandoff({
+      stopKey: toKey,
+      rect: { left: win.left, top: win.top, width: win.width, height: win.height },
+      viewBox: region,
+      player: { x: pos.x, y: pos.y, facing: facingRef.current },
+      chefHat,
+    });
+  };
   const from = STOPS[fromKey] || { icon: '📍', label: 'Corridor' };
   const to = STOPS[toKey] || { icon: '📍', label: 'Corridor' };
   const dest = route[route.length - 1];
   const routePoints = route.map(p => p.join(',')).join(' ');
 
   return (
-    <div className={`station-transition-screen${leaving ? ' st-leaving' : ''}`}>
-      <div className="st-hud">
+    <div className={`station-transition-screen${leaving ? ' st-leaving' : ''}${zoomK > 0 ? ' st-zooming' : ''}`}>
+      <div className="st-hud" style={zoomK > 0 ? { opacity: 1 - zoomK } : undefined}>
         <div className="st-hud-pill st-hud-dest">
           <span className="st-hud-icon" aria-hidden="true">{to.icon}</span>
           <span className="st-hud-text">
@@ -180,8 +285,9 @@ export default function StationTransitionScreen({ fromKey, toKey, subtitle, onNe
 
       <div className="st-map">
         <svg
+          ref={svgRef}
           className="st-map-svg"
-          viewBox={MAP_VIEWBOX}
+          viewBox={viewBox}
           role="img"
           aria-label={`Factory floor plan: walking from ${from.label} to ${to.label}`}
         >
@@ -196,6 +302,19 @@ export default function StationTransitionScreen({ fromKey, toKey, subtitle, onNe
                 strokeDasharray={`${dist} ${total + 20}`}
               />
             </>
+          )}
+
+          {/* Everything outside the room sinks into the dark page as the camera moves
+              in, until only the window-shaped part of the room is left */}
+          <Doors player={pos} />
+
+          {cutout && (
+            <path
+              d={`M-3000 -3000 h7000 v7000 h-7000 Z ${cutout}`}
+              fillRule="evenodd"
+              fill={PAGE_BG}
+              opacity={zoomK}
+            />
           )}
 
           <g transform={`translate(${dest[0]},${dest[1]})`}>

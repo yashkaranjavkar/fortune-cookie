@@ -14,7 +14,7 @@ installPressTilt();
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <MascotProvider position="bottom">
+    <MascotProvider position="corner" size="84px">
       <App />
     </MascotProvider>
   </React.StrictMode>

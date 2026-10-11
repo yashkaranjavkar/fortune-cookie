@@ -3,6 +3,7 @@ import TimerDial from './TimerDial';
 import { playSound, startLoop, preloadLoop } from '../sounds';
 import { useMascotTrigger } from '../config/mascotTriggers';
 import { track, startTimer } from '../analytics';
+import { useScreenCovered } from '../utils/screenCover';
 import './MarkingScreen.css';
 
 // Hand-drawn highlighter icon, matching the line-icon style used elsewhere in the app
@@ -42,7 +43,12 @@ export default function MarkingScreen({ faultyItems, onNext }) {
   // (empty) marking data.
   const handleSubmitRef = useRef(() => {});
 
+  // The countdown starts once the screen is actually showing - not while it's still
+  // behind the "Now entering" card that opens up into it
+  const covered = useScreenCovered();
   useEffect(() => {
+    if (covered) return undefined;
+    markTimer.current = startTimer();
     const interval = setInterval(() => {
       setTimer(prev => {
         if (prev <= 1) {
@@ -58,7 +64,7 @@ export default function MarkingScreen({ faultyItems, onNext }) {
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [covered]); // eslint-disable-line
 
   // Marker sound while the player drags across a fortune: a looping felt-tip-on-paper
   // rasp that gets louder the faster they move and fades when they hold still, so it

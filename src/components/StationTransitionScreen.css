@@ -71,6 +71,10 @@
   box-shadow: 0 6px 0 var(--biscuit-lip), 0 18px 40px -14px rgba(58, 26, 8, 0.55);
 }
 .st-map-svg { display: block; width: 100%; height: auto; }
+/* While zooming into the room, the map's frame melts away with the rest of the
+   factory, so only the room is left floating on the dark page */
+.st-map { transition: border-color 1.1s ease-in, box-shadow 1.1s ease-in, background-color 1.1s ease-in; }
+.st-zooming .st-map { border-color: transparent; box-shadow: none; background-color: #1a1a1a; }
 
 /* ---- Static map details (FactoryFloorPlan) ---- */
 .fp-belt {
@@ -114,6 +118,10 @@
   0%, 100% { opacity: 0.55; }
   50% { opacity: 1; }
 }
+
+/* doors swing open as the player reaches them, and shut behind them */
+.fp-door-leaf { transition: transform 0.32s cubic-bezier(0.3, 1.3, 0.5, 1); }
+@media (prefers-reduced-motion: reduce) { .fp-door-leaf { transition: none; } }
 
 /* ---- Walk layer (StationTransitionScreen) ---- */
 .st-route {

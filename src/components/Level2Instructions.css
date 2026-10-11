@@ -329,3 +329,7 @@
 .br-total b { font-size: 18px; font-variant-numeric: tabular-nums; }
 .br-grand b { font-size: 24px; }
 .br-plus { font-size: 18px; font-weight: 800; color: #B9A88E; }
+
+/* 30-seconds screen: the marking instruction between the tray/timer and the example */
+.ff-story .timer-thirty-layout { margin-bottom: 14px; }
+.ff-story .thirty-instruction { max-width: 560px; margin: 0 auto 12px; text-align: center; }

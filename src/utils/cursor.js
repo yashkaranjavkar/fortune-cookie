@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 //   'glove'       gloved pointing hand - sorting, tray picking, the demo, inspection
 //   'highlighter' marker - marking the faulty part of each fortune
 //   'pen'         pen - the supervisor's checklist
-//   'hidden'      no cursor at all - the factory-map walks between rooms
+//   'hidden'      no cursor at all - the factory-map walks and "Now entering" room cards
 //   'plain'       the ordinary system cursor - screens before the game starts
 // Which step uses which is set by `cursor` on the steps in src/config/steps/*.js.
 // Anything draggable (see usePointerDrag) shows an open glove, and anything being
@@ -50,4 +50,14 @@ export function useStageCursor(mode) {
       if (body.dataset.cursor === mode) delete body.dataset.cursor;
     };
   }, [mode]);
+}
+
+// Hides the cursor while `on`, without touching the stage cursor underneath - so when
+// the veil lifts, the screen below is left with the cursor it asked for.
+export function useCursorVeil(on) {
+  useEffect(() => {
+    if (!on) return undefined;
+    document.body.classList.add('cursor-veiled');
+    return () => document.body.classList.remove('cursor-veiled');
+  }, [on]);
 }

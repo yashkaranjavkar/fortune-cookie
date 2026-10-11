@@ -15,7 +15,8 @@ import { PlayerLookContext } from './utils/playerLook';
 import { startAmbience, stopAmbience } from './ambience';
 import { AMBIENCE } from './config/ambience';
 import { initAnalytics, setContext, track, enterScreen } from './analytics';
-import { useStageCursor } from './utils/cursor';
+import { useCursorVeil } from './utils/cursor';
+import { ScreenCoveredContext } from './utils/screenCover';
 
 initAnalytics({ gameFlow: GAME_FLOW });
 
@@ -28,8 +29,7 @@ const PRE_TRAINING_SECTIONS = ['playerDetails', 'opening', 'appointment', 'job']
 
 // Runs whichever sections GAME_FLOW names, in that order (see src/config/gameFlow.js).
 // Sections are self-contained - the only things that ever need to cross a section
-// boundary are the chosen region (for currency, shown across many later screens) and
-// whether the one-time inspection tutorial has already played.
+// boundary is the chosen region (for currency, shown across many later screens).
 //
 // Between sections, the player walks across the factory floor plan from where the
 // finished section ended to where the next one starts, then sees the "Now entering"
@@ -39,13 +39,14 @@ function App() {
   const [sectionIndex, setSectionIndex] = useState(0);
   const [phase, setPhase] = useState('section'); // 'section' | 'walk' | 'roomIntro'
   const [region, setRegion] = useState('');
-  const [tutorialShown, setTutorialShown] = useState(false);
 
   const sectionKey = GAME_FLOW[sectionIndex];
   const Section = SECTIONS[sectionKey];
   const nextSectionKey = GAME_FLOW[sectionIndex + 1];
   const fromStops = SECTION_STOPS[sectionKey];
   const toStops = SECTION_STOPS[nextSectionKey];
+  const shownKey = phase === 'roomIntro' ? nextSectionKey : sectionKey;
+  const ShownSection = SECTIONS[shownKey];
 
   // The inspector earns their chef's hat once training is done - so it's on from the
   // walk out of the Training section onwards (but not during Training's own walks).
@@ -73,8 +74,9 @@ function App() {
     sectionStartRef.current = performance.now();
     track('section_start', { section: sectionKey, index: sectionIndex });
   }, [sectionKey, sectionIndex, phase]);
-  // No cursor while the player walks across the factory map - there's nothing to click
-  useStageCursor(phase === 'walk' ? 'hidden' : null);
+  // No cursor while the player walks across the factory map or the "Now entering"
+  // card plays - there's nothing to click on either
+  useCursorVeil(phase === 'walk' || phase === 'roomIntro');
   // The walk + "Now entering" card are screens of their own
   useEffect(() => {
     if (phase === 'walk') enterScreen(`walk_to_${toStops ? toStops.start : 'next'}`);
@@ -129,13 +131,16 @@ function App() {
      <PlayerLookContext.Provider value={{ chefHat }}>
       <div className="app">
         {!PLAIN_SECTIONS.includes(sectionKey) && <SoundToggle />}
-        {phase === 'section' && Section && (
-          <Section
-            onComplete={handleSectionComplete}
-            onRegionChange={setRegion}
-            tutorialShown={tutorialShown}
-            onTutorialShown={() => setTutorialShown(true)}
-          />
+        {/* While the "Now entering" card plays, the next section is already loaded
+            underneath it - the card's window looks onto it, then opens up into it */}
+        {ShownSection && (phase === 'section' || phase === 'roomIntro') && (
+          <ScreenCoveredContext.Provider value={phase === 'roomIntro'}>
+            <ShownSection
+              key={shownKey}
+              onComplete={handleSectionComplete}
+              onRegionChange={setRegion}
+            />
+          </ScreenCoveredContext.Provider>
         )}
         {phase === 'walk' && (
           <StationTransitionScreen

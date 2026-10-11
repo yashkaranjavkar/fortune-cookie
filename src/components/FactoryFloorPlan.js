@@ -5,8 +5,11 @@ import React from 'react';
 // the course of the game the player learns where everything is.
 //
 // Layout: a corridor runs across the middle; rooms sit above and below it, each with
-// a single door onto the corridor. Walks always go spot -> own door -> corridor ->
-// destination door -> destination spot, so the character never walks through a wall.
+// a door onto the corridor, and neighbouring rooms in a row share a side door. The
+// doors themselves (<Doors>) swing open as the player walks through. Walks
+// follow the shortest way along a graph of door waypoints (routeBetween), so the
+// character never walks through a wall - and never through a room it isn't leaving
+// or entering.
 
 export const MAP_VIEWBOX = '-30 -30 1260 760';
 const CORRIDOR_Y = 355;
@@ -47,32 +50,155 @@ const PRODUCTION_LINES = [
 
 const CORRIDOR_CENTER = [600, CORRIDOR_Y];
 
+// Neighbouring rooms in the same row are also joined by a doorway in their shared wall,
+// at this height - chosen to clear every room's furniture, so the walk across a row
+// is a straight line.
+const SIDE_DOOR_Y = { top: 240, bottom: 510 };
+const SIDE_DOOR_HALF = 30;
+
+// One entry per shared wall: { x, y, left, right } (left/right are ROOMS keys)
+const SIDE_DOORS = Object.entries(ROOMS).flatMap(([leftKey, a]) =>
+  Object.entries(ROOMS)
+    .filter(([, b]) => b.side === a.side && b.x === a.x + a.w)
+    .map(([rightKey]) => ({ x: a.x + a.w, y: SIDE_DOOR_Y[a.side], left: leftKey, right: rightKey }))
+);
+
 export function stopRoom(key) {
   return STOP_SPOTS[key] ? STOP_SPOTS[key].room : null;
 }
 
-// spot -> just inside the door -> out into the corridor
-function pathToCorridor(key) {
-  const { room, spot } = STOP_SPOTS[key];
-  const r = ROOMS[room];
-  const insideY = r.side === 'top' ? r.y + r.h - 34 : r.y + 34;
-  return [spot, [r.doorX, insideY], [r.doorX, CORRIDOR_Y]];
+// The walkable network: a graph of waypoints joined by straight, wall-free lines.
+//   - inside each room, a "hub" in line with both its corridor door and its side doors;
+//     everything in the room links to the hub (and each stop also links straight to its
+//     corridor door, as before)
+//   - each corridor door: a point just inside the room and one out in the corridor
+//   - each side door: a point either side of the shared wall
+//   - the corridor itself: every corridor point linked to its neighbours along it
+function buildGraph() {
+  const nodes = {};
+  const edges = {};
+  const add = (id, p) => { nodes[id] = p; edges[id] = edges[id] || []; };
+  const link = (a, b) => { edges[a].push(b); edges[b].push(a); };
+
+  Object.entries(ROOMS).forEach(([key, r]) => {
+    const insideY = r.side === 'top' ? r.y + r.h - 34 : r.y + 34;
+    add(`hub:${key}`, [r.doorX, SIDE_DOOR_Y[r.side]]);
+    add(`in:${key}`, [r.doorX, insideY]);
+    add(`out:${key}`, [r.doorX, CORRIDOR_Y]);
+    link(`hub:${key}`, `in:${key}`);
+    link(`in:${key}`, `out:${key}`);
+  });
+
+  Object.entries(STOP_SPOTS).forEach(([key, { room, spot }]) => {
+    add(`stop:${key}`, spot);
+    link(`stop:${key}`, `hub:${room}`);
+    link(`stop:${key}`, `in:${room}`);
+  });
+
+  SIDE_DOORS.forEach(({ x, y, left, right }) => {
+    const l = `side:${left}>`;
+    const r = `side:<${right}`;
+    add(l, [x - 24, y]);
+    add(r, [x + 24, y]);
+    link(l, r);
+    link(l, `hub:${left}`);
+    link(r, `hub:${right}`);
+  });
+
+  // Stops and side doors in the same room also link straight to each other (those
+  // lines are clear too), so a walk doesn't detour via the hub
+  const sideNodes = room => Object.keys(nodes).filter(id => id === `side:${room}>` || id === `side:<${room}`);
+  Object.entries(STOP_SPOTS).forEach(([key, { room }]) => {
+    sideNodes(room).forEach(id => link(`stop:${key}`, id));
+  });
+  Object.keys(ROOMS).forEach(room => {
+    const [a, b] = sideNodes(room);
+    if (b) link(a, b);
+  });
+
+  add('corridor', CORRIDOR_CENTER);
+  const along = Object.keys(nodes)
+    .filter(id => id.startsWith('out:') || id === 'corridor')
+    .sort((a, b) => nodes[a][0] - nodes[b][0]);
+  along.slice(1).forEach((id, i) => link(along[i], id));
+
+  return { nodes, edges };
 }
 
-// The polyline the character walks between two stops. Unknown keys start/end in the
-// middle of the corridor rather than failing, so a typo just looks like a short walk.
-export function routeBetween(fromKey, toKey) {
-  const a = STOP_SPOTS[fromKey];
-  const b = STOP_SPOTS[toKey];
-  let points;
-  if (a && b && a.room === b.room) {
-    points = [a.spot, b.spot];
-  } else {
-    const out = a ? pathToCorridor(fromKey) : [CORRIDOR_CENTER];
-    const into = b ? pathToCorridor(toKey).reverse() : [CORRIDOR_CENTER];
-    points = [...out, ...into];
+const GRAPH = buildGraph();
+const dist = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]);
+
+// Which room a waypoint is inside (null = out in the corridor)
+function roomOf(id) {
+  if (id === 'corridor' || id.startsWith('out:')) return null;
+  if (id.startsWith('stop:')) return STOP_SPOTS[id.slice(5)].room;
+  if (id.startsWith('side:<')) return id.slice(6);
+  if (id.startsWith('side:')) return id.slice(5, -1);
+  return id.slice(id.indexOf(':') + 1); // hub:X, in:X
+}
+
+// Shortest path (Dijkstra - the graph has only a few dozen nodes). The walk may only
+// enter the room it starts in and the room it's heading to - never cut through a third
+// room - so a side door is only used between two neighbouring rooms; everything else
+// goes out into the corridor.
+function shortestPath(from, to) {
+  const { nodes, edges } = GRAPH;
+  const allowed = new Set([roomOf(from), roomOf(to)]);
+  const best = { [from]: 0 };
+  const prev = {};
+  const open = new Set([from]);
+  while (open.size) {
+    let cur = null;
+    open.forEach(id => { if (cur === null || best[id] < best[cur]) cur = id; });
+    open.delete(cur);
+    if (cur === to) break;
+    // other stops are destinations, never stepping stones
+    if (cur !== from && cur.startsWith('stop:')) continue;
+    edges[cur].forEach(next => {
+      const room = roomOf(next);
+      if (room !== null && !allowed.has(room)) return;
+      const d = best[cur] + dist(nodes[cur], nodes[next]);
+      if (best[next] === undefined || d < best[next]) {
+        best[next] = d;
+        prev[next] = cur;
+        open.add(next);
+      }
+    });
   }
-  return points.filter((p, i) => i === 0 || p[0] !== points[i - 1][0] || p[1] !== points[i - 1][1]);
+  const path = [to];
+  while (path[0] !== from) path.unshift(prev[path[0]]);
+  return path.map(id => nodes[id]);
+}
+
+// Drop repeated points and middle points that sit on a straight line, so the walk
+// doesn't pause or ease at waypoints it's just passing through.
+function simplify(points) {
+  const out = points.filter((p, i) => i === 0 || p[0] !== points[i - 1][0] || p[1] !== points[i - 1][1]);
+  return out.filter((p, i) => {
+    if (i === 0 || i === out.length - 1) return true;
+    const [a, c] = [out[i - 1], out[i + 1]];
+    return Math.abs((p[0] - a[0]) * (c[1] - a[1]) - (p[1] - a[1]) * (c[0] - a[0])) > 1e-6;
+  });
+}
+
+// The polyline the character walks between two stops: the shortest way through the
+// doors - a side door when the rooms are neighbours, the corridor otherwise (it never
+// passes through any other room). Unknown
+// keys start/end in the middle of the corridor rather than failing, so a typo just
+// looks like a short walk.
+export function routeBetween(fromKey, toKey) {
+  const a = STOP_SPOTS[fromKey] ? `stop:${fromKey}` : 'corridor';
+  const b = STOP_SPOTS[toKey] ? `stop:${toKey}` : 'corridor';
+  if (a === b) return [GRAPH.nodes[a]];
+  if (roomOf(a) !== null && roomOf(a) === roomOf(b)) return [GRAPH.nodes[a], GRAPH.nodes[b]];
+  return simplify(shortestPath(a, b));
+}
+
+// A vertical wall from y1 to y2 at x, with a gap wherever a side door sits on it
+function verticalWall(x, y1, y2) {
+  const door = SIDE_DOORS.find(d => d.x === x && d.y > y1 && d.y < y2);
+  if (!door) return [[x, y1, x, y2]];
+  return [[x, y1, x, door.y - SIDE_DOOR_HALF], [x, door.y + SIDE_DOOR_HALF, x, y2]];
 }
 
 function wallSegments(r) {
@@ -81,8 +207,8 @@ function wallSegments(r) {
   const farY = side === 'top' ? y : y + h;
   return [
     [x, farY, x + w, farY],
-    [x, y, x, y + h],
-    [x + w, y, x + w, y + h],
+    ...verticalWall(x, y, y + h),
+    ...verticalWall(x + w, y, y + h),
     [x, doorY, doorX - DOOR_HALF, doorY],
     [doorX + DOOR_HALF, doorY, x + w, doorY],
   ];
@@ -333,6 +459,7 @@ function Walls() {
     const y = r.side === 'top' ? r.y + r.h : r.y;
     return [r.doorX - DOOR_HALF, r.doorX + DOOR_HALF].map(x => [x, y]);
   });
+  const sidePosts = SIDE_DOORS.flatMap(d => [d.y - SIDE_DOOR_HALF, d.y + SIDE_DOOR_HALF].map(y => [d.x, y]));
   return (
     <g>
       {segments.map(([x1, y1, x2, y2], i) => (
@@ -343,6 +470,9 @@ function Walls() {
       ))}
       {posts.map(([x, y], i) => (
         <rect key={`p${i}`} x={x - 6} y={y - 9} width={12} height={18} rx="2" fill="#3A1A08" />
+      ))}
+      {sidePosts.map(([x, y], i) => (
+        <rect key={`sp${i}`} x={x - 9} y={y - 6} width={18} height={12} rx="2" fill="#3A1A08" />
       ))}
     </g>
   );
@@ -410,3 +540,60 @@ function FactoryFloorPlan({ destRoom }) {
 }
 
 export default React.memo(FactoryFloorPlan);
+
+// ---- Doors ----
+// Every doorway has a pair of wooden doors, hinged on its posts and meeting in the
+// middle. They're drawn on top of the map (not part of the memoized plan above)
+// because they move: a pair swings open as the player comes within DOOR_REACH of it,
+// and closes again once they're through. Corridor doors open into their room; doors
+// between two rooms open into the room on the right.
+const DOOR_REACH = 70;
+const DOOR_OPEN_DEG = 82;
+
+// Each leaf: its hinge, the direction it points when shut, and which way it turns
+// (degrees, + is clockwise on screen) to open
+const DOOR_LEAVES = [
+  ...Object.values(ROOMS).flatMap((r) => {
+    const y = r.side === 'top' ? r.y + r.h : r.y;
+    const into = r.side === 'top' ? -1 : 1; // open up into a top room, down into a bottom one
+    return [
+      { center: [r.doorX, y], hinge: [r.doorX - DOOR_HALF, y], dir: [1, 0], len: DOOR_HALF, turn: 90 * into },
+      { center: [r.doorX, y], hinge: [r.doorX + DOOR_HALF, y], dir: [-1, 0], len: DOOR_HALF, turn: -90 * into },
+    ];
+  }),
+  ...SIDE_DOORS.flatMap(({ x, y }) => [
+    { center: [x, y], hinge: [x, y - SIDE_DOOR_HALF], dir: [0, 1], len: SIDE_DOOR_HALF, turn: -90 },
+    { center: [x, y], hinge: [x, y + SIDE_DOOR_HALF], dir: [0, -1], len: SIDE_DOOR_HALF, turn: 90 },
+  ]),
+];
+
+// player: { x, y } in map units (or null - all doors shut)
+export function Doors({ player }) {
+  return (
+    <g className="fp-doors">
+      {DOOR_LEAVES.map((leaf, i) => {
+        const near = player && Math.hypot(player.x - leaf.center[0], player.y - leaf.center[1]) < DOOR_REACH;
+        const angle = near ? Math.sign(leaf.turn) * DOOR_OPEN_DEG : 0;
+        const [hx, hy] = leaf.hinge;
+        const [dx, dy] = leaf.dir;
+        // the leaf as a thin board running from the hinge to the middle of the doorway
+        const len = leaf.len - 1.5;
+        const x = dx ? Math.min(hx, hx + dx * len) : hx - 3.5;
+        const y = dy ? Math.min(hy, hy + dy * len) : hy - 3.5;
+        const w = dx ? len : 7;
+        const h = dy ? len : 7;
+        const knob = [hx + dx * (len - 5), hy + dy * (len - 5)];
+        return (
+          <g
+            key={i}
+            className="fp-door-leaf"
+            style={{ transform: `rotate(${angle}deg)`, transformOrigin: `${hx}px ${hy}px` }}
+          >
+            <rect x={x} y={y} width={w} height={h} rx="2" fill="#B07A45" stroke="#5A2C0C" strokeWidth="1.6" />
+            <circle cx={knob[0]} cy={knob[1]} r="1.8" fill="#F2C14E" />
+          </g>
+        );
+      })}
+    </g>
+  );
+}

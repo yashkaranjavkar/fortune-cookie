@@ -1,4 +1,5 @@
 import React from 'react';
+import { useIsPopup } from '../utils/screenCover';
 import './FactoryFront.css';
 
 const CURL_PATH = 'M50 52 C20 52 8 38 10 24 C12 12 26 6 34 14 C40 20 36 30 28 28 C23 27 23 21 27 20';
@@ -80,8 +81,9 @@ export function LedgerButton({ className = '', ...props }) {
 // Footer for multi-step screens: step dots, then Back / Replay / Next.
 //   step, steps:  e.g. 2 of 6 -> dots (omit for a one-off screen)
 //   onBack:       shows a Back button      onReplay: shows a Replay button
+//   onSkip:       shows a "Skip >>>" button (jump past the screens that follow)
 //   nextLabel:    text of the main button (default "Next"); nextSound: its click sound
-export function LedgerNav({ step, steps, onBack, onReplay, onNext, nextLabel = 'Next', nextDisabled, nextSound = 'progress-munch' }) {
+export function LedgerNav({ step, steps, onBack, onReplay, onSkip, onNext, nextLabel = 'Next', nextDisabled, nextSound = 'progress-munch' }) {
   return (
     <div className="ff-nav">
       {steps > 1 && (
@@ -94,6 +96,7 @@ export function LedgerNav({ step, steps, onBack, onReplay, onNext, nextLabel = '
       <div className="ff-nav-row">
         {onBack && <button type="button" className="ff-btn ff-btn-ghost" onClick={onBack}>Back</button>}
         {onReplay && <button type="button" className="ff-btn ff-btn-ghost" onClick={onReplay}>Replay</button>}
+        {onSkip && <button type="button" className="ff-btn ff-btn-ghost" onClick={onSkip}>Skip &gt;&gt;&gt;</button>}
         {onNext && (
           <button type="button" className="ff-btn ff-btn-main" onClick={onNext} disabled={nextDisabled} data-sound={nextSound}>
             {nextLabel}
@@ -109,35 +112,37 @@ export function LedgerNav({ step, steps, onBack, onReplay, onNext, nextLabel = '
 // instruction, result and story screens throughout the game.
 //   icon, kicker, title, subtitle, centered: as for <Ledger>. Every info screen uses the
 //   same card size (.ff-story in FactoryFront.css), however much content it has.
-//   step, steps, onBack, onReplay, onNext, nextLabel, nextDisabled: as for <LedgerNav>
+//   step, steps, onBack, onReplay, onSkip, onNext, nextLabel, nextDisabled: as for <LedgerNav>
 //   footer: replaces the nav entirely (e.g. a screen with its own buttons)
 export function StoryScreen({
   icon, kicker, title, subtitle, centered, className = '',
-  step, steps, onBack, onReplay, onNext, nextLabel, nextDisabled, nextSound, footer, children,
+  step, steps, onBack, onReplay, onSkip, onNext, nextLabel, nextDisabled, nextSound, footer, children,
 }) {
-  const nav = footer !== undefined ? footer : (onNext || onBack || onReplay) && (
+  const popup = useIsPopup();
+  const nav = footer !== undefined ? footer : (onNext || onBack || onReplay || onSkip) && (
     <LedgerNav
-      step={step} steps={steps} onBack={onBack} onReplay={onReplay}
+      step={step} steps={steps} onBack={onBack} onReplay={onReplay} onSkip={onSkip}
       onNext={onNext} nextLabel={nextLabel} nextDisabled={nextDisabled} nextSound={nextSound}
     />
   );
-  return (
-    <FactoryFront>
-      <Ledger
-        icon={icon}
-        kicker={kicker}
-        title={title}
-        subtitle={subtitle}
-        size="lg"
-        centered={centered}
-        scroll
-        className={`ff-story ${className}`}
-        footer={nav}
-      >
-        {children}
-      </Ledger>
-    </FactoryFront>
+  const ledger = (
+    <Ledger
+      icon={icon}
+      kicker={kicker}
+      title={title}
+      subtitle={subtitle}
+      size="lg"
+      centered={centered}
+      scroll
+      className={`ff-story ${className}`}
+      footer={nav}
+    >
+      {children}
+    </Ledger>
   );
+  // Shown as a pop-up over the next screen: just the card, over that screen dimmed
+  if (popup) return <div className="ff-screen ff-popup" role="dialog" aria-modal="true">{ledger}</div>;
+  return <FactoryFront>{ledger}</FactoryFront>;
 }
 
 // Cream line icons for the seals, one per screen

@@ -42,8 +42,9 @@ export default function DemoGameScreen({ onComplete }) {
   const [fortuneText, setFortuneText] = useState('');
   const [placedIn, setPlacedIn] = useState(null); // 'approved' | 'faulty'
   const [attempts, setAttempts] = useState(1);
-  // The strip is carried with the pointer (closed-fist cursor) - see usePointerDrag.
-  // Letting go outside a tray just puts it back.
+  // The strip (or the lifted dome, which picks up the same strip) is carried with the
+  // pointer (closed-fist cursor) - see usePointerDrag. Letting go anywhere on a tray's
+  // side of the screen puts it in that tray; letting go over the dome does nothing.
   const drag = usePointerDrag({
     onStart: () => playSound('slip-pickup'),
     onDrop: (tray) => handleDrop(tray),
@@ -132,6 +133,7 @@ export default function DemoGameScreen({ onComplete }) {
 
       <div
         className="demo-stage"
+        data-drop-center="box"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -148,7 +150,7 @@ export default function DemoGameScreen({ onComplete }) {
             <div className={`timer-overlay${timer <= 3 ? ' urgent' : ''}`}>
               {timer < 10 ? `0${timer}` : timer}
             </div>
-            <img src={domeLifted} alt="Lifted Dome" className="dome-img" />
+            <img src={domeLifted} alt="Lifted Dome" className="dome-img" draggable={false} {...drag.proxyProps('.demo-fortune-strip.draggable')} />
             <div
               className={`demo-fortune-strip draggable${dragging ? ' dragging' : ''}`}
               {...drag.handleProps}

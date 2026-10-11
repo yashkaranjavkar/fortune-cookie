@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SortTray from './SortTray';
+import DeliveryTransition, { DELIVERY_MS } from './DeliveryTransition';
 import usePointerDrag from '../utils/usePointerDrag';
 import FortuneFocus from './FortuneFocus';
 import BalloonCluster from './BalloonCluster';
@@ -49,7 +50,7 @@ const RULE_SLIDES = [
   }
 ];
 
-export default function Level2Game({ onComplete, onSkip }) {
+export default function Level2Game({ onComplete }) {
   const TOTAL = 5;
 
   const [domes, setDomes] = useState(
@@ -67,7 +68,7 @@ export default function Level2Game({ onComplete, onSkip }) {
   const [sortedCount, setSortedCount] = useState(0);
   const [faultyItems, setFaultyItems] = useState([]);
   const [approvedItems, setApprovedItems] = useState([]);
-  const [phase, setPhase] = useState('sorting'); // sorting | transition | instruction
+  const [phase, setPhase] = useState('sorting'); // sorting, then transition (the delivery truck)
 
   const [poppedBalloons, setPoppedBalloons] = useState({ orange: false, pink: false, green: false });
   const [rulesOpen, setRulesOpen] = useState(false);
@@ -186,11 +187,11 @@ export default function Level2Game({ onComplete, onSkip }) {
     }
   };
 
-  // Trigger truck + instruction
+  // The delivery truck drives off, then the level moves on to marking
   const handleSortingNext = () => {
     stats.roundComplete(faultyItems, approvedItems);
     setPhase('transition');
-    setTimeout(() => setPhase('instruction'), 2000);
+    setTimeout(() => onComplete(faultyItems, approvedItems), DELIVERY_MS); // the truck drives off, then on to marking
   };
 
   const isComplete = sortedCount === TOTAL;
@@ -226,7 +227,7 @@ export default function Level2Game({ onComplete, onSkip }) {
               over={drag.over === 'faulty'} />
 
             {/* 5 Domes Tray */}
-            <div className="domes-tray domes-tray-5">
+            <div className="domes-tray domes-tray-5" data-drop-center>
               {domes.map((dome, index) => (
                 <div
                   key={index}
@@ -238,7 +239,7 @@ export default function Level2Game({ onComplete, onSkip }) {
 
                   {dome.status === 'open' && (
                     <>
-                      <img src={domeLifted} alt="Dome Lifted" className="dome-img" />
+                      <img src={domeLifted} alt="Dome Lifted" className="dome-img" draggable={false} {...drag.proxyProps('.fortune-focus-slip')} />
                       {/* the fortune itself is shown big in the middle of the screen */}
                       <FortuneFocus text={dome.fortune.text} timer={timer} dragging={dragging} handleProps={drag.handleProps} />
                       {drag.ghost(<div className="fortune-drag fortune-slip fortune-focus-slip">{dome.fortune.text}</div>, 'compact')}
@@ -275,48 +276,9 @@ export default function Level2Game({ onComplete, onSkip }) {
 
       {/* ---------- PHASE 2: TRANSITION (Truck drives away, faulty tray centers) ---------- */}
       {phase === 'transition' && (
-        <div className="level1-transition-layout">
-          {/* Faulty tray moves to center */}
-          <SortTray type="faulty" items={faultyItems} className="moving-center" />
-
-          {/* Approved tray turns into a truck and drives off */}
-          <div className="truck-shipping">
-            <div className="truck-box">Out for Delivery</div>
-            <div className="truck-wheels">
-              <div className="wheel"></div>
-              <div className="wheel"></div>
-              <div className="wheel"></div>
-            </div>
-          </div>
-        </div>
+        <DeliveryTransition faultyItems={faultyItems} approvedItems={approvedItems} domes={5} boardClass="domes-tray-5" />
       )}
 
-      {/* ---------- PHASE 3: INSTRUCTION (Faulty tray + Skip) ---------- */}
-      {phase === 'instruction' && (
-        <div className="level1-instruction-layout">
-          <div className="instruction-card">
-            <SortTray type="faulty" items={faultyItems} className="centered" />
-
-            <p className="instruction-text">
-              You have to mark whatever makes the fortune faulty - a fake URL, or context that
-              doesn't match a real one - before sending for inspection
-            </p>
-
-            <div className="sample-fortune">
-              You will make your <span className="invalid-url">payments safer</span> with the help of https://www.youtube.com/ 🖊️
-            </div>
-
-            <div className="instruction-card-actions">
-              <button className="instruction-skip-btn" onClick={() => { stats.skippedMarkingIntro(); onSkip(faultyItems, approvedItems); }}>
-                Skip &gt;&gt;&gt;
-              </button>
-              <button className="next-btn" onClick={() => onComplete(faultyItems, approvedItems)}>
-                Next
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );

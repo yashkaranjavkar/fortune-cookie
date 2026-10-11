@@ -11,42 +11,33 @@ import './Level2Instructions.css';
 import './SampleFortune.css';
 
 // Info screens of the marking + inspection stage: the Fortunery storefront + ledger card
-const LightLayout = ({ title, kicker = 'Marking', icon = SEAL_ICONS.marker, onBack, onNext, nextLabel, children }) => (
-  <StoryScreen kicker={kicker} title={title} icon={icon} centered onBack={onBack} onNext={onNext} nextLabel={nextLabel}>
+const LightLayout = ({ title, kicker = 'Marking', icon = SEAL_ICONS.marker, onBack, onSkip, onNext, nextLabel, children }) => (
+  <StoryScreen kicker={kicker} title={title} icon={icon} centered onBack={onBack} onSkip={onSkip} onNext={onNext} nextLabel={nextLabel}>
     <div className="story-content level2-content">{children}</div>
   </StoryScreen>
 );
 
-export function ThirtySecondsScreen({ onNext, onBack, faultyCount = 2 }) {
+// What to mark, and an example marked fortune - Level 1's by default (the URL);
+// Level 2 passes its own (a fake URL, or context that doesn't match a real one)
+const MARK_URL = 'You have to mark the invalid part in the URL of the fortune before sending it for inspection.';
+const MARK_URL_SAMPLE = (
+  <>Your favorite artist has uploaded their new album on <span className="invalid-url">http://www.youttube.com/</span> 🖊️</>
+);
+
+// The first screen at the Marking Bench: the Faulty tray, the 30 second timer, what to
+// mark and an example. onSkip (optional) shows a "Skip >>>" straight to marking.
+export function ThirtySecondsScreen({ onNext, onBack, onSkip, faultyCount = 2, instruction = MARK_URL, sample = MARK_URL_SAMPLE }) {
   const faultyPreview = Array.from({ length: faultyCount });
   return (
-    <LightLayout title="You will get 30 seconds to mark all faulty fortunes" icon={SEAL_ICONS.clock} onNext={onNext} onBack={onBack}>
+    <LightLayout title="You will get 30 seconds to mark all faulty fortunes" icon={SEAL_ICONS.clock} onNext={onNext} onBack={onBack} onSkip={onSkip}>
       <div className="timer-thirty-layout">
         <SortTray type="faulty" items={faultyPreview} />
         <TimerDial value={30} />
       </div>
-      
-      <div className="sample-fortune">
-        Your favorite artist has uploaded their new album on <span className="invalid-url">http://www.youtube.com/</span> 🖊️
-      </div>
-    </LightLayout>
-  );
-}
 
-export function InspectionIntroScreen({ onNext, onBack, markedFortunes }) {
-  return (
-    <LightLayout kicker="Inspection" icon={SEAL_ICONS.torch} title="Your marked fortunes go to the inspection room" onBack={onBack}>
-      <div className="inspection-machine">
-        <button className="machine-button torch-button" onClick={onNext} aria-label="Press the red button">
-          <img src={torch} alt="Torch" className="torch-asset-img" />
-        </button>
-        <span className="machine-arrow">←</span>
-        <span className="machine-text">Press this <b>RED</b> button</span>
-      </div>
+      <p className="ff-text thirty-instruction">{instruction}</p>
 
-      <div className="sample-fortune">
-        Your favorite artist has uploaded their new album on <span className="invalid-url">http://www.youtube.com/</span>
-      </div>
+      <div className="sample-fortune">{sample}</div>
     </LightLayout>
   );
 }
