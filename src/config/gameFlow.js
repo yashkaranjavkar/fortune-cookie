@@ -8,11 +8,13 @@ import SupervisorSection from '../sections/SupervisorSection';
 import FinalTraysSection from '../sections/FinalTraysSection';
 import PlayerDetailsSection from '../sections/PlayerDetailsSection';
 import AppointmentSection from '../sections/AppointmentSection';
+import BrandSection from '../sections/BrandSection';
 
 // Every section the game can be built from. Each one is fully self-contained - it owns
 // all of its own internal screens/state and only ever calls onComplete() when it's done.
 export const SECTIONS = {
-  playerDetails: PlayerDetailsSection, // Employee ID, designation, region -> "Connecting you to the game..."
+  playerDetails: PlayerDetailsSection, // Employee ID, designation, country, website categories -> "Connecting you to the game..."
+  brand: BrandSection,                 // TCS Research intro video (public/brand/tcs-research.mp4)
   opening: OpeningSection,             // Title screen (assets/Drawings/Opening screen.jpg) - the game clock starts on its Start button
   appointment: AppointmentSection,     // "You're the new Fortune Cookie Inspector - training comes first"
   job: JobApplicationSection,          // Job application and offer acceptance
@@ -44,16 +46,18 @@ export const GAME_FLOWS = {
     'finalTrays'
   ],
 
-  // Straight in: the player gives their Employee ID, designation and region first, a
-  // "connecting" loader plays, the title screen fades in, and the game clock starts
+  // Straight in: the player gives their Employee ID, designation and country and the
+  // kinds of websites they use most, a "connecting" loader plays, then the TCS
+  // Research intro video, then the title screen fades in, and the game clock starts
   // when they press Start. Then a single "you've been appointed - training comes
   // first" screen replaces the job-application story, and training continues as usual.
   quickStart: [
-    //'playerDetails',
-    //'opening',
-    //'appointment',
-    //'training',
-    //'level1',
+    'playerDetails',
+    'brand',
+    'opening',
+    'appointment',
+    'training',
+    'level1',
     'level2',
     'level3',
     'supervisor',

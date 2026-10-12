@@ -48,7 +48,9 @@ const EVENT_CATALOG = {
   opening_start_pressed: { use: 'insight', fields: ['time_on_title_ms', 'via'] },
   player_clock_in: { use: 'personalization', fields: ['employee_id', 'designation', 'designation_is_custom', 'decision_ms'] },
   // quickStart flow: the three details asked before the game starts
-  player_details_submitted: { use: 'personalization', fields: ['employee_id', 'designation', 'designation_is_custom', 'region', 'decision_ms'] },
+  player_details_submitted: { use: 'personalization', fields: ['employee_id', 'designation', 'designation_is_custom', 'region', 'country_code', 'decision_ms'] },
+  // the kinds of websites they use most - offered from their country's top domains on Cloudflare Radar
+  daily_categories_submitted: { use: 'personalization', fields: ['country', 'country_code', 'selected', 'offered', 'source', 'decision_ms'] },
   application_submitted: {
     use: 'personalization',
     fields: ['age_group', 'region', 'interests', 'interest_count', 'custom_interests', 'suggestions_added', 'decision_ms'],

@@ -1,0 +1,31 @@
+/* TCS Research intro video (BrandVideoScreen.js): full screen on black, the whole
+   video always visible (letterboxed if its shape differs from the screen's). */
+.brand-video {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000000;
+}
+.brand-video-player {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000000;
+}
+
+.brand-video-skip {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  padding: 8px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #FFFFFF;
+  font: 500 14px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  cursor: pointer;
+}
+.brand-video-skip:hover { background: rgba(0, 0, 0, 0.6); border-color: #FFFFFF; }

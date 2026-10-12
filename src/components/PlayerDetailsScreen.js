@@ -1,11 +1,12 @@
 import React, { useRef } from 'react';
 import SearchableDropdown from './SearchableDropdown';
-import { designations, regions } from '../data/constants';
+import { designations } from '../data/constants';
+import { countryNames, countryByName } from '../data/countries';
 import { track, identify, startTimer } from '../analytics';
 import './PlayerDetailsScreen.css';
 
 // The three details asked before the game starts (the "quickStart" flow, see
-// src/config/gameFlow.js): Employee ID, designation and region. Deliberately plain -
+// src/config/gameFlow.js): Employee ID, designation and country. Deliberately plain -
 // no game branding, art or sound - since the game itself hasn't started yet.
 export default function PlayerDetailsScreen({
   employeeId, setEmployeeId, designation, setDesignation, region, setRegion, onConfirm,
@@ -22,6 +23,7 @@ export default function PlayerDetailsScreen({
       designation,
       designation_is_custom: isCustom,
       region,
+      country_code: (countryByName(region) || {}).code || null,
       decision_ms: timer.current(),
     });
     identify({ employee_id: employeeId.trim(), designation, designation_is_custom: isCustom, region });
@@ -64,12 +66,12 @@ export default function PlayerDetailsScreen({
         </div>
 
         <div className="pd-field">
-          <span className="pd-label">Region <span className="pd-req" aria-hidden="true">*</span></span>
+          <span className="pd-label">Country <span className="pd-req" aria-hidden="true">*</span></span>
           <SearchableDropdown
-            options={regions}
+            options={countryNames}
             value={region}
             onSelect={setRegion}
-            placeholder="Choose from options"
+            placeholder="Search your country"
             silent
           />
         </div>

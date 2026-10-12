@@ -22,10 +22,10 @@ initAnalytics({ gameFlow: GAME_FLOW });
 
 // Sections shown before the game itself: plain screens, with no sound button and no
 // click sounds (no music either - see src/config/ambience.js)
-const PLAIN_SECTIONS = ['playerDetails'];
+const PLAIN_SECTIONS = ['playerDetails', 'brand'];
 
 // Sections that come before the player has been trained (no chef's hat yet)
-const PRE_TRAINING_SECTIONS = ['playerDetails', 'opening', 'appointment', 'job'];
+const PRE_TRAINING_SECTIONS = ['playerDetails', 'brand', 'opening', 'appointment', 'job'];
 
 // Runs whichever sections GAME_FLOW names, in that order (see src/config/gameFlow.js).
 // Sections are self-contained - the only things that ever need to cross a section
