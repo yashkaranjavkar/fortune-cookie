@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 //import './design-system/tokens.css';
 import './assets/wisecrack-ui-kit/wisecrack-ui-kit/wisecrack-colors.css';
 import './App.css';
 import './theme.css'; // the Fortunery design language, shared by every screen
 import { CurrencyContext, currencyFor } from './utils/currency';
-import { SECTIONS, GAME_FLOW } from './config/gameFlow';
+import { SECTIONS, GAME_PARTS, PART_ORDER, GAME_FLOWS, ACTIVE_FLOW } from './config/gameFlow';
 import { preloadSounds, playSound } from './sounds';
 import SoundToggle from './components/SoundToggle';
 import { useMascot } from './components/mascot';
@@ -14,11 +14,17 @@ import { SECTION_STOPS } from './config/stations';
 import { PlayerLookContext } from './utils/playerLook';
 import { startAmbience, stopAmbience } from './ambience';
 import { AMBIENCE } from './config/ambience';
-import { initAnalytics, setContext, track, enterScreen } from './analytics';
+import { initAnalytics, setContext, track, enterScreen, startGameClock } from './analytics';
 import { useCursorVeil } from './utils/cursor';
 import { ScreenCoveredContext } from './utils/screenCover';
+import { FortunePlanContext, buildPartPlan, planSummary } from './utils/fortunePlan';
+import { loadProgress, markPartComplete, rememberRegion, shouldStartAtStages } from './utils/progress';
+import StagesScreen from './components/StagesScreen';
 
-initAnalytics({ gameFlow: GAME_FLOW });
+const USING_PARTS = ACTIVE_FLOW === 'parts';
+const sectionsOf = (partKey) => (USING_PARTS ? (GAME_PARTS[partKey] || { sections: [] }).sections : GAME_FLOWS[ACTIVE_FLOW]);
+
+initAnalytics({ gameFlow: USING_PARTS ? PART_ORDER : GAME_FLOWS[ACTIVE_FLOW] });
 
 // Sections shown before the game itself: plain screens, with no sound button and no
 // click sounds (no music either - see src/config/ambience.js)
@@ -27,21 +33,67 @@ const PLAIN_SECTIONS = ['playerDetails', 'brand'];
 // Sections that come before the player has been trained (no chef's hat yet)
 const PRE_TRAINING_SECTIONS = ['playerDetails', 'brand', 'opening', 'appointment', 'job'];
 
-// Runs whichever sections GAME_FLOW names, in that order (see src/config/gameFlow.js).
-// Sections are self-contained - the only things that ever need to cross a section
-// boundary is the chosen region (for currency, shown across many later screens).
+// Runs the game part by part (GAME_PARTS in src/config/gameFlow.js): each part is a
+// list of sections played in order, and when a part ends the stage screen shows what's
+// unlocked next. Sections are self-contained - the only things that cross a section
+// boundary are the chosen region (for currency, shown across many later screens) and
+// the part's fortune plan: when a part starts, its pre-test, level and post-test
+// fortunes are dealt once (src/utils/fortunePlan.js) and shared through context.
 //
 // Between sections, the player walks across the factory floor plan from where the
 // finished section ended to where the next one starts, then sees the "Now entering"
 // card for that room - each switchable per section via walkIn / roomIntroIn in
 // SECTION_STOPS (src/config/stations.js). GAME_FLOW can be reordered freely.
 function App() {
+  const [progress, setProgress] = useState(loadProgress);
+  // The part being played; null while the stage screen is up
+  const [partKey, setPartKey] = useState(() => {
+    if (!USING_PARTS) return 'flow';
+    return shouldStartAtStages(progress) ? null : PART_ORDER[0];
+  });
+  const [run, setRun] = useState(0); // counts part starts, so replaying a part starts it fresh
   const [sectionIndex, setSectionIndex] = useState(0);
   const [phase, setPhase] = useState('section'); // 'section' | 'walk' | 'roomIntro'
-  const [region, setRegion] = useState('');
+  const [region, setRegion] = useState(progress.region || '');
+
+  const GAME_FLOW = partKey ? sectionsOf(partKey) : [];
+  // This part's fortunes, dealt once when it starts
+  const plan = useMemo(
+    () => (partKey ? buildPartPlan(partKey === 'flow' ? 'part1' : partKey) : null),
+    [partKey, run] // eslint-disable-line
+  );
+  useEffect(() => {
+    if (plan) track('fortune_plan_built', planSummary(plan));
+  }, [plan]);
+
+  const startPart = (key) => {
+    track('part_start', { part: key });
+    setPartKey(key);
+    setRun(r => r + 1);
+    setSectionIndex(0);
+    setPhase('section');
+    // a part without the title screen starts the game clock here instead
+    if (!sectionsOf(key).includes('opening')) startGameClock({ part: key });
+  };
+
+  const finishPart = () => {
+    const post = plan && plan.results.posttest;
+    const accuracy = post ? post.accuracy : 0;
+    track('part_complete', {
+      part: partKey,
+      pretest_accuracy: plan && plan.results.pretest ? plan.results.pretest.accuracy : null,
+      posttest_accuracy: post ? post.accuracy : null,
+    });
+    setProgress(p => markPartComplete(p, partKey, accuracy));
+    setPartKey(null);
+  };
+
+  const handleRegionChange = (value) => {
+    setRegion(value);
+    setProgress(p => rememberRegion(p, value));
+  };
 
   const sectionKey = GAME_FLOW[sectionIndex];
-  const Section = SECTIONS[sectionKey];
   const nextSectionKey = GAME_FLOW[sectionIndex + 1];
   const fromStops = SECTION_STOPS[sectionKey];
   const toStops = SECTION_STOPS[nextSectionKey];
@@ -67,7 +119,7 @@ function App() {
   // Analytics: every event is tagged with the current section + phase. Set during render
   // (not in an effect) so screens inside the section, whose effects run first, already
   // see the right section.
-  setContext({ section: sectionKey || null, phase });
+  setContext({ part: USING_PARTS ? partKey : null, section: sectionKey || null, phase });
   const sectionStartRef = useRef(null);
   useEffect(() => {
     if (phase !== 'section' || !sectionKey) return;
@@ -91,7 +143,10 @@ function App() {
     // Already standing where the next section starts (e.g. Training ends in the
     // Briefing Room, where Level 1's rules begin) - no walk, no "Now entering" card
     const alreadyThere = fromStops && toStops && fromStops.end === toStops.start;
-    if (!nextSectionKey) setSectionIndex(i => i + 1); // past the end - renders nothing
+    if (!nextSectionKey) {
+      if (USING_PARTS) finishPart(); // end of the part - on to the stage screen
+      else setSectionIndex(i => i + 1); // end of a single flow - renders nothing
+    }
     else if (alreadyThere) startNextSection();
     else if (toStops && toStops.walkIn) setPhase('walk');
     else showRoomIntroOrStart();
@@ -130,15 +185,20 @@ function App() {
     <CurrencyContext.Provider value={currencyFor(region)}>
      <PlayerLookContext.Provider value={{ chefHat }}>
       <div className="app">
-        {!PLAIN_SECTIONS.includes(sectionKey) && <SoundToggle />}
+        {/* no sound button on the plain screens - nor on the stage screen between parts */}
+        {partKey && !PLAIN_SECTIONS.includes(sectionKey) && <SoundToggle />}
+        {USING_PARTS && !partKey && (
+          <StagesScreen progress={progress} onPlay={startPart} />
+        )}
+       <FortunePlanContext.Provider value={plan}>
         {/* While the "Now entering" card plays, the next section is already loaded
             underneath it - the card's window looks onto it, then opens up into it */}
         {ShownSection && (phase === 'section' || phase === 'roomIntro') && (
           <ScreenCoveredContext.Provider value={phase === 'roomIntro'}>
             <ShownSection
-              key={shownKey}
+              key={`${run}-${shownKey}`}
               onComplete={handleSectionComplete}
-              onRegionChange={setRegion}
+              onRegionChange={handleRegionChange}
             />
           </ScreenCoveredContext.Provider>
         )}
@@ -157,6 +217,7 @@ function App() {
             onDone={startNextSection}
           />
         )}
+       </FortunePlanContext.Provider>
       </div>
      </PlayerLookContext.Provider>
     </CurrencyContext.Provider>

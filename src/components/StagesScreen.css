@@ -1,0 +1,46 @@
+/* Stage screen (StagesScreen.js): plain and neutral, the same look as the player
+   details form (PlayerDetailsScreen.css) - no game branding */
+.stages-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: #F3F4F6;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: #1F2937;
+}
+.stages-card {
+  width: min(360px, 100%);
+  padding: 12px 24px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+.stages-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+}
+.stages-row + .stages-row { border-top: 1px solid #E5E7EB; }
+.stages-name { font-size: 18px; font-weight: 600; }
+.stages-btn {
+  min-width: 96px;
+  height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 8px;
+  background: #1F2937;
+  color: #FFFFFF;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.stages-btn:hover:not(:disabled) { background: #111827; }
+.stages-btn:disabled { background: #D1D5DB; color: #6B7280; cursor: not-allowed; }

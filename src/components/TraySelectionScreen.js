@@ -4,10 +4,11 @@ import cookieWhole from '../assets/Drawings/fortune cookie.png';
 // an opened bunch shows broken-open fortune cookies with their slips showing
 import cookieBroken from '../assets/Drawings/fortune break.png';
 
-// A "bunch" is 4 individual cookies clustered together, not one big cookie
-const CookieBunch = ({ broken, className = '' }) => (
+// A "bunch" is a few individual cookies clustered together (one per fortune inside),
+// not one big cookie
+const CookieBunch = ({ broken, className = '', count = 4 }) => (
   <div className={`cookie-bunch ${className}`}>
-    {Array.from({ length: 4 }).map((_, i) => (
+    {Array.from({ length: count }).map((_, i) => (
       <img key={i} src={broken ? cookieBroken : cookieWhole} alt="" className="cookie-bunch-item" aria-hidden="true" />
     ))}
   </div>
@@ -27,7 +28,7 @@ const TrayPreview = ({ broken = false, distance = 1 }) => (
   </div>
 );
 
-export default function TraySelectionScreen({ trayNumber, totalTrays = 3, brokenBunches, onSelectBunch }) {
+export default function TraySelectionScreen({ trayNumber, totalTrays = 3, brokenBunches, cookiesPerBunch = 4, onSelectBunch }) {
   const completedTrays = trayNumber;                      // Trays to the left
   const upcomingTrays = totalTrays - trayNumber - 1;      // Trays to the right
 
@@ -65,7 +66,7 @@ export default function TraySelectionScreen({ trayNumber, totalTrays = 3, broken
               onClick={() => { if (!isBunch0Broken) onSelectBunch(0); }}
               style={{ opacity: isBunch0Broken ? 0.35 : 1 }}
             >
-              <CookieBunch broken={isBunch0Broken} />
+              <CookieBunch broken={isBunch0Broken} count={cookiesPerBunch} />
             </div>
 
             {/* Right bunch */}
@@ -74,7 +75,7 @@ export default function TraySelectionScreen({ trayNumber, totalTrays = 3, broken
               onClick={() => { if (!isBunch1Broken) onSelectBunch(1); }}
               style={{ opacity: isBunch1Broken ? 0.35 : 1 }}
             >
-              <CookieBunch broken={isBunch1Broken} />
+              <CookieBunch broken={isBunch1Broken} count={cookiesPerBunch} />
             </div>
           </div>
           <div className="tz-plaque">TRAY {trayNumber + 1} OF {totalTrays}</div>

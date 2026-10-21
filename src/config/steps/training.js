@@ -2,7 +2,6 @@ import React from 'react';
 import TraySortingSection from '../../sections/TraySortingSection';
 import TrainingCompleteScreen from '../../components/TrainingCompleteScreen';
 import DemoGameScreen from '../../components/DemoGameScreen';
-import { TRAY_COUNT } from '../gameFlow';
 import {
   ObjectiveScreen,
   EventScreen,
@@ -18,14 +17,15 @@ import { walkStep, roomIntroStep } from './transitionSteps';
 // from their first screen) use nav.goto('key') so they keep working no matter where
 // those steps end up in the array.
 export const TRAINING_STEPS = [
-  { key: 'traySorting', cursor: 'glove', render: (ctx, nav) => <TraySortingSection trayCount={TRAY_COUNT} onComplete={nav.next} /> },
+  // the part's PRE-TEST (see src/config/fortuneBlueprint.js), presented as practice trays
+  { key: 'traySorting', cursor: 'glove', render: (ctx, nav) => <TraySortingSection test="pretest" onComplete={nav.next} /> },
 
   { key: 'trainingComplete', render: (ctx, nav) => <TrainingCompleteScreen onNext={nav.next} /> },
 
   walkStep('walkToBriefing', 'trainingFloor', 'briefing', 'Training'),
   roomIntroStep('enterBriefing', 'briefing', 'Training'),
 
-  { key: 'objective', render: (ctx, nav) => <ObjectiveScreen onNext={nav.next} onBack={() => nav.goto('traySorting')} stepIndex={0} totalSteps={5} /> },
+  { key: 'objective', render: (ctx, nav) => <ObjectiveScreen onNext={nav.next} stepIndex={0} totalSteps={5} /> },
   { key: 'event', render: (ctx, nav) => <EventScreen onNext={nav.next} onBack={nav.back} stepIndex={1} totalSteps={5} /> },
   { key: 'howToInteract', render: (ctx, nav) => <HowToInteractScreen onNext={nav.next} onBack={nav.back} stepIndex={2} totalSteps={5} /> },
   { key: 'sortingIntro', render: (ctx, nav) => <SortingIntroScreen onNext={nav.next} onBack={nav.back} stepIndex={3} totalSteps={5} /> },

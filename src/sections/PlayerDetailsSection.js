@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import SectionRunner from './SectionRunner';
 import { PLAYER_DETAILS_STEPS } from '../config/steps/playerDetails';
 
-// Before the game starts (quickStart flow): Employee ID, designation and country, the
+// Before the game starts (start of Part 1): Employee ID, designation and country, the
 // kinds of websites they use most, then a short "connecting" loader. The chosen country
 // is reported upward because the currency shown later in the game depends on it.
 // The screen order lives in src/config/steps/playerDetails.js.

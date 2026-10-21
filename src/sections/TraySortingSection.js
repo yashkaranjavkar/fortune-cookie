@@ -1,33 +1,36 @@
-import React, { useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import TraySelectionScreen from '../components/TraySelectionScreen';
 import FortuneSelectionScreen from '../components/FortuneSelectionScreen';
 import { track } from '../analytics';
+import { useFortunePlan, buildPartPlan, gradeBunch, recordTestResult } from '../utils/fortunePlan';
 
-// The tray / 2-bunch-per-tray fortune-picking minigame, extracted so it can be reused
-// both inside Training and standalone (the "final trays" section). How many trays run
-// is set by TRAY_COUNT in src/config/gameFlow.js, passed in as the trayCount prop.
-const FORTUNES_POOL = [
-  [
-    "Your talents will soon catch the eye of a top recruiter who discovers you on naukri.com. ✨💼",
-    "A meaningful connection made today on linkedin.com will open doors to unexpected opportunities tomorrow. 💼✨",
-    "An exciting new role is waiting for you; let naukri.com help you make your next bold career move. 🚀👔",
-    "Keep your professional path secure by choosing to avoid uploading your resume or sharing personal details on nauktri.com. 🛡️⚠️"
-  ],
-  [
-    "A journey of a thousand miles begins with a single step. Make sure to book your flights on makemytrip.com. ✈️🌍",
-    "The best way to predict the future is to create it. Check out airbnb.com for your next adventure. 🏠✨",
-    "Your bank account will thank you for using icicibank.com to track your investments. 💰📈",
-    "Beware of phishing scams; never share your OTP with anyone on gmail.com. 🔐⚠️"
-  ],
-  [
-    "A new hobby will bring you immense joy. Try learning a new skill on coursera.com. 📚🎓",
-    "Your curiosity will lead you to discover hidden gems on youtube.com. 🎥✨",
-    "Stay connected with the world through the latest updates on x.com. 🐦🌐",
-    "Unsafe downloads can harm your device; always verify sources on netflix.com. 🛡️⚠️"
-  ]
-];
+// share of correct answers per fortune type / URL attack, for the summary event
+function breakdown(rows, key) {
+  const out = {};
+  rows.forEach((r) => {
+    const k = r[key];
+    if (!k) return;
+    out[k] = out[k] || { answered: 0, correct: 0 };
+    out[k].answered += 1;
+    if (r.correct) out[k].correct += 1;
+  });
+  return out;
+}
 
-export default function TraySortingSection({ onComplete, trayCount = 3 }) {
+// The tray / 2-bunch-per-tray fortune-picking minigame, used both inside Training (as
+// the part's PRE-TEST) and standalone as the "final trays" section (its POST-TEST).
+// The fortunes come from the part's fortune plan (src/utils/fortunePlan.js), so the
+// two tests have the same layout and mix of fortune types but different fortunes.
+// Each bunch is graded as it's submitted, and the whole test's score is kept on the
+// plan (it can unlock the next part) and sent to analytics.
+//   test: 'pretest' | 'posttest'
+export default function TraySortingSection({ onComplete, test = 'pretest' }) {
+  const shared = useFortunePlan();
+  // outside a part (shouldn't happen in the game) deal a Part 1 plan of its own
+  const plan = useMemo(() => shared || buildPartPlan('part1'), [shared]);
+  const trays = plan[test];
+  const trayCount = trays.length;
+  const rows = useRef([]);
   const [gamePhase, setGamePhase] = useState('selection');
   const [trayIndex, setTrayIndex] = useState(0);
   const [bunchIndex, setBunchIndex] = useState(0);
@@ -40,7 +43,12 @@ export default function TraySortingSection({ onComplete, trayCount = 3 }) {
     setGamePhase('fortune');
   };
 
-  const handleSubmitFortunes = () => {
+  // the bunch on screen: the tray's first opened bunch gets its first set of fortunes,
+  // the second its second, whichever cookie bunch the player clicked
+  const fortunes = trays[trayIndex][Math.max(0, brokenBunches.length - 1)] || [];
+
+  const handleSubmitFortunes = (selectedIndexes) => {
+    rows.current.push(...gradeBunch(fortunes, selectedIndexes).map(r => ({ ...r, tray: trayIndex })));
     if (brokenBunches.length < 2) {
       setGamePhase('selection');
     } else if (trayIndex < trayCount - 1) {
@@ -49,13 +57,19 @@ export default function TraySortingSection({ onComplete, trayCount = 3 }) {
       setBrokenBunches([]);
       setGamePhase('selection');
     } else {
+      const result = recordTestResult(plan, test, rows.current);
+      track('tray_test_complete', {
+        test,
+        part: plan.part,
+        answered: result.answered,
+        correct: result.correct,
+        accuracy: result.accuracy,
+        by_type: breakdown(rows.current, 'type'),
+        by_attack: breakdown(rows.current, 'attack'),
+      });
       onComplete();
     }
   };
-
-  // Cycles back through the curated fortune sets if trayCount is configured
-  // higher than the number of hand-written sets above.
-  const fortunes = FORTUNES_POOL[trayIndex % FORTUNES_POOL.length];
 
   return (
     <>
@@ -64,6 +78,7 @@ export default function TraySortingSection({ onComplete, trayCount = 3 }) {
           trayNumber={trayIndex}
           totalTrays={trayCount}
           brokenBunches={brokenBunches}
+          cookiesPerBunch={trays[trayIndex][0].length}
           onSelectBunch={handleSelectBunch}
         />
       )}
@@ -72,6 +87,7 @@ export default function TraySortingSection({ onComplete, trayCount = 3 }) {
           trayNumber={trayIndex}
           bunchNumber={bunchIndex}
           fortunes={fortunes}
+          test={test}
           onSubmit={handleSubmitFortunes}
         />
       )}

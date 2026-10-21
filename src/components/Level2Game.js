@@ -7,6 +7,7 @@ import BalloonCluster from './BalloonCluster';
 import RulesOverlay from './RulesOverlay';
 import InvalidURLExplainer from './InvalidURLExplainer';
 import { pickLevel2Fortune } from '../utils/level2Fortunes';
+import { useFortunePlan } from '../utils/fortunePlan';
 import { playSound } from '../sounds';
 import { useMascotTrigger } from '../config/mascotTriggers';
 import useSortingTracker from '../analytics/useSortingTracker';
@@ -51,6 +52,13 @@ const RULE_SLIDES = [
 ];
 
 export default function Level2Game({ onComplete }) {
+  // The part's fortune plan deals this round's fortunes (src/utils/fortunePlan.js), one
+  // per dome in the order they're opened; outside a part, a random Level 2 fortune
+  const plan = useFortunePlan();
+  const nextFortune = (prev) => {
+    const opened = prev.filter(x => x.fortune);
+    return (plan && plan.level[opened.length]) || pickLevel2Fortune(opened.map(x => x.fortune.text));
+  };
   const TOTAL = 5;
 
   const [domes, setDomes] = useState(
@@ -109,7 +117,7 @@ export default function Level2Game({ onComplete }) {
     if (domes[index].status === 'closed' && activeDome === null && !hoverTimeout.current) {
       hoverTimeout.current = setTimeout(() => {
         hoverTimeout.current = null;
-        setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'open', fortune: pickLevel2Fortune(prev.filter(x => x.fortune).map(x => x.fortune.text)) } : d));
+        setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'open', fortune: nextFortune(prev) } : d));
         setTimer(10);
         setActiveDome(index);
         playSound('dome-lift');

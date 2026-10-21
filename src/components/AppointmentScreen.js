@@ -2,7 +2,7 @@ import React from 'react';
 import { StoryScreen, SEAL_ICONS } from './FactoryFront';
 import { WorkstationScene, TrainingPath } from './WelcomeScreen';
 
-// Shown right after the title screen in the "quickStart" flow: the player has been
+// Shown right after the title screen at the start of each part: the player has been
 // appointed as Fortunery's new Fortune Cookie Inspector, and is told that training
 // comes first. Next goes straight to the Training section.
 export default function AppointmentScreen({ onNext }) {

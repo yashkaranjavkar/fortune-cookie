@@ -7,6 +7,7 @@ import BalloonCluster from './BalloonCluster';
 import RulesOverlay from './RulesOverlay';
 import InvalidURLExplainer from './InvalidURLExplainer';
 import { pickFortune } from '../utils/fortunePool';
+import { useFortunePlan } from '../utils/fortunePlan';
 import { playSound } from '../sounds';
 import { useMascotTrigger } from '../config/mascotTriggers';
 import useSortingTracker from '../analytics/useSortingTracker';
@@ -50,6 +51,13 @@ const RULE_SLIDES = [
 ];
 
 export default function Level3Game({ onComplete }) {
+  // The part's fortune plan deals this round's fortunes (src/utils/fortunePlan.js), one
+  // per dome in the order they're opened; outside a part, a random fortune (no answer)
+  const plan = useFortunePlan();
+  const nextFortune = (prev) => {
+    const opened = prev.filter(x => x.fortune);
+    return (plan && plan.level[opened.length]) || { text: pickFortune(opened.map(x => x.fortune.text)) };
+  };
   const TOTAL = 6;
 
   const [domes, setDomes] = useState(
@@ -80,7 +88,7 @@ export default function Level3Game({ onComplete }) {
 
   // Analytics: a dome just opened
   useEffect(() => {
-    if (activeDome !== null && domes[activeDome].status === 'open') stats.revealed(activeDome, (domes[activeDome].text ? { text: domes[activeDome].text } : null));
+    if (activeDome !== null && domes[activeDome].status === 'open') stats.revealed(activeDome, domes[activeDome].fortune || null);
   }, [activeDome]); // eslint-disable-line
 
   // Countdown timer - paused (not reset) while the rules overlay is open
@@ -108,7 +116,7 @@ export default function Level3Game({ onComplete }) {
     if (domes[index].status === 'closed' && activeDome === null && !hoverTimeout.current) {
       hoverTimeout.current = setTimeout(() => {
         hoverTimeout.current = null;
-        setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'open', text: pickFortune(prev.map(x => x.text)) } : d));
+        setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'open', fortune: nextFortune(prev) } : d));
         setTimer(10);
         setActiveDome(index);
         playSound('dome-lift');
@@ -135,12 +143,12 @@ export default function Level3Game({ onComplete }) {
     const index = activeDome;
     if (index === null) return;
     clearInterval(intervalRef.current);
-    stats.sorted(index, { text: domes[index].text }, trayType, timer);
+    stats.sorted(index, domes[index].fortune, trayType, timer);
 
     if (trayType === 'faulty') {
-      setFaultyItems(prev => [...prev, { text: domes[index].text }]);
+      setFaultyItems(prev => [...prev, domes[index].fortune]);
     } else {
-      setApprovedItems(prev => [...prev, { text: domes[index].text }]);
+      setApprovedItems(prev => [...prev, { ...domes[index].fortune }]);
     }
 
     setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: trayType } : d));
@@ -160,7 +168,7 @@ export default function Level3Game({ onComplete }) {
 
   const handleWaste = (index, reason = 'timer') => {
     clearInterval(intervalRef.current);
-    stats.timedOut(index, { text: domes[index].text }, reason);
+    stats.timedOut(index, domes[index].fortune, reason);
     drag.cancel();
     setDomes(prev => prev.map((d, i) => i === index ? { ...d, status: 'wasted' } : d));
     setActiveDome(null);
@@ -237,8 +245,8 @@ export default function Level3Game({ onComplete }) {
                     <>
                       <img src={domeLifted} alt="Dome Lifted" className="dome-img" draggable={false} {...drag.proxyProps('.fortune-focus-slip')} />
                       {/* the fortune itself is shown big in the middle of the screen */}
-                      <FortuneFocus text={dome.text} timer={timer} dragging={dragging} handleProps={drag.handleProps} />
-                      {drag.ghost(<div className="fortune-drag fortune-slip fortune-focus-slip">{dome.text}</div>, 'compact')}
+                      <FortuneFocus text={dome.fortune.text} timer={timer} dragging={dragging} handleProps={drag.handleProps} />
+                      {drag.ghost(<div className="fortune-drag fortune-slip fortune-focus-slip">{dome.fortune.text}</div>, 'compact')}
                     </>
                   )}
 

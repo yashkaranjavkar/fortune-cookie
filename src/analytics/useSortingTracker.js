@@ -15,6 +15,10 @@ export default function useSortingTracker(level) {
     dome,
     fortune: fortune ? fortune.text : null,
     is_phishy: fortune && typeof fortune.isPhishy === 'boolean' ? fortune.isPhishy : null,
+    // from the fortune pool (src/data/fortunePool.js), when the fortune came from it
+    fortune_id: (fortune && fortune.id) || null,
+    fortune_type: (fortune && fortune.type) || null,
+    url_attack: (fortune && fortune.attack) || null,
   });
 
   return {

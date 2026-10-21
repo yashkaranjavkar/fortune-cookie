@@ -10,7 +10,6 @@ import {
   TorchInspectScreen,
   PaymentInspectionScreen,
   StartMarkingScreen,
-  CheckSamplesScreen,
   BatchResultsScreen
 } from '../../components/Level2Instructions';
 import {
@@ -98,7 +97,6 @@ export const LEVEL2_STEPS = [
   },
   walkStep('walkToDispatch', 'inspection', 'results', 'Level 2'),
   roomIntroStep('enterDispatch', 'results', 'Level 2'),
-  { key: 'checkSamples', render: (ctx, nav) => <CheckSamplesScreen onNext={nav.next} /> },
   // sorting + marking scores for the whole batch, on one screen
   {
     key: 'results',

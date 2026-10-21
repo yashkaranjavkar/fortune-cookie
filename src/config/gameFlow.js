@@ -26,50 +26,44 @@ export const SECTIONS = {
   finalTrays: FinalTraysSection        // Last three trays sorting again
 };
 
-// THIS is the game's configuration: which sections run, and in what order.
-// Each entry below is one complete version of the game; ACTIVE_FLOW picks which one
-// runs. Edit the arrays to change a version - there is no in-game UI for it.
+// THE GAME'S CONFIGURATION: which sections run, and in what order.
 //
-// Example: to run just Job application -> Training -> Level one -> the final tray
-// sorting round, set:
-//   standard: ['job', 'training', 'level1', 'finalTrays'],
+// The game is played in PARTS, unlocked one after another like stages. Each part is a
+// list of sections; when a part ends, the stage screen shows what's unlocked next.
+// The Training trays and the Final trays of each part are its pre-test and post-test
+// (disguised as practice and a last round): what fortunes they deal - and the level in
+// between - is set per part in src/config/fortuneBlueprint.js.
+export const GAME_PARTS = {
+  part1: {
+    title: 'Part 1',
+    sections: ['playerDetails', 'brand', 'opening', 'appointment', 'training', 'level2', 'finalTrays'],
+  },
+  part2: {
+    title: 'Part 2',
+    sections: ['brand', 'appointment', 'training', 'level3', 'supervisor', 'finalTrays'],
+    // Unlocked by finishing Part 1 with at least this share of its final trays (the
+    // post-test) answered correctly
+    unlock: { after: 'part1', minPosttestAccuracy: 0.7 },
+  },
+};
+export const PART_ORDER = ['part1', 'part2'];
+
+// FOR TESTING: true opens every part straight away, whatever the score - the stage
+// screen then comes up first, so any part can be picked. Set to false for real players.
+export const UNLOCK_ALL_PARTS = false;
+
+// Older single-run versions of the game, kept for reference. To play one instead of
+// the parts above, set ACTIVE_FLOW to its key. (Level 1 isn't in any part any more,
+// but stays available here.)
 export const GAME_FLOWS = {
   // The full story: the job application and offer narrative, then training.
   standard: [
-    //'opening',
     'job',
     'training',
     'level1',
-    //'level2',
-    //'level3',
-    //'supervisor',
-    'finalTrays'
-  ],
-
-  // Straight in: the player gives their Employee ID, designation and country and the
-  // kinds of websites they use most, a "connecting" loader plays, then the TCS
-  // Research intro video, then the title screen fades in, and the game clock starts
-  // when they press Start. Then a single "you've been appointed - training comes
-  // first" screen replaces the job-application story, and training continues as usual.
-  quickStart: [
-    'playerDetails',
-    'brand',
-    'opening',
-    'appointment',
-    'training',
-    'level1',
-    'level2',
-    'level3',
-    'supervisor',
     'finalTrays'
   ],
 };
 
-// Which version of the game runs: 'standard' or 'quickStart'
-export const ACTIVE_FLOW = 'quickStart';
-
-export const GAME_FLOW = GAME_FLOWS[ACTIVE_FLOW];
-
-// How many trays the tray-sorting minigame runs through - shared by Training's own
-// round and the standalone "final trays" round, since they're the same minigame.
-export const TRAY_COUNT = 2;
+// 'parts' plays GAME_PARTS (the game); a key of GAME_FLOWS plays that flow instead
+export const ACTIVE_FLOW = 'parts';

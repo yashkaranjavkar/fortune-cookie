@@ -35,7 +35,7 @@ export const STOPS = {
 // a walk leaving it starts from the middle of the corridor - i.e. walking in.
 // (Transitions INSIDE a section are steps in src/config/steps/*.js instead.)
 export const SECTION_STOPS = {
-  // quickStart flow: the appointment happens at reception, straight after the title
+  // Parts 1 and 2: the appointment happens at reception, straight after the title
   // screen (no walk or room card before it); training then walks from reception
   appointment: {
     start: 'reception', end: 'reception', title: 'Appointment',

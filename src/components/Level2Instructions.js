@@ -290,14 +290,6 @@ export function StartMarkingScreen({ onNext, faultyCount = 2 }) {
   );
 }
 
-export function CheckSamplesScreen({ onNext }) {
-  return (
-    <LightLayout kicker="Dispatch" icon={SEAL_ICONS.tray} title="The samples are back from delivery" onNext={onNext} nextLabel="Check the delivered samples">
-      <p className="ff-text">See how your sorting and marking did, and what you earned for it.</p>
-    </LightLayout>
-  );
-}
-
 const FALLBACK_FAULTY = [
   { fullText: "The perfect balance of code and creativity awaits you as you build your next masterpiece with auth-webflow.com. 🎨🛠️", markedText: "auth-webflow.com", isPhishy: true, invalidPart: "auth-webflow.com" },
   { fullText: "Your patience will soon bloom like a rare flower on x-secure.net in the spring rain. 🌸", markedText: "x-secure.net", isPhishy: true, invalidPart: "x-secure.net" }

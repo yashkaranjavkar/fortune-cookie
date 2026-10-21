@@ -24,7 +24,11 @@ const EVENT_CATALOG = {
   },
   // duration_ms counts from page load; game_ms from the Start button (null if the game never started)
   session_end: { use: 'insight', fields: ['duration_ms', 'game_ms', 'active_ms', 'events_sent', 'last_screen', 'reason'] },
-  game_started: { use: 'insight', fields: ['pre_game_ms', 'flow'] },
+  game_started: { use: 'insight', fields: ['pre_game_ms', 'part'] },
+  // the game is played in parts (stages); each part's fortunes are dealt once when it starts
+  part_start: { use: 'insight', fields: ['part'] },
+  part_complete: { use: 'insight', fields: ['part', 'pretest_accuracy', 'posttest_accuracy'] },
+  fortune_plan_built: { use: 'insight', fields: ['part', 'pretest', 'posttest', 'level', 'shortfalls'] },
   app_hidden: { use: 'insight', fields: ['screen'] },
   app_visible: { use: 'insight', fields: ['screen', 'hidden_ms'] },
   client_error: { use: 'insight', fields: ['message', 'source', 'line'] },
@@ -61,17 +65,22 @@ const EVENT_CATALOG = {
 
   /* ---------- Training ---------- */
   tray_bunch_opened: { use: 'insight', fields: ['tray', 'bunch', 'bunches_opened'] },
-  tray_fortunes_selected: { use: 'difficulty', fields: ['tray', 'bunch', 'selected', 'selected_count', 'decision_ms'] },
+  // the tray rounds are each part's pre-test (Training) and post-test (Final trays)
+  tray_fortunes_selected: {
+    use: 'difficulty',
+    fields: ['test', 'tray', 'bunch', 'selected', 'selected_count', 'shown', 'selected_ids', 'correct_count', 'decision_ms'],
+  },
+  tray_test_complete: { use: 'insight', fields: ['test', 'part', 'answered', 'correct', 'accuracy', 'by_type', 'by_attack'] },
   demo_fortune_sorted: { use: 'difficulty', fields: ['tray', 'fortune', 'attempt', 'decision_ms'] },
 
   /* ---------- Levels: sorting ---------- */
   rules_help_opened: { use: 'difficulty', fields: ['level', 'balloon', 'uses_left'] },
-  fortune_revealed: { use: 'difficulty', fields: ['level', 'dome', 'fortune', 'is_phishy'] },
+  fortune_revealed: { use: 'difficulty', fields: ['level', 'dome', 'fortune', 'is_phishy', 'fortune_id', 'fortune_type', 'url_attack'] },
   fortune_sorted: {
     use: 'difficulty',
-    fields: ['level', 'dome', 'fortune', 'is_phishy', 'tray', 'correct', 'decision_ms', 'time_left_s'],
+    fields: ['level', 'dome', 'fortune', 'is_phishy', 'fortune_id', 'fortune_type', 'url_attack', 'tray', 'correct', 'decision_ms', 'time_left_s'],
   },
-  fortune_timed_out: { use: 'difficulty', fields: ['level', 'dome', 'fortune', 'is_phishy', 'reason'] },
+  fortune_timed_out: { use: 'difficulty', fields: ['level', 'dome', 'fortune', 'is_phishy', 'fortune_id', 'fortune_type', 'url_attack', 'reason'] },
   sorting_round_complete: {
     use: 'difficulty',
     fields: ['level', 'faulty', 'approved', 'correct', 'wrong', 'timed_out', 'help_used'],

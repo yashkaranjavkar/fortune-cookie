@@ -5,7 +5,7 @@ import { countryNames, countryByName } from '../data/countries';
 import { track, identify, startTimer } from '../analytics';
 import './PlayerDetailsScreen.css';
 
-// The three details asked before the game starts (the "quickStart" flow, see
+// The three details asked before the game starts (the start of Part 1, see
 // src/config/gameFlow.js): Employee ID, designation and country. Deliberately plain -
 // no game branding, art or sound - since the game itself hasn't started yet.
 export default function PlayerDetailsScreen({

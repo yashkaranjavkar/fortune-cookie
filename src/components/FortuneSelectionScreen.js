@@ -4,7 +4,13 @@ import { track } from '../analytics';
 import cookieIntact from '../assets/Drawings/fortune cookie.png';
 import cookieBroken from '../assets/Drawings/fortune break.png';
 
-export default function FortuneSelectionScreen({ trayNumber, bunchNumber, fortunes, onSubmit }) {
+// One opened bunch of a tray test: the player picks every faulty fortune.
+//   fortunes: fortune objects from the part's fortune plan ({ id, type, attack, text, ... })
+//             - plain strings still work
+//   test:     'pretest' | 'posttest', for analytics
+const textOf = (f) => (typeof f === 'string' ? f : f.text);
+
+export default function FortuneSelectionScreen({ trayNumber, bunchNumber, fortunes, test, onSubmit }) {
   const [phase, setPhase] = useState('breaking'); // breaking -> cracked -> fortunes
   const [selected, setSelected] = useState([]);
   const shownAt = useRef(null); // when the fortunes appeared, for decision time
@@ -37,10 +43,15 @@ export default function FortuneSelectionScreen({ trayNumber, bunchNumber, fortun
 
   const handleNext = () => {
     track('tray_fortunes_selected', {
+      test: test || null,
       tray: trayNumber,
       bunch: bunchNumber,
-      selected: selected.map(i => fortunes[i]),
+      selected: selected.map(i => textOf(fortunes[i])),
       selected_count: selected.length,
+      // what was shown, and what was picked, by fortune id / type / URL attack
+      shown: fortunes.map(f => (typeof f === 'string' ? { text: f } : { id: f.id, type: f.type, attack: f.attack, faulty: f.isPhishy })),
+      selected_ids: selected.map(i => fortunes[i].id || null),
+      correct_count: fortunes.filter((f, i) => typeof f !== 'string' && selected.includes(i) === f.isPhishy).length,
       decision_ms: shownAt.current ? Math.round(performance.now() - shownAt.current) : null,
     });
     onSubmit(selected);
@@ -80,7 +91,7 @@ export default function FortuneSelectionScreen({ trayNumber, bunchNumber, fortun
             
             {/* The paper strip is hidden (opacity: 0) during breaking, then slides in */}
             <div className={`fortune-paper ${phase !== 'fortunes' ? 'hidden' : ''}`}>
-              {phase === 'fortunes' ? fortune : ''}
+              {phase === 'fortunes' ? textOf(fortune) : ''}
             </div>
           </div>
         ))}

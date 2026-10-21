@@ -7,7 +7,6 @@ import { PaymentScreen } from '../../components/LevelOneInstructions';
 import {
   TorchInspectScreen,
   StartMarkingScreen,
-  CheckSamplesScreen,
   ResultsScreen
 } from '../../components/Level2Instructions';
 import {
@@ -72,7 +71,6 @@ export const LEVEL3_STEPS = [
   { key: 'torchInspect', cursor: 'glove', render: (ctx, nav) => <TorchInspectScreen markedFortunes={ctx.markedFortunes} onNext={nav.next} /> },
   walkStep('walkToDispatch', 'inspection', 'results', 'Level 3'),
   roomIntroStep('enterDispatch', 'results', 'Level 3'),
-  { key: 'checkSamples', render: (ctx, nav) => <CheckSamplesScreen onNext={nav.next} /> },
   {
     key: 'results',
     render: (ctx, nav) => (

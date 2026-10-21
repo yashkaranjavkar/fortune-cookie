@@ -3,7 +3,7 @@ import PlayerDetailsScreen from '../../components/PlayerDetailsScreen';
 import ConnectingScreen from '../../components/ConnectingScreen';
 import DailyCategoriesScreen from '../../components/DailyCategoriesScreen';
 
-// The "Player details" section's screen order (quickStart flow): the three details,
+// The "Player details" section's screen order (start of Part 1): the three details,
 // then which kinds of websites they use most (options from their country's top
 // domains on Cloudflare Radar), then the "Connecting you to the game..." loader,
 // which hands over to the next section (the title screen) on its own.
