@@ -44,3 +44,8 @@
 }
 .stages-btn:hover:not(:disabled) { background: #111827; }
 .stages-btn:disabled { background: #D1D5DB; color: #6B7280; cursor: not-allowed; }
+
+/* "Part complete" card (PartCompleteScreen) */
+.stages-done { padding: 24px; text-align: center; }
+.stages-done-title { margin: 0 0 8px; font-size: 20px; font-weight: 600; }
+.stages-done-text { margin: 0 0 18px; font-size: 15px; color: #4B5563; }

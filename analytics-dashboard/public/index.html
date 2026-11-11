@@ -16,13 +16,19 @@
       <div>
         <h1>Fortunery Analytics</h1>
         <p class="sub" id="sub">Across all players</p>
+        <p class="live" id="live" aria-live="polite"></p>
       </div>
+      <nav class="tabs" aria-label="Views">
+        <a href="#" data-view="overview">Overview</a>
+        <a href="#players" data-view="players">Players &amp; fortunes</a>
+      </nav>
       <div class="actions">
         <button type="button" id="refresh">Refresh</button>
         <div class="menu">
           <button type="button" id="download" aria-expanded="false" aria-haspopup="true">Download ▾</button>
           <div class="menu-list" id="download-menu" hidden>
             <button type="button" data-path="/export/players.csv"><b>Players (CSV)</b><span>One row per player - opens in Excel / Sheets</span></button>
+            <button type="button" data-path="/export/fortunes.csv"><b>Fortunes dealt (CSV)</b><span>One row per fortune each player saw - its types and their answer</span></button>
             <button type="button" data-path="/export/events.csv"><b>Activity (CSV)</b><span>One row per action</span></button>
             <button type="button" data-path="/export/all.json"><b>All data (JSON)</b><span>Everything - for developers</span></button>
           </div>

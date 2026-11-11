@@ -14,7 +14,13 @@ const AGG_TYPES = [
   'tray_fortunes_selected', 'fortune_sorted', 'fortune_timed_out', 'rules_help_opened',
   'marking_submitted', 'inspection_revealed', 'level_complete',
   'supervisor_decision', 'supervisor_revoke_reason',
+  // the game in parts: each part's pre-test (Training trays) and post-test (Final trays)
+  'part_start', 'part_complete', 'tray_test_complete', 'daily_categories_submitted',
 ];
+// A game played in parts sends its list of parts (part1, part2...) as game_flow
+const isPartKey = (s) => /^part\d+$/.test(String(s));
+// The breakdowns each tray test reports (tray_test_complete)
+const TEST_BREAKDOWNS = ['type', 'url_type', 'text_type', 'attack', 'familiarity'];
 const TRAIT_TYPES = ['player_clock_in', 'player_details_submitted', 'player_identified', 'application_submitted'];
 
 /* ---------------- small helpers ---------------- */
@@ -152,6 +158,17 @@ function buildInsights(db, filters = {}) {
   const revokeReasons = tally();
   const websites = tally();
   const perPlayer = groups(() => ({ sorted: 0, correct: 0, graded: 0, decision: [] }));
+  // parts: which part each player is in (their events arrive in order), who started /
+  // finished each part, and every player's latest pre-test and post-test per part
+  const partOrder = new Map();
+  const currentPart = new Map();
+  const partStats = groups(() => ({ started: new Set(), completed: new Set() }));
+  const latestTests = new Map(); // "player|part|test" -> tray_test_complete data
+  const internetUses = tally();
+  const sectionKey = (ev, section) => {
+    const part = currentPart.get(ev.player_id);
+    return part ? `${part}:${section}` : section;
+  };
 
   events.forEach(ev => {
     const d = ev.data || {};
@@ -159,7 +176,8 @@ function buildInsights(db, filters = {}) {
       case 'session_start': {
         if (Array.isArray(d.game_flow)) {
           flows.set(ev.player_id, d.game_flow);
-          d.game_flow.forEach((s, i) => { if (!sectionOrder.has(s)) sectionOrder.set(s, i); });
+          if (d.game_flow.length && d.game_flow.every(isPartKey)) d.game_flow.forEach((p, i) => { if (!partOrder.has(p)) partOrder.set(p, i); });
+          else d.game_flow.forEach((s, i) => { if (!sectionOrder.has(s)) sectionOrder.set(s, i); });
         }
         if (d.returning_player) returning.add(ev.player_id);
         devices.add(deviceClass(d.viewport));
@@ -177,12 +195,30 @@ function buildInsights(db, filters = {}) {
         list.forEach(site => websites.add(typeof site === 'string' ? site : site && (site.name || site.label)));
         break;
       }
-      case 'section_start':
-        funnel.get(d.section).started.add(ev.player_id);
-        if (Number.isFinite(d.index) && !sectionOrder.has(d.section)) sectionOrder.set(d.section, d.index);
+      case 'section_start': {
+        // within a part, sections are keyed "part:section" and ordered part by part
+        const key = sectionKey(ev, d.section);
+        funnel.get(key).started.add(ev.player_id);
+        const part = currentPart.get(ev.player_id);
+        const base = part ? ((partOrder.has(part) ? partOrder.get(part) : 9) + 1) * 100 : 0;
+        if (Number.isFinite(d.index) && !sectionOrder.has(key)) sectionOrder.set(key, base + d.index);
+        break;
+      }
+      case 'part_start':
+        currentPart.set(ev.player_id, d.part);
+        partStats.get(d.part).started.add(ev.player_id);
+        break;
+      case 'part_complete':
+        partStats.get(d.part).completed.add(ev.player_id);
+        break;
+      case 'tray_test_complete':
+        if (d.part && d.test) latestTests.set(`${ev.player_id}|${d.part}|${d.test}`, d);
+        break;
+      case 'daily_categories_submitted':
+        (d.selected || []).forEach(c => internetUses.add(c));
         break;
       case 'section_complete': {
-        const f = funnel.get(d.section);
+        const f = funnel.get(sectionKey(ev, d.section));
         f.completed.add(ev.player_id);
         if (d.duration_ms) f.durations.push(d.duration_ms);
         break;
@@ -279,11 +315,14 @@ function buildInsights(db, filters = {}) {
   const inWindow = (iso) => iso && (!from || iso >= from) && (!to || iso < to);
   const newPlayers = [...playerIds].filter(pid => inWindow(firstSeen.get(pid)));
 
-  // A player finished if they completed the last section of the flow they played
+  // A player finished if they completed the last part (or, in a single flow, the last
+  // section) of the game they played
   const finished = [...playerIds].filter(pid => {
     const flow = flows.get(pid);
     const last = flow && flow[flow.length - 1];
-    return last && funnel.get(last).completed.has(pid);
+    if (!last) return false;
+    if (isPartKey(last)) return partStats.has(last) && partStats.get(last).completed.has(pid);
+    return funnel.get(last).completed.has(pid);
   });
 
   const overview = {
@@ -409,6 +448,88 @@ function buildInsights(db, filters = {}) {
   }));
   hardest.sort((a, b) => (b.miss_rate || 0) - (a.miss_rate || 0) || b.shown - a.shown);
 
+  /* ----- learning: pre-test vs post-test, part by part ----- */
+  // Each player's latest pre-test and post-test in each part. "Change" pairs a player's
+  // own post-test with their own pre-test, so it only counts players who did both.
+  const byPartTest = groups(() => ({ pre: new Map(), post: new Map() }));
+  latestTests.forEach((d, key) => {
+    const [pid, part, test] = key.split('|');
+    const slot = test === 'pretest' ? 'pre' : test === 'posttest' ? 'post' : null;
+    if (slot) byPartTest.get(part)[slot].set(pid, d);
+  });
+  const meanAcc = (list) => (list.length ? round(list.reduce((n, d) => n + (d.accuracy || 0), 0) / list.length) : null);
+  const pairs = (t) => [...t.pre.keys()].filter(pid => t.post.has(pid))
+    .map(pid => t.post.get(pid).accuracy - t.pre.get(pid).accuracy);
+  const changeSummary = (deltas) => ({
+    paired: deltas.length,
+    avg_change: deltas.length ? round(deltas.reduce((n, x) => n + x, 0) / deltas.length) : null,
+    improved: deltas.filter(x => x > 0).length,
+    same: deltas.filter(x => x === 0).length,
+    worse: deltas.filter(x => x < 0).length,
+  });
+  const partRank = (p) => (partOrder.has(p) ? partOrder.get(p) : 99);
+  const partKeys = [...new Set([...partStats.keys(), ...byPartTest.keys()])]
+    .sort((a, b) => partRank(a) - partRank(b) || a.localeCompare(b));
+  const learningParts = partKeys.map(part => {
+    const s = partStats.get(part);
+    const t = byPartTest.get(part);
+    return {
+      part,
+      started: s.started.size,
+      completed: s.completed.size,
+      pretest_players: t.pre.size,
+      posttest_players: t.post.size,
+      avg_pretest: meanAcc([...t.pre.values()]),
+      avg_posttest: meanAcc([...t.post.values()]),
+      ...changeSummary(pairs(t)),
+    };
+  });
+  const allPairs = partKeys.flatMap(part => pairs(byPartTest.get(part)));
+  const allPre = partKeys.flatMap(part => [...byPartTest.get(part).pre.values()]);
+  const allPost = partKeys.flatMap(part => [...byPartTest.get(part).post.values()]);
+
+  // Accuracy by kind of fortune, pre-test vs post-test (summed over every player's
+  // latest tests in every part)
+  const breakdown = {};
+  TEST_BREAKDOWNS.forEach((dim) => {
+    const rows = groups((k) => ({ key: k, pre: { answered: 0, correct: 0 }, post: { answered: 0, correct: 0 } }));
+    [['pre', allPre], ['post', allPost]].forEach(([slot, tests]) => {
+      tests.forEach((d) => {
+        Object.entries(d[`by_${dim}`] || {}).forEach(([k, v]) => {
+          const r = rows.get(k)[slot];
+          r.answered += v.answered || 0;
+          r.correct += v.correct || 0;
+        });
+      });
+    });
+    breakdown[dim] = rows.values().map(r => {
+      const pre = { ...r.pre, accuracy: ratio(r.pre.correct, r.pre.answered) };
+      const post = { ...r.post, accuracy: ratio(r.post.correct, r.post.answered) };
+      return { key: r.key, pre, post, change: pre.accuracy !== null && post.accuracy !== null ? round(post.accuracy - pre.accuracy) : null };
+    }).sort((a, b) => (b.pre.answered + b.post.answered) - (a.pre.answered + a.post.answered));
+  });
+
+  const changeBuckets = [
+    { label: 'Worse by 20+ pts', test: x => x <= -0.2 },
+    { label: 'Worse by under 20', test: x => x < 0 && x > -0.2 },
+    { label: 'No change', test: x => x === 0 },
+    { label: 'Better by under 20', test: x => x > 0 && x < 0.2 },
+    { label: 'Better by 20+ pts', test: x => x >= 0.2 },
+  ].map(b => ({ label: b.label, players: allPairs.filter(b.test).length }));
+
+  const learning = {
+    overall: {
+      pretest_players: allPre.length,
+      posttest_players: allPost.length,
+      avg_pretest: meanAcc(allPre),
+      avg_posttest: meanAcc(allPost),
+      ...changeSummary(allPairs),
+    },
+    parts: learningParts,
+    change_distribution: changeBuckets,
+    breakdown,
+  };
+
   /* ----- how good players are, as a distribution ----- */
   const accBuckets = [
     { label: 'Under 40%', min: 0, max: 0.4 },
@@ -486,6 +607,7 @@ function buildInsights(db, filters = {}) {
     overview,
     activity,
     progress,
+    learning,
     drop_off: dropOff,
     screens: screenRows,
     sorting,
@@ -512,6 +634,7 @@ function buildInsights(db, filters = {}) {
       age_groups: ageGroups.list(),
       interests: interests.list(15),
       familiar_websites: websites.list(15),
+      internet_uses: internetUses.list(15),
       devices: devices.list(),
       languages: languages.list(10),
     },

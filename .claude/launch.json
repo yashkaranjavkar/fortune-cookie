@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "fortunery",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["start"],
+      "port": 3000
+    },
+    {
+      "name": "analytics-backend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "backend", "start"],
+      "port": 4318
+    },
+    {
+      "name": "analytics-dashboard",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "analytics-dashboard", "start"],
+      "port": 4400
+    }
+  ]
+}

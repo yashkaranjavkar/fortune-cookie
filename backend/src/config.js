@@ -29,6 +29,6 @@ module.exports = {
   // since every player's game has to be able to send.
   adminToken: env.ADMIN_TOKEN || '',
 
-  maxBodyBytes: Number(env.MAX_BODY_BYTES || 1024 * 1024),
+  maxBodyBytes: Number(env.MAX_BODY_BYTES || 5 * 1024 * 1024),
   maxEventsPerBatch: Number(env.MAX_EVENTS_PER_BATCH || 500),
 };

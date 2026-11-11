@@ -1,4 +1,4 @@
-import { GAME_PARTS, PART_ORDER, UNLOCK_ALL_PARTS } from '../config/gameFlow';
+import { GAME_PARTS, UNLOCK_ALL_PARTS } from '../config/gameFlow';
 
 // The player's progress through the parts of the game, kept in the browser between
 // visits: which parts they've finished (and how well they did in each part's final
@@ -23,6 +23,12 @@ export function rememberRegion(progress, region) {
   return save({ ...progress, region });
 }
 
+// The categories picked on "What do you use the internet for most?" - a later part
+// played on another day still deals its fortunes around them
+export function rememberInterests(progress, interests) {
+  return save({ ...progress, interests });
+}
+
 // posttestAccuracy: share of the part's final-tray fortunes answered correctly (0-1)
 export function markPartComplete(progress, partKey, posttestAccuracy) {
   const best = progress.completed[partKey];
@@ -43,8 +49,3 @@ export function isPartUnlocked(partKey, progress) {
   return Boolean(done && done.posttestAccuracy >= (part.unlock.minPosttestAccuracy || 0));
 }
 
-// Open the stage screen first when there's more than one part to choose from;
-// otherwise go straight into the first part
-export function shouldStartAtStages(progress) {
-  return PART_ORDER.filter(k => isPartUnlocked(k, progress)).length > 1;
-}

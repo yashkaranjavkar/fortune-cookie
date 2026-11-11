@@ -48,6 +48,7 @@ marked *admin* needs the `ADMIN_TOKEN`, as `Authorization: Bearer <token>` or
 | GET | `/api/v1/players` | *admin* - all player profiles |
 | GET | `/api/v1/players/:id` | *admin* - one player's profile |
 | GET | `/api/v1/players/:id/events` | *admin* - that player's events, each with a plain-English `description` |
+| GET | `/api/v1/players/:id/fortunes` | *admin* - every fortune that player was dealt, per part and stage (pre-test, level, post-test), with its text, website, text type, URL type, valid/faulty, URL attack, and how they answered |
 | GET | `/api/v1/players/:id/sessions` | *admin* - that player's play sessions |
 | DELETE | `/api/v1/players/:id` | *admin* - delete one player and all their data |
 | GET | `/api/v1/events` | *admin* - events; filter with `player_id`, `session_id`, `type`, `since`, `until`, `limit`, `offset`, `order=desc` |
@@ -55,6 +56,7 @@ marked *admin* needs the `ADMIN_TOKEN`, as `Authorization: Bearer <token>` or
 | GET | `/api/v1/summary` | *admin* - totals and counts by event type |
 | GET | `/api/v1/insights` | *admin* - aggregate report across all players (used by the Analytics dashboard, `../analytics-dashboard`). Filters: `since`, `until` (YYYY-MM-DD), `designation`, `region` |
 | GET | `/api/v1/export/events.csv` | *admin* - activity, one row per event (same filters as `/events`) |
+| GET | `/api/v1/export/fortunes.csv` | *admin* - one row per fortune dealt to a player, with its types and their answer (`?player_id=` for one player) |
 | GET | `/api/v1/export/players.csv` | *admin* - one row per player |
 | GET | `/api/v1/export/all.json` | *admin* - everything |
 | DELETE | `/api/v1/data?confirm=yes` | *admin* - delete all analytics data |

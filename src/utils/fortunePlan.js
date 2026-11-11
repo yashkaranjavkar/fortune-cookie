@@ -9,24 +9,36 @@ import { FORTUNE_POOL } from '../data/fortunePool';
 //   level     the level round - one fortune per dome, in the order domes are opened
 //   posttest  the Final trays - same layout and same mix as the pretest
 //
-// Balance:
-//   - every test has the part's fortune types in equal numbers (any spare fortunes go
-//     to the suspicious types), the same mix in the pre-test and post-test, and every
-//     bunch holds at least one fortune of each type
-//   - every test includes every URL attack, spread over its suspicious fortunes in a
-//     fresh random order for each test
-//   - the pre-test and post-test are drawn side by side, slot by slot, so neither gets
-//     the leftovers; which fortunes land in which test is random for each player
-//   - no fortune appears twice in a part, and a bunch avoids repeating a brand
+// What is balanced, for every player:
+//   - TYPES: every test holds the blueprint's mix of fortune types - and so the same
+//     split of text type (related / unrelated / warning), URL type (legitimate /
+//     suspicious) and valid / faulty. The pre-test and post-test share one layout:
+//     the same types in the same bunches. Types are spread evenly over the bunches,
+//     and every bunch has something valid and something faulty.
+//   - WEBSITES (domains): a test shows as many different websites as it can - with 16
+//     or more in the pool, each at most once per test - and a bunch never repeats one.
+//   - THE PLAYER'S CHOICES: websites in the categories the player picked on "What do
+//     you use the internet for most?" (their `interests`) are FAMILIAR. Once the
+//     websites are spread out, familiar ones are dealt first - in the tests and in
+//     the level - and the pre-test and post-test get the same number of them, since
+//     the two are drawn side by side, slot by slot.
+//   - URL ATTACKS: suspicious fortunes are spread over the attacks the pool has; a
+//     bunch avoids repeating one.
+//   - no fortune appears twice in a part.
 //
-// Each fortune handed out keeps its pool fields (id, type, attack, brand, url, text)
-// plus what the existing sorting / marking / grading screens read: isPhishy (true =
-// it belongs in the Faulty tray) and invalidPart (null for the valid types).
+// The deal is random, so it is made several times over and the most balanced one is
+// kept. Anything the pool couldn't provide is listed in plan.shortfalls.
+//
+// Each fortune handed out keeps its pool fields (id, type, domain, textType, urlType,
+// attack, brand, url, text...) plus `familiar` and what the sorting / marking /
+// grading screens read: isPhishy (true = it belongs in the Faulty tray) and
+// invalidPart (null for the valid types).
 
 export const FortunePlanContext = createContext(null);
 export const useFortunePlan = () => useContext(FortunePlanContext);
 
 const ATTACKS = Object.keys(URL_ATTACKS);
+const DEALS_TRIED = 40; // how many random deals are made to pick the most balanced from
 
 function shuffle(list, random) {
   const out = [...list];
@@ -37,12 +49,8 @@ function shuffle(list, random) {
   return out;
 }
 
-const asDealt = (f) => ({
-  ...f,
-  attack: f.attack || null,
-  isPhishy: Boolean(FORTUNE_TYPES[f.type] && FORTUNE_TYPES[f.type].faulty),
-  invalidPart: f.invalidPart || null,
-});
+const domainOf = (f) => f.domain || f.brand || f.id;
+const countUp = (counts, key) => { counts[key] = (counts[key] || 0) + 1; };
 
 // Checks the pool's entries for mistakes (missing fields, an invalidPart that isn't in
 // the text...). Returns a list of problems; also logged to the console in development.
@@ -55,10 +63,16 @@ export function checkPool(pool = FORTUNE_POOL) {
     else if (ids.has(f.id)) problems.push(`${where}: id used twice`);
     ids.add(f.id);
     const type = FORTUNE_TYPES[f.type];
-    if (!type) { problems.push(`${where}: unknown type "${f.type}"`); return; }
+    if (!type) { problems.push(`${where}: unknown type "${f.type}" - check its text type and URL type`); return; }
     if (!f.text) problems.push(`${where}: no text`);
+    if (f.text && f.text.includes('{url}')) problems.push(`${where}: the text still has a {url} placeholder`);
     if (f.url && f.text && !f.text.includes(f.url)) problems.push(`${where}: url isn't in the text`);
+    if (f.verdict && (f.verdict === 'faulty') !== type.faulty) problems.push(`${where}: marked ${f.verdict}, but a ${type.label.toLowerCase()} fortune is ${type.faulty ? 'faulty' : 'valid'}`);
+    if (!f.domain) problems.push(`${where}: no website (domain)`);
+    if (!f.categories || !f.categories.length) problems.push(`${where}: its website has no categories (add it to FORTUNE_DOMAINS)`);
     if (type.suspiciousUrl && !URL_ATTACKS[f.attack]) problems.push(`${where}: suspicious fortunes need an attack (one of ${ATTACKS.join(', ')})`);
+    if (type.suspiciousUrl && f.url && f.domain && f.url.toLowerCase() === f.domain.toLowerCase()) problems.push(`${where}: marked suspicious, but its URL is the real website`);
+    if (!type.suspiciousUrl && f.url && f.domain && !f.url.toLowerCase().includes(f.domain.toLowerCase())) problems.push(`${where}: marked legitimate, but its URL isn't the website's own`);
     if (type.faulty && !f.invalidPart) problems.push(`${where}: faulty fortunes need an invalidPart`);
     if (f.invalidPart && f.text && !f.text.includes(f.invalidPart)) problems.push(`${where}: invalidPart "${f.invalidPart}" isn't in the text`);
     if (!type.faulty && f.invalidPart) problems.push(`${where}: valid fortunes shouldn't have an invalidPart`);
@@ -66,107 +80,174 @@ export function checkPool(pool = FORTUNE_POOL) {
   return problems;
 }
 
-// One dealer per part: remembers what's been handed out, and where the pool ran short
-function makeDealer(pool, random) {
-  const used = new Set();
-  const shortfalls = [];
-  const valid = pool.filter(f => FORTUNE_TYPES[f.type]);
-
-  const draw = (type, attack, avoidBrands, slotName) => {
-    const fresh = valid.filter(f => f.type === type && !used.has(f.id));
-    const tiers = [
-      fresh.filter(f => (!attack || f.attack === attack) && !avoidBrands.includes(f.brand)),
-      fresh.filter(f => !attack || f.attack === attack),
-      fresh.filter(f => !avoidBrands.includes(f.brand)),
-      fresh,
-      valid.filter(f => f.type === type), // last resort: repeat a fortune
-    ];
-    const tier = tiers.findIndex(t => t.length > 0);
-    if (tier === -1) { shortfalls.push(`${slotName}: no ${type} fortunes at all`); return null; }
-    if (tier >= 2 && attack) shortfalls.push(`${slotName}: no unused ${type} fortune with attack "${attack}"`);
-    if (tier === 4) shortfalls.push(`${slotName}: ran out of ${type} fortunes - repeating one`);
-    const options = tiers[tier];
-    const pick = options[Math.floor(random() * options.length)];
-    used.add(pick.id);
-    return asDealt(pick);
-  };
-
-  return { draw, shortfalls };
-}
-
-// How many fortunes of each type one test holds: an equal share each, with any spare
-// fortunes going to the suspicious types first (they carry the URL attacks). The same
-// for the pre-test and post-test.
-function typeCounts(blueprint) {
-  const { types, test } = blueprint;
+// How many fortunes of each type one test holds: the blueprint's mix - or, without
+// one, an equal share each, with any spare fortunes going to the valid types first
+// (there are fewer of those). The same for the pre-test and post-test.
+export function typeCounts(blueprint) {
+  const { types, test, mix } = blueprint;
   const total = test.trays * BUNCHES_PER_TRAY * test.fortunesPerBunch;
+  if (mix && types.reduce((sum, t) => sum + (mix[t] || 0), 0) === total) {
+    return Object.fromEntries(types.map(t => [t, mix[t] || 0]));
+  }
   const counts = Object.fromEntries(types.map(t => [t, Math.floor(total / types.length)]));
-  const spareOrder = [...types.filter(t => FORTUNE_TYPES[t].suspiciousUrl), ...types.filter(t => !FORTUNE_TYPES[t].suspiciousUrl)];
+  const spareOrder = [...types.filter(t => !FORTUNE_TYPES[t].faulty), ...types.filter(t => FORTUNE_TYPES[t].faulty)];
   for (let i = 0; i < total - types.length * Math.floor(total / types.length); i++) counts[spareOrder[i % spareOrder.length]] += 1;
   return counts;
 }
 
-// The type (and attack, for suspicious types) of every slot of one test, bunch by bunch
-function testSlots(blueprint, random) {
+// Which type goes in which bunch of a test: each type spread over the bunches as
+// evenly as it goes, every bunch the same size, and (wherever the mix allows) every
+// bunch with something valid and something faulty in it
+function testLayout(blueprint, random) {
   const { types, test } = blueprint;
-  const bunches = test.trays * BUNCHES_PER_TRAY;
-  const per = test.fortunesPerBunch;
+  const bunchCount = test.trays * BUNCHES_PER_TRAY;
+  const counts = typeCounts(blueprint);
+  const order = [...types].sort((x, y) => counts[y] - counts[x]);
+  const mixed = (bunch) => bunch.some(t => FORTUNE_TYPES[t].faulty) && bunch.some(t => !FORTUNE_TYPES[t].faulty);
 
-  // Deal the types round-robin (skipping a type once it's used up) and cut the line
-  // into bunches - so every bunch gets every type before any type repeats
-  const left = typeCounts(blueprint);
-  const line = [];
-  while (line.length < bunches * per) {
-    types.forEach((t) => { if (left[t] > 0 && line.length < bunches * per) { line.push(t); left[t] -= 1; } });
-  }
-  const slots = Array.from({ length: bunches }, (_, b) =>
-    line.slice(b * per, (b + 1) * per).map(type => ({ type, attack: null, bunch: b })));
-
-  // Attacks: one shuffled cycle shared by all the suspicious fortunes of the test, type
-  // after type - so every attack appears in the test, and no attack repeats within a
-  // type until that type has had them all. Then avoid the same attack twice in one bunch
-  // where a reshuffle can.
-  const suspicious = slots.flat()
-    .filter(s => FORTUNE_TYPES[s.type].suspiciousUrl)
-    .sort((x, y) => types.indexOf(x.type) - types.indexOf(y.type));
-  const clashes = () => slots.some(bunch => {
-    const seen = bunch.filter(s => s.attack).map(s => s.attack);
-    return new Set(seen).size < seen.length;
-  });
+  let layout = null;
   for (let attempt = 0; attempt < 30; attempt++) {
-    const order = shuffle(ATTACKS, random);
-    suspicious.forEach((s, i) => { s.attack = order[i % order.length]; });
-    if (!clashes()) break;
-    // keep the attacks, move them between this test's slots of the same type
-    types.forEach((type) => {
-      const mine = suspicious.filter(s => s.type === type);
-      const moved = shuffle(mine.map(s => s.attack), random);
-      mine.forEach((s, i) => { s.attack = moved[i]; });
+    const bunches = Array.from({ length: bunchCount }, () => []);
+    order.forEach((type) => {
+      const share = Math.floor(counts[type] / bunchCount);
+      bunches.forEach((bunch) => { for (let i = 0; i < share; i++) bunch.push(type); });
+      // the ones left over go to the emptiest bunches, one each
+      shuffle(bunches, random)
+        .sort((x, y) => x.length - y.length)
+        .slice(0, counts[type] - share * bunchCount)
+        .forEach(bunch => bunch.push(type));
     });
-    if (!clashes()) break;
+    layout = bunches;
+    if (bunches.every(mixed)) break;
   }
-  return slots;
+  return layout;
 }
 
-// A full plan for one part (see the top of this file)
-export function buildPartPlan(partKey, { pool = FORTUNE_POOL, random = Math.random } = {}) {
-  const blueprint = PART_BLUEPRINTS[partKey] || PART_BLUEPRINTS.part1;
-  const dealer = makeDealer(pool, random);
+// One random deal of a whole part. Fortunes are drawn one slot at a time: of the
+// unused fortunes of the slot's type, the one that keeps the part most balanced - in
+// this order of importance:
+//   1. a website not already in this bunch (or in the level)
+//   2. the website this test has shown least
+//   3. a website familiar to the player
+//   4. the website this part has shown least
+//   5. a URL attack not already in this bunch, then the one this test has used least
+function dealOnce(blueprint, pool, random, isFamiliar) {
+  const used = new Set();
+  const shortfalls = [];
+  const partDomains = {};
+  const newTest = () => ({ domains: {}, attacks: {}, familiar: 0 });
+  const tests = { pre: newTest(), post: newTest() };
 
-  // Pre-test and post-test, drawn slot by slot side by side
-  const preSlots = testSlots(blueprint, random);
-  const postSlots = testSlots(blueprint, random);
-  const pre = preSlots.map(() => []);
-  const post = postSlots.map(() => []);
-  preSlots.forEach((bunch, b) => bunch.forEach((slot, k) => {
-    const first = random() < 0.5 ? ['pre', 'post'] : ['post', 'pre'];
-    first.forEach((which) => {
-      const s = which === 'pre' ? slot : postSlots[b][k];
-      const into = which === 'pre' ? pre[b] : post[b];
-      const f = dealer.draw(s.type, s.attack, into.map(x => x.brand), `${which}test bunch ${b + 1}`);
-      if (f) into.push(f);
+  const draw = (type, group, test, slotName) => {
+    let options = pool.filter(f => f.type === type && !used.has(f.id));
+    if (!options.length) {
+      options = pool.filter(f => f.type === type);
+      if (!options.length) { shortfalls.push(`${slotName}: no ${type} fortunes at all`); return null; }
+      shortfalls.push(`${slotName}: ran out of ${type} fortunes - repeating one`);
+    }
+    const cost = (f) => {
+      const d = domainOf(f);
+      return (group.some(g => domainOf(g) === d) ? 1000 : 0)
+        + 100 * (test ? (test.domains[d] || 0) : 0)
+        + (isFamiliar(f) ? 0 : 20)
+        + 6 * (partDomains[d] || 0)
+        + (f.attack && group.some(g => g.attack === f.attack) ? 4 : 0)
+        + (f.attack && test ? (test.attacks[f.attack] || 0) : 0)
+        + random() * 0.9;
+    };
+    const pick = options.map(f => ({ f, c: cost(f) })).sort((x, y) => x.c - y.c)[0].f;
+    if (group.some(g => domainOf(g) === domainOf(pick))) shortfalls.push(`${slotName}: had to repeat the website ${domainOf(pick)}`);
+    used.add(pick.id);
+    countUp(partDomains, domainOf(pick));
+    const familiar = isFamiliar(pick);
+    if (test) {
+      countUp(test.domains, domainOf(pick));
+      if (pick.attack) countUp(test.attacks, pick.attack);
+      if (familiar) test.familiar += 1;
+    }
+    return {
+      ...pick,
+      attack: pick.attack || null,
+      familiar,
+      isPhishy: FORTUNE_TYPES[pick.type].faulty,
+      invalidPart: pick.invalidPart || null,
+    };
+  };
+
+  // Pre-test and post-test: one layout for both, drawn slot by slot side by side.
+  // Whichever test has fewer familiar websites so far draws first, so they keep level.
+  const layout = testLayout(blueprint, random);
+  const dealt = { pre: layout.map(() => []), post: layout.map(() => []) };
+  layout.forEach((bunch, b) => shuffle(bunch, random).forEach((type) => {
+    const gap = tests.pre.familiar - tests.post.familiar;
+    const preFirst = gap === 0 ? random() < 0.5 : gap < 0;
+    (preFirst ? ['pre', 'post'] : ['post', 'pre']).forEach((which) => {
+      const f = draw(type, dealt[which][b], tests[which], `${which}test bunch ${b + 1}`);
+      if (f) dealt[which][b].push(f);
     });
   }));
+
+  // The level round from what's left: the types round-robin from a random start
+  // (so which types get the extra dome is random), then shuffled
+  const { types } = blueprint;
+  const start = Math.floor(random() * types.length);
+  const levelTypes = shuffle(Array.from({ length: blueprint.level.domes }, (_, i) => types[(start + i) % types.length]), random);
+  const level = [];
+  levelTypes.forEach((type, i) => {
+    const f = draw(type, level, null, `level dome ${i + 1}`);
+    if (f) level.push(f);
+  });
+
+  // How far this deal is from perfectly balanced (0 = nothing to improve)
+  const domainCount = new Set(pool.filter(f => types.includes(f.type)).map(domainOf)).size || 1;
+  const testSize = layout.reduce((n, bunch) => n + bunch.length, 0);
+  const fairShare = Math.ceil(testSize / domainCount);
+  const repeatedAttacks = (bunches) => bunches.reduce((n, bunch) => {
+    const seen = bunch.filter(f => f.attack).map(f => f.attack);
+    return n + seen.length - new Set(seen).size;
+  }, 0);
+  const crowded = (test) => Object.values(test.domains).reduce((n, c) => n + Math.max(0, c - fairShare), 0);
+  const imbalance = 10000 * shortfalls.length
+    + 100 * (crowded(tests.pre) + crowded(tests.post))
+    + 50 * Math.abs(tests.pre.familiar - tests.post.familiar)
+    + 5 * (repeatedAttacks(dealt.pre) + repeatedAttacks(dealt.post));
+
+  return { pre: dealt.pre, post: dealt.post, level, shortfalls, imbalance };
+}
+
+// What a list of dealt fortunes adds up to - how many of each type, text type, URL
+// type, verdict, attack and website, and how many are familiar to the player
+export function tally(fortunes) {
+  const out = { total: fortunes.length, familiar: 0, type: {}, text_type: {}, url_type: {}, verdict: {}, attack: {}, domain: {} };
+  fortunes.forEach((f) => {
+    const kind = FORTUNE_TYPES[f.type] || {};
+    countUp(out.type, f.type);
+    countUp(out.text_type, kind.textType);
+    countUp(out.url_type, kind.urlType);
+    countUp(out.verdict, f.isPhishy ? 'faulty' : 'valid');
+    if (f.attack) countUp(out.attack, f.attack);
+    countUp(out.domain, domainOf(f));
+    if (f.familiar) out.familiar += 1;
+  });
+  return out;
+}
+
+// A full plan for one part (see the top of this file).
+//   interests: the categories the player picked on "What do you use the internet for
+//              most?" - websites in them are dealt first
+export function buildPartPlan(partKey, { pool = FORTUNE_POOL, random = Math.random, interests = [] } = {}) {
+  const blueprint = PART_BLUEPRINTS[partKey] || PART_BLUEPRINTS.part1;
+  const usable = pool.filter(f => FORTUNE_TYPES[f.type]);
+  const picked = new Set(interests || []);
+  const isFamiliar = (f) => (f.categories || []).some(c => picked.has(c));
+
+  let best = null;
+  for (let i = 0; i < DEALS_TRIED; i++) {
+    const deal = dealOnce(blueprint, usable, random, isFamiliar);
+    if (!best || deal.imbalance < best.imbalance) best = deal;
+    if (best.imbalance === 0) break;
+  }
+
   const toTrays = (bunches) => {
     const trays = [];
     for (let i = 0; i < bunches.length; i += BUNCHES_PER_TRAY) {
@@ -175,27 +256,16 @@ export function buildPartPlan(partKey, { pool = FORTUNE_POOL, random = Math.rand
     return trays;
   };
 
-  // The level round from what's left: types round-robin from a random start, then
-  // shuffled; suspicious ones cycle through the attacks
-  const { types } = blueprint;
-  const start = Math.floor(random() * types.length);
-  const levelTypes = shuffle(Array.from({ length: blueprint.level.domes }, (_, i) => types[(start + i) % types.length]), random);
-  const attackCycle = shuffle(ATTACKS, random);
-  let nextAttack = 0;
-  const level = [];
-  levelTypes.forEach((type, i) => {
-    const attack = FORTUNE_TYPES[type].suspiciousUrl ? attackCycle[nextAttack++ % attackCycle.length] : null;
-    const f = dealer.draw(type, attack, level.map(x => x.brand), `level dome ${i + 1}`);
-    if (f) level.push(f);
-  });
-
   const plan = {
     part: partKey,
-    types,
-    pretest: toTrays(pre),
-    posttest: toTrays(post),
-    level,
-    shortfalls: dealer.shortfalls,
+    types: blueprint.types,
+    interests: [...picked],
+    familiarDomains: [...new Set(usable.filter(isFamiliar).map(domainOf))],
+    pretest: toTrays(best.pre),
+    posttest: toTrays(best.post),
+    level: best.level,
+    balance: { pretest: tally(best.pre.flat()), posttest: tally(best.post.flat()), level: tally(best.level) },
+    shortfalls: best.shortfalls,
     results: {}, // filled in as the tests are played (recordTestResult)
   };
   if (process.env.NODE_ENV !== 'production') {
@@ -207,14 +277,35 @@ export function buildPartPlan(partKey, { pool = FORTUNE_POOL, random = Math.rand
 }
 
 // Every fortune id in a plan, test by test - for analytics, so researchers can see
-// exactly what each player was shown
+// exactly what each player was shown, and how balanced it was. `fortunes` carries each
+// dealt fortune's text and types, so the backend can show them without the pool.
 export function planSummary(plan) {
   const ids = (trays) => trays.map(tray => tray.map(bunch => bunch.map(f => f.id)));
+  const fortunes = {};
+  [...plan.pretest.flat(2), ...plan.posttest.flat(2), ...plan.level].forEach((f) => {
+    const kind = FORTUNE_TYPES[f.type] || {};
+    fortunes[f.id] = {
+      text: f.text,
+      url: f.url || null,
+      domain: f.domain || null,
+      type: f.type,
+      text_type: kind.textType || null,
+      url_type: kind.urlType || null,
+      verdict: f.isPhishy ? 'faulty' : 'valid',
+      attack: f.attack || null,
+      familiar: Boolean(f.familiar),
+      invalid_part: f.invalidPart || null,
+    };
+  });
   return {
+    fortunes,
     part: plan.part,
+    interests: plan.interests,
+    familiar_domains: plan.familiarDomains,
     pretest: ids(plan.pretest),
     posttest: ids(plan.posttest),
     level: plan.level.map(f => f.id),
+    balance: plan.balance,
     shortfalls: plan.shortfalls,
   };
 }
@@ -224,7 +315,13 @@ export function planSummary(plan) {
 export function gradeBunch(fortunes, selectedIndexes) {
   return fortunes.map((f, i) => {
     const selected = selectedIndexes.includes(i);
-    return { id: f.id, type: f.type, attack: f.attack, faulty: f.isPhishy, selected, correct: selected === f.isPhishy };
+    const kind = FORTUNE_TYPES[f.type] || {};
+    return {
+      id: f.id, type: f.type, attack: f.attack, domain: f.domain || null,
+      text_type: kind.textType || null, url_type: kind.urlType || null,
+      familiarity: f.familiar ? 'familiar' : 'unfamiliar',
+      faulty: f.isPhishy, selected, correct: selected === f.isPhishy,
+    };
   });
 }
 

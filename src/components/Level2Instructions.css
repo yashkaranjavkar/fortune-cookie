@@ -221,7 +221,14 @@
   overflow: hidden;
 }
 
+/* The lit layer is the one in the flow, so the strip is always as tall as the text
+   actually shown - with its bold, padded highlights, which can wrap onto an extra line.
+   The dim paper just fills the space behind it. */
 .ti-strip-dim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
   box-sizing: border-box;
   padding: 22px 46px;
   font-size: 20px;
@@ -233,8 +240,8 @@
 }
 
 .ti-strip-lit.fortune-paper {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  z-index: 1;
   margin: 0;
   box-sizing: border-box;
   padding: 22px 46px;

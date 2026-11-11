@@ -32,12 +32,34 @@
 }
 .marking-instruction-icon { flex-shrink: 0; color: var(--orange-deep); }
 
+/* The progress line + Next button, below the list: sticky to the bottom of the screen
+   while the list is longer than the screen, on a fade of the backdrop so the fortunes
+   scrolling past underneath stay out of the way. margin-top: auto keeps it at the
+   bottom when the list is short. */
+.marking-screen .marking-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  width: 100%;
+  margin-top: auto;
+  padding: 36px 0 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(to top, #2E1415 0%, #2E1415 55%, rgba(46, 20, 21, 0));
+  pointer-events: none; /* the faded edge mustn't block marking the fortune under it */
+}
+.marking-screen .marking-footer > * { pointer-events: auto; }
+.marking-screen .marking-footer .next-btn {
+  position: static;
+  transform: none;
+  margin: 0;
+}
+.app .marking-screen .marking-list { flex-shrink: 0; padding-bottom: 8px; }
+
 /* "Mark every fortune to continue · 1 of 2 marked" - just above the locked Next button */
 .marking-progress {
-  position: absolute;
-  bottom: 108px;
-  left: 50%;
-  transform: translateX(-50%);
   margin: 0;
   white-space: nowrap;
   font-family: var(--font-sans);

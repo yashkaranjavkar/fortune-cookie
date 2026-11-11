@@ -1,5 +1,7 @@
-// Fortunery Analytics - an aggregate view across all players, read from the analytics
-// backend's REST API (GET /api/v1/insights). Plain browser JavaScript, no build step.
+// Fortunery Analytics - an aggregate view across all players (GET /api/v1/insights),
+// and a Players view: every player and the fortunes they were dealt, with each
+// fortune's types and how they answered (GET /api/v1/players/:id/fortunes). Read from
+// the analytics backend's REST API. Plain browser JavaScript, no build step.
 (function () {
   'use strict';
 
@@ -7,10 +9,16 @@
   const API_URL = (params.get('api') || (window.FORTUNERY_ANALYTICS || {}).apiUrl || 'http://localhost:4318').replace(/\/+$/, '');
   const API = `${API_URL}/api/v1`;
   const TOKEN_KEY = 'fortunery.dashboard.admin_token';
+  // Live: while the page is open (and visible) it checks the backend this often and
+  // redraws only when something changed - a new player, a finished test...
+  const LIVE_MS = 5000;
   const FILTER_KEY = 'fortunery.dashboard.filters';
 
   const SECTION_LABELS = {
     opening: 'Title screen',
+    playerDetails: 'Player details',
+    brand: 'TCS Research video',
+    appointment: 'Appointment',
     job: 'Job application',
     training: 'Training',
     level1: 'Level 1',
@@ -36,7 +44,14 @@
 
   const esc = (v) => String(v === null || v === undefined ? '' : v)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  const sectionName = (key) => SECTION_LABELS[key] || prettyName(key);
+  const PART_NAMES = { part1: 'Part 1', part2: 'Part 2' };
+  const partName = (key) => PART_NAMES[key] || prettyName(key);
+  // "part1:training" (a section within a part) reads "Part 1 · Training"
+  const sectionName = (key) => {
+    const m = /^(part\d+):(.+)$/.exec(String(key || ''));
+    if (m) return `${partName(m[1])} · ${SECTION_LABELS[m[2]] || prettyName(m[2])}`;
+    return SECTION_LABELS[key] || prettyName(key);
+  };
   function prettyName(key) {
     if (!key || key === '-') return '-';
     const words = String(key).replace(/_/g, ' ').replace(/([a-z])([A-Z0-9])/g, '$1 $2').toLowerCase().trim();
@@ -204,22 +219,51 @@
 
   /* ---------------- the report ---------------- */
 
+  // Which view the address asks for: the overview, the player list, or one player
+  function route() {
+    const h = decodeURIComponent(window.location.hash.replace(/^#/, ''));
+    if (h.startsWith('player/')) return { view: 'player', id: h.slice(7) };
+    if (h === 'players') return { view: 'players' };
+    return { view: 'overview' };
+  }
+
   let loading = 0;
-  async function load() {
+  let lastShown = '';   // what's on screen now, to skip redrawing when nothing changed
+  let blocked = false;  // an error or the admin-token form is up - live refresh waits
+  const setLive = (text) => { const el = $('#live'); if (el) el.textContent = text; };
+  const liveOk = () => setLive(`Live · updated ${new Date().toLocaleTimeString()}`);
+
+  async function load({ silent = false } = {}) {
+    if (!silent) lastShown = '';
+    const r = route();
+    document.querySelectorAll('.tabs a').forEach((a) => {
+      a.classList.toggle('on', a.dataset.view === (r.view === 'overview' ? 'overview' : 'players'));
+    });
+    filtersForm.hidden = r.view !== 'overview';
+    if (r.view !== 'overview') { loadPlayers(r, { silent }); return; }
     const ticket = ++loading;
     const filters = readFilters();
     store.set(FILTER_KEY, JSON.stringify(filters));
-    main.classList.add('busy');
+    if (!silent) main.classList.add('busy');
     try {
       const data = await api(`/insights${filterQuery(filters)}`);
       if (ticket !== loading) return;
-      fillSelect(filtersForm.designation, data.filter_options.designations, filters.designation);
-      fillSelect(filtersForm.region, data.filter_options.regions, filters.region);
-      $('#signout').hidden = !store.get(TOKEN_KEY);
-      $('#download').disabled = false;
-      render(data);
+      const { generated_at, ...content } = data;
+      const key = `overview|${JSON.stringify(content)}`;
+      if (key !== lastShown) {
+        fillSelect(filtersForm.designation, data.filter_options.designations, filters.designation);
+        fillSelect(filtersForm.region, data.filter_options.regions, filters.region);
+        $('#signout').hidden = !store.get(TOKEN_KEY);
+        $('#download').disabled = false;
+        render(data);
+        lastShown = key;
+      }
+      blocked = false;
+      liveOk();
     } catch (e) {
-      if (ticket === loading) showError(e);
+      if (ticket !== loading) return;
+      if (silent && e.status !== 401) setLive('Live · backend not answering - showing the last data');
+      else { blocked = true; showError(e); }
     } finally {
       if (ticket === loading) main.classList.remove('busy');
     }
@@ -252,6 +296,8 @@
     </div>`);
 
     out.push(section('Players over time', 'How many people played each day.', columns(d.activity)));
+
+    if (d.learning) out.push(learningSection(d.learning));
 
     // Progress through the game
     const top = d.progress.length ? d.progress[0].started || o.players : o.players;
@@ -380,6 +426,7 @@
         ${block('Device', a.devices, 'var(--green)')}
         ${block('Top interests', a.interests, 'var(--gold)')}
         ${block('Websites they use', a.familiar_websites)}
+        ${a.internet_uses && a.internet_uses.length ? block('What they use the internet for', a.internet_uses, 'var(--blue)') : ''}
       </div>`));
 
     if (o.client_errors) {
@@ -387,6 +434,226 @@
     }
 
     main.innerHTML = out.join('');
+  }
+
+  /* ---------------- learning: pre-test vs post-test ---------------- */
+
+  // Each part's Training trays are its pre-test and its Final trays its post-test; the
+  // change pairs every player's own post-test with their own pre-test.
+  const BREAKDOWN_LABELS = {
+    type: 'By fortune type', url_type: 'By URL type', text_type: 'By text type',
+    attack: 'By URL attack (suspicious URLs)', familiarity: 'By familiarity (websites in the categories players picked)',
+  };
+  const pts = (x) => (x === null || x === undefined ? '-' : `${x > 0 ? '+' : ''}${Math.round(x * 100)} pts`);
+  const change = (x) => ({ html: x === null || x === undefined ? '-'
+    : `<span class="${x > 0 ? 'up' : x < 0 ? 'down' : ''}">${esc(pts(x))}</span>` });
+
+  function learningSection(L) {
+    const o = L.overall;
+    if (!o.pretest_players && !o.posttest_players) {
+      return section('Learning: pre-test vs post-test',
+        'Each part starts with a disguised pre-test (the Training trays) and ends with a post-test (the Final trays).',
+        emptyLine('No one has finished a pre-test yet.'));
+    }
+    const out = [];
+    out.push(`<div class="cards small">
+      ${card('Average pre-test', pct(o.avg_pretest), `${num(o.pretest_players)} test${o.pretest_players === 1 ? '' : 's'}`)}
+      ${card('Average post-test', pct(o.avg_posttest), `${num(o.posttest_players)} test${o.posttest_players === 1 ? '' : 's'}`)}
+      ${card('Average change', pts(o.avg_change), `${num(o.paired)} player${o.paired === 1 ? '' : 's'} did both`)}
+      ${card('Improved', o.paired ? pct(o.improved / o.paired) : '-', o.paired ? `${num(o.improved)} better · ${num(o.same)} same · ${num(o.worse)} worse` : 'needs a pre-test and a post-test')}
+    </div>`);
+    out.push(`<h3>By part</h3>${table(
+      ['Part', 'Started', 'Finished', 'Pre-test', 'Post-test', 'Change', 'Did both', 'Improved'],
+      L.parts.map(p => [partName(p.part), num(p.started), num(p.completed), meter(p.avg_pretest, 'var(--gold)'),
+        meter(p.avg_posttest, 'var(--green)'), change(p.avg_change), num(p.paired), p.paired ? `${num(p.improved)} of ${num(p.paired)}` : '-']),
+      { numeric: [1, 2, 6] })}`);
+    if (o.paired) {
+      out.push(`<h3>How much players changed</h3>${bars(L.change_distribution.map(b => ({
+        label: b.label, value: b.players, text: num(b.players),
+        color: /Worse/.test(b.label) ? 'var(--red)' : /Better/.test(b.label) ? 'var(--green)' : 'var(--gold)',
+      })))}`);
+    }
+    Object.keys(BREAKDOWN_LABELS).forEach((dim) => {
+      const rows = (L.breakdown && L.breakdown[dim]) || [];
+      if (!rows.length) return;
+      out.push(`<h3>${esc(BREAKDOWN_LABELS[dim])}</h3>${table(
+        ['', 'Pre-test', 'Answered', 'Post-test', 'Answered', 'Change'],
+        rows.map(r => [label(r.key), meter(r.pre.accuracy, 'var(--gold)'), num(r.pre.answered),
+          meter(r.post.accuracy, 'var(--green)'), num(r.post.answered), change(r.change)]),
+        { numeric: [2, 4] })}`);
+    });
+    return section('Learning: pre-test vs post-test',
+      'Each part starts with a disguised pre-test (the Training trays) and ends with a post-test (the Final trays) - same layout and mix, different fortunes. Scores are the share of fortunes answered right, using each player\'s latest attempt.',
+      out.join(''));
+  }
+
+  /* ---------------- players & their fortunes ---------------- */
+
+  const LABEL = {
+    related: 'Related', unrelated: 'Unrelated', warning: 'Warning',
+    legitimate: 'Legitimate', suspicious: 'Suspicious', valid: 'Valid', faulty: 'Faulty',
+    typosquatting: 'Typosquatting', combosquatting: 'Combosquatting', homoglyph: 'Homoglyph',
+    tld_swap: 'TLD swap', subdomain_spoof: 'Subdomain spoof', ip_address: 'IP address',
+    pretest: 'Pre-test', level: 'Level', posttest: 'Post-test',
+    legit_related: 'Legitimate, related', sus_related: 'Suspicious, related', legit_unrelated: 'Legitimate, unrelated',
+    sus_unrelated: 'Suspicious, unrelated', sus_warned: 'Suspicious, warned', familiar: 'Familiar', unfamiliar: 'Unfamiliar',
+  };
+  const PART_LABEL = PART_NAMES;
+  const label = (k) => (k === null || k === undefined ? '-' : LABEL[k] || prettyName(k));
+  const when = (iso) => (iso ? new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '-');
+  const playerName = (p) => (p.traits && p.traits.employee_id) || `Player ${String(p.player_id).slice(0, 8)}`;
+
+  const tag = (text, kind) => `<span class="tag ${kind}">${esc(text)}</span>`;
+  const verdictTag = (v) => (v === 'faulty' ? tag('Faulty', 'bad') : v === 'valid' ? tag('Valid', 'good') : '-');
+  const urlTag = (v) => (v === 'suspicious' ? tag('Suspicious', 'warn') : v === 'legitimate' ? tag('Legitimate', 'info') : '-');
+  const textTag = (v) => (v ? tag(label(v), v === 'warning' ? 'warn' : 'neutral') : '-');
+
+  // the fortune with its URL highlighted
+  function fortuneHtml(r) {
+    const text = r.text || r.fortune_id;
+    if (!r.url || !text.includes(r.url)) return esc(text);
+    const i = text.indexOf(r.url);
+    return `${esc(text.slice(0, i))}<mark>${esc(r.url)}</mark>${esc(text.slice(i + r.url.length))}`;
+  }
+
+  // "Related 10 · Unrelated 6" from { related: 10, unrelated: 6 }
+  const split = (counts) => {
+    const parts = Object.entries(counts || {}).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${label(k)} ${n}`);
+    return parts.length ? parts.join(' · ') : '-';
+  };
+
+  async function loadPlayers(r, { silent = false } = {}) {
+    // don't redraw the list under someone typing a search
+    const search = $('#player-search');
+    if (silent && r.view === 'players' && search && search.value) return;
+    const ticket = ++loading;
+    if (!silent) main.classList.add('busy');
+    try {
+      if (r.view === 'player') {
+        const [profile, fortunes] = await Promise.all([
+          api(`/players/${encodeURIComponent(r.id)}`),
+          api(`/players/${encodeURIComponent(r.id)}/fortunes`),
+        ]);
+        if (ticket !== loading) return;
+        const key = `player|${JSON.stringify([profile, fortunes])}`;
+        if (key !== lastShown) { renderPlayer(profile, fortunes.parts); lastShown = key; }
+      } else {
+        const list = await api('/players');
+        if (ticket !== loading) return;
+        const key = `players|${JSON.stringify(list)}`;
+        if (key !== lastShown) { renderPlayerList(list); lastShown = key; }
+      }
+      $('#signout').hidden = !store.get(TOKEN_KEY);
+      $('#download').disabled = false;
+      blocked = false;
+      liveOk();
+    } catch (e) {
+      if (ticket !== loading) return;
+      if (silent && e.status !== 401) setLive('Live · backend not answering - showing the last data');
+      else { blocked = true; showError(e); }
+    } finally {
+      if (ticket === loading) main.classList.remove('busy');
+    }
+  }
+
+  function renderPlayerList(list) {
+    $('#sub').textContent = `Every player and the fortunes they were dealt · data from ${API_URL}`;
+    if (!list.length) {
+      main.innerHTML = '<div class="panel empty"><h2>No one has played yet</h2><p>Players appear here once they start the game with the backend running.</p></div>';
+      return;
+    }
+    const rowsHtml = (filter) => {
+      const q = filter.trim().toLowerCase();
+      const shown = list.filter(p => !q || [playerName(p), p.traits.designation, p.traits.region, p.player_id]
+        .some(v => v && String(v).toLowerCase().includes(q)));
+      return table(['Player', 'Designation', 'Region', 'First played', 'Last played', 'Sessions', 'Got as far as', ''],
+        shown.map(p => [
+          { html: `<a class="link" href="#player/${encodeURIComponent(p.player_id)}">${esc(playerName(p))}</a>` },
+          p.traits.designation || '-', p.traits.region || '-', when(p.first_seen), when(p.last_seen),
+          num(p.sessions.length),
+          sectionName(p.progress.sections_started[p.progress.sections_started.length - 1]),
+          { html: `<a class="link" href="#player/${encodeURIComponent(p.player_id)}">Fortunes ›</a>` },
+        ]), { numeric: [5], empty: 'No players match.' });
+    };
+    main.innerHTML = section('Players',
+      'Open a player to see every fortune they were dealt - in the pre-test, the level and the post-test - with its website, text type, URL type, valid / faulty and how they answered.',
+      `<input class="search" id="player-search" type="search" placeholder="Search by employee ID, designation, region…">
+       <div id="player-rows">${rowsHtml('')}</div>`);
+    $('#player-search').addEventListener('input', (e) => { $('#player-rows').innerHTML = rowsHtml(e.target.value); });
+  }
+
+  function renderPlayer(p, parts) {
+    $('#sub').textContent = `${playerName(p)} · data from ${API_URL}`;
+    const out = ['<a class="back" href="#players">‹ All players</a>'];
+    out.push(section(playerName(p), '',
+      `<div class="cards small">
+        ${card('Designation', p.traits.designation || '-')}
+        ${card('Region', p.traits.region || '-')}
+        ${card('Last played', when(p.last_seen))}
+        ${card('Parts started', num(parts.length))}
+      </div>
+      <p><button type="button" class="small-btn" data-download="/export/fortunes.csv?player_id=${encodeURIComponent(p.player_id)}">Download this player's fortunes (CSV)</button></p>`));
+
+    if (!parts.length) {
+      out.push('<div class="panel empty"><h2>No fortunes dealt yet</h2><p>Fortunes are dealt when a part starts - in Part 1, right after the player picks their website categories.</p></div>');
+    }
+
+    // newest first
+    [...parts].reverse().forEach((part, i) => {
+      const n = parts.length - i;
+      const pre = part.test_results.pretest;
+      const post = part.test_results.posttest;
+      const familiar = new Set(part.familiar_domains);
+      const body = [];
+
+      body.push(`<div class="part-head"><span class="when">Dealt ${esc(when(part.dealt_at))} · ${part.finished ? 'finished' : 'not finished'}</span></div>`);
+      body.push(`<h3>Their choices ("What do you use the internet for most?")</h3>
+        <div class="chips">${part.interests.length ? part.interests.map(x => `<span class="chip">${esc(x)}</span>`).join('') : '<span class="empty-line">None recorded</span>'}</div>
+        <h3>Websites familiar to them</h3>
+        <div class="chips">${part.familiar_domains.length ? part.familiar_domains.map(x => `<span class="chip fam">${esc(x)}</span>`).join('') : '<span class="empty-line">None of the websites in the pool</span>'}</div>`);
+
+      body.push(`<div class="cards small">
+        ${card('Pre-test score', pre ? pct(pre.accuracy) : '-', pre ? `${pre.correct} of ${pre.answered} right` : 'not played yet')}
+        ${card('Post-test score', post ? pct(post.accuracy) : '-', post ? `${post.correct} of ${post.answered} right` : 'not played yet')}
+        ${card('Improvement', pre && post ? `${post.accuracy >= pre.accuracy ? '+' : ''}${Math.round((post.accuracy - pre.accuracy) * 100)} pts` : '-')}
+      </div>`);
+
+      body.push(`<h3>Mix of fortunes dealt</h3>${table(
+        ['Stage', 'Fortunes', 'Fortune type', 'URL type', 'Text type', 'URL attacks', 'Websites', 'Familiar', 'Answered right'],
+        part.stages.map(s => [
+          s.label, num(s.tally.total), split(s.tally.verdict), split(s.tally.url_type), split(s.tally.text_type),
+          split(s.tally.attack), num(Object.keys(s.tally.domain).length), num(s.tally.familiar),
+          s.tally.answered ? `${s.tally.correct} / ${s.tally.answered}` : '-',
+        ]), { numeric: [1, 6, 7] })}`);
+
+      if (!part.has_fortune_details) {
+        body.push('<p class="empty-line">This part was played on an older version of the game, which sent only fortune ids - the text and types are missing.</p>');
+      }
+
+      part.stages.forEach((s) => {
+        body.push(`<h3>${esc(s.label)} - ${s.fortunes.length} fortunes</h3>${table(
+          [s.key === 'level' ? 'Dome' : 'Tray / bunch', 'Fortune', 'Fortune type', 'Their answer', '', 'Text type', 'URL type', 'Website', 'URL attack'],
+          s.fortunes.map(r => [
+            s.key === 'level' ? r.dome : `${r.tray} / ${r.bunch}`,
+            { html: `<div class="fortune-text">${fortuneHtml(r)}</div>` },
+            { html: verdictTag(r.verdict) },
+            r.answer === null ? 'not answered' : label(r.answer),
+            { html: r.correct === true ? '<span class="ok" title="Right">✓</span>' : r.correct === false ? '<span class="no" title="Wrong">✗</span>' : '' },
+            { html: textTag(r.text_type) }, { html: urlTag(r.url_type) },
+            { html: `${esc(r.domain || '-')}${r.familiar || familiar.has(r.domain) ? ' <span class="chip fam" title="In a category the player picked">familiar</span>' : ''}` },
+            label(r.attack),
+          ]), { empty: 'None dealt.' })}`);
+      });
+
+      if (part.shortfalls.length) {
+        body.push(`<h3>Where the pool ran short</h3><ul>${part.shortfalls.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`);
+      }
+
+      out.push(section(`${PART_LABEL[part.part] || prettyName(part.part)} · play ${n}`, '', body.join('')));
+    });
+
+    main.innerHTML = out.join('');
+    main.querySelectorAll('[data-download]').forEach(b => b.addEventListener('click', () => download(b.dataset.download)));
   }
 
   /* ---------------- downloads ---------------- */
@@ -422,9 +689,14 @@
 
   /* ---------------- start ---------------- */
 
-  $('#refresh').addEventListener('click', load);
+  $('#refresh').addEventListener('click', () => load());
+  window.addEventListener('hashchange', () => { window.scrollTo(0, 0); load(); });
+  // live: check again every few seconds while the page is visible, and straight away
+  // when it comes back into view
+  setInterval(() => { if (!document.hidden && !blocked) load({ silent: true }); }, LIVE_MS);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && !blocked) load({ silent: true }); });
   $('#signout').addEventListener('click', () => { store.remove(TOKEN_KEY); load(); });
-  filtersForm.addEventListener('change', load);
+  filtersForm.addEventListener('change', () => load());
   menuBtn.disabled = true;
 
   try {

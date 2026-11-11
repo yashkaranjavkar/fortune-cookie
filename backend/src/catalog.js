@@ -28,7 +28,7 @@ const EVENT_CATALOG = {
   // the game is played in parts (stages); each part's fortunes are dealt once when it starts
   part_start: { use: 'insight', fields: ['part'] },
   part_complete: { use: 'insight', fields: ['part', 'pretest_accuracy', 'posttest_accuracy'] },
-  fortune_plan_built: { use: 'insight', fields: ['part', 'pretest', 'posttest', 'level', 'shortfalls'] },
+  fortune_plan_built: { use: 'insight', fields: ['part', 'interests', 'familiar_domains', 'pretest', 'posttest', 'level', 'fortunes', 'balance', 'shortfalls'] },
   app_hidden: { use: 'insight', fields: ['screen'] },
   app_visible: { use: 'insight', fields: ['screen', 'hidden_ms'] },
   client_error: { use: 'insight', fields: ['message', 'source', 'line'] },
@@ -70,7 +70,7 @@ const EVENT_CATALOG = {
     use: 'difficulty',
     fields: ['test', 'tray', 'bunch', 'selected', 'selected_count', 'shown', 'selected_ids', 'correct_count', 'decision_ms'],
   },
-  tray_test_complete: { use: 'insight', fields: ['test', 'part', 'answered', 'correct', 'accuracy', 'by_type', 'by_attack'] },
+  tray_test_complete: { use: 'insight', fields: ['test', 'part', 'answered', 'correct', 'accuracy', 'by_type', 'by_attack', 'by_text_type', 'by_url_type', 'by_domain', 'by_familiarity'] },
   demo_fortune_sorted: { use: 'difficulty', fields: ['tray', 'fortune', 'attempt', 'decision_ms'] },
 
   /* ---------- Levels: sorting ---------- */

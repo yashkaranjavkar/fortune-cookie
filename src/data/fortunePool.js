@@ -1,191 +1,284 @@
-// THE FORTUNE POOL - every fortune the tests and levels can deal. Add, edit or remove
-// entries freely; src/config/fortuneBlueprint.js decides how many of each kind a part
-// uses, and src/utils/fortunePlan.js deals them out (never repeating a fortune within
-// a part, so a part's pre-test and post-test always show different fortunes).
+// THE FORTUNE POOL - every fortune the tests and levels can deal.
+// src/config/fortuneBlueprint.js decides how many of each kind a part uses, and
+// src/utils/fortunePlan.js deals them out (never repeating a fortune within a part, so
+// a part's pre-test and post-test always show different fortunes).
 //
-// ONE FORTUNE:
-//   {
-//     id:          a unique short name, never reused (it's what analytics records)
-//     type:        'sus_related' | 'legit_related' | 'legit_unrelated' | 'sus_warned'
-//                  (see FORTUNE_TYPES in src/config/fortuneBlueprint.js)
-//     attack:      for the two sus_ types: how the URL imitates the brand -
-//                  'typosquatting' | 'combosquatting' | 'homoglyph' | 'tld_swap' |
-//                  'subdomain_spoof' | 'ip_address' (see URL_ATTACKS). Leave it out for
-//                  the two legit_ types.
-//     brand:       the brand the URL is (or pretends to be), e.g. 'YouTube'
-//     url:         the URL exactly as it appears in the text
-//     text:        the fortune itself, containing the URL
-//     invalidPart: FAULTY types only - the exact words the player should highlight
-//                  when marking (must appear in the text, character for character):
-//                    sus_related     -> the fake part of the URL, e.g. 'youtyube'
-//                    legit_unrelated -> the context that doesn't fit the brand
-//                  Leave it out for the two valid types.
-//   }
+// The pool is kept in the same shape as the fortune spreadsheet, one row per fortune:
 //
-// HOW MANY ARE NEEDED: each test holds 16 fortunes (2 trays x 2 bunches x 4). Per part
-// that's up to 6 of a type in the pre-test, 6 in the post-test and a couple in the
-// level round - so about 14 of each type, and for the sus_ types at least 2 of every
-// URL attack (one for each test). More is better: fortunes are drawn at random,
-// so a bigger pool means different players see different fortunes. If the pool runs
-// short the game still works, but repeats fortunes and warns in the browser console.
+//   [ input website, text type, URL type, fortune type, URL, fortune ]
 //
-// IP addresses below use the ranges reserved for documentation (192.0.2.x,
-// 198.51.100.x, 203.0.113.x), so none of them can ever point at a real server.
+//     input website  the real site the fortune is about - its DOMAIN ('amazon.com')
+//     text type      'related'   - the text is about that site
+//                    'unrelated' - the text is about something else entirely
+//                    'warning'   - the text warns the reader away from the link
+//     URL type       'legitimate' | 'suspicious'
+//     fortune type   'valid' | 'faulty' - what the player should answer. It follows
+//                    from the two columns before it (see FORTUNE_TYPES in
+//                    src/config/fortuneBlueprint.js); checkPool reports a row where the
+//                    sheet and the rule disagree.
+//     URL            the link shown - the website itself, or a fake of it
+//     fortune        the text, with {url} where the link goes
 //
-// The entries below are a STARTER SET to replace or extend with the real pool.
+// To add fortunes, add rows. A NEW WEBSITE also needs an entry in FORTUNE_DOMAINS
+// below, so the game knows which of the player's "What do you use the internet for
+// most?" choices it belongs to.
+//
+// HOW MANY ARE NEEDED: each test holds 16 fortunes, and a part deals a pre-test, a
+// post-test and a level round without repeating a fortune - 37 or 38 in all. A type
+// needs (its share of a test x 2) + 2 fortunes, and a test shows every website once
+// when there are at least 16 websites. If the pool runs short the game still works,
+// but repeats fortunes and says so in the browser console and in analytics.
 
-export const FORTUNE_POOL = [
-  /* ---------------- sus_related: suspicious URL, context about that brand - FAULTY ---------------- */
-  { id: 'sr-typo-youtube', type: 'sus_related', attack: 'typosquatting', brand: 'YouTube', url: 'https://www.youtyube.com/music',
-    text: 'Your favourite artist has just dropped a new album on https://www.youtyube.com/music', invalidPart: 'youtyube' },
-  { id: 'sr-typo-netflix', type: 'sus_related', attack: 'typosquatting', brand: 'Netflix', url: 'https://www.netflx.com/browse',
-    text: "Tonight's new series premiere is waiting for you on https://www.netflx.com/browse", invalidPart: 'netflx' },
-  { id: 'sr-typo-naukri', type: 'sus_related', attack: 'typosquatting', brand: 'Naukri', url: 'https://www.naukari.com/jobs',
-    text: 'Your dream job is one application away on https://www.naukari.com/jobs', invalidPart: 'naukari' },
+// The websites in the pool: a display name, and the broad categories (the options of
+// the "What do you use the internet for most?" screen - src/data/dailyCategories.js)
+// each one belongs to. A website is FAMILIAR to a player who picked one of them.
+export const FORTUNE_DOMAINS = {
+  'amazon.com': { brand: 'Amazon', categories: ['Shopping & Auctions'] },
+  'webflow.com': { brand: 'Webflow', categories: ['Technology', 'Business & Economy'] },
+  'linkedin.com': { brand: 'LinkedIn', categories: ['Society & Lifestyle', 'Job Search & Careers'] },
+  'x.com': { brand: 'X', categories: ['Society & Lifestyle', 'Internet Communication'] },
+  'youtube.com': { brand: 'YouTube', categories: ['Entertainment'] },
+  'github.com': { brand: 'GitHub', categories: ['Technology'] },
+  'gitlab.com': { brand: 'GitLab', categories: ['Technology'] },
+  'stackoverflow.com': { brand: 'Stack Overflow', categories: ['Technology', 'Internet Communication'] },
+  'geekforgeeks.org': { brand: 'GeeksforGeeks', categories: ['Education', 'Technology'] },
+  'huggingface.co': { brand: 'Hugging Face', categories: ['Technology'] },
+  'udemy.com': { brand: 'Udemy', categories: ['Education'] },
+  'coursera.com': { brand: 'Coursera', categories: ['Education'] },
+  'airbnb.com': { brand: 'Airbnb', categories: ['Travel'] },
+  'economictimes.com': { brand: 'The Economic Times', categories: ['Business & Economy', 'Entertainment'] },
+  'cnn.com': { brand: 'CNN', categories: ['Entertainment'] },
+  'naukri.com': { brand: 'Naukri', categories: ['Job Search & Careers'] },
+};
 
-  { id: 'sr-combo-amazon', type: 'sus_related', attack: 'combosquatting', brand: 'Amazon', url: 'https://amazon-gift-rewards.com',
-    text: 'Claim your festive shopping voucher before midnight on https://amazon-gift-rewards.com', invalidPart: 'gift-rewards' },
-  { id: 'sr-combo-paypal', type: 'sus_related', attack: 'combosquatting', brand: 'PayPal', url: 'https://paypal-secure-login.com',
-    text: 'Keep your wallet safe by confirming your details on https://paypal-secure-login.com', invalidPart: 'secure-login' },
-  { id: 'sr-combo-irctc', type: 'sus_related', attack: 'combosquatting', brand: 'IRCTC', url: 'https://irctc-refund-portal.in',
-    text: 'Your cancelled train ticket refund is ready to collect on https://irctc-refund-portal.in', invalidPart: 'refund-portal' },
+// [ input website, text type, URL type, fortune type, URL, fortune ]
+const ROWS = [
+  ['amazon.com', 'related', 'legitimate', 'valid', 'amazon.com',
+    'Your next big opportunity is already in transit and will arrive faster than a prime delivery from {url}. 📦✨'],
+  ['amazon.com', 'related', 'suspicious', 'faulty', 'free-amazon.com',
+    'Your path to success is beautifully customized, matching the perfect recommendations found on {url}. 🎯🌟'],
+  ['amazon.com', 'unrelated', 'legitimate', 'faulty', 'amazon.com',
+    'A patient gardener always remembers that {url} needs deep soil and morning sunlight to truly blossom. 🌸'],
+  ['amazon.com', 'unrelated', 'suspicious', 'faulty', 'yamazon.com',
+    'A deep-sea explorer will soon discover that {url} holds the secrets to ancient forgotten worlds. 🌊🐚'],
+  ['amazon.com', 'warning', 'suspicious', 'valid', 'amazon-install.com',
+    'You should avoid verifying your shipping address or purchasing Prime items through {url}, as it mimics your trusted marketplace. 📦⚠️'],
 
-  { id: 'sr-homo-amazon', type: 'sus_related', attack: 'homoglyph', brand: 'Amazon', url: 'https://www.arnazon.in/orders',
-    text: 'Your parcel is out for delivery - track it live on https://www.arnazon.in/orders', invalidPart: 'arnazon' },
-  { id: 'sr-homo-paypal', type: 'sus_related', attack: 'homoglyph', brand: 'PayPal', url: 'https://www.paypa1.com/statements',
-    text: 'Your monthly statement is ready to download on https://www.paypa1.com/statements', invalidPart: 'paypa1' },
-  { id: 'sr-homo-google', type: 'sus_related', attack: 'homoglyph', brand: 'Google Drive', url: 'https://drive.g00gle.com/file',
-    text: 'A colleague has shared an important document with you on https://drive.g00gle.com/file', invalidPart: 'g00gle' },
+  ['webflow.com', 'related', 'legitimate', 'valid', 'webflow.com',
+    'Your boldest design ideas will find their perfect expression on {url}, bringing your digital vision to life. 🎨✨'],
+  ['webflow.com', 'related', 'suspicious', 'faulty', 'auth-webflow.com',
+    'The perfect balance of code and creativity awaits you as you build your next masterpiece with {url}. 💻🚀'],
+  ['webflow.com', 'unrelated', 'legitimate', 'faulty', 'webflow.com',
+    'A fresh batch of {url} will bring warmth and comfort to your kitchen this weekend. 🍞🍂'],
+  ['webflow.com', 'unrelated', 'suspicious', 'faulty', 'webfolow.com',
+    'Your patience with {url} will reward you with a beautiful, blooming garden in the coming spring. 🌸🌱'],
+  ['webflow.com', 'warning', 'suspicious', 'valid', 'webflow.app',
+    'You should avoid entering your web design credentials or publishing your creative projects on {url} to protect your digital assets from unexpected risks. 🛡️💻'],
 
-  { id: 'sr-tld-netflix', type: 'sus_related', attack: 'tld_swap', brand: 'Netflix', url: 'https://www.netflix.top/watch',
-    text: 'Catch the season finale of your favourite show on https://www.netflix.top/watch', invalidPart: '.top' },
-  { id: 'sr-tld-instagram', type: 'sus_related', attack: 'tld_swap', brand: 'Instagram', url: 'https://www.instagram.xyz',
-    text: 'Your new followers are waiting to see your latest reel on https://www.instagram.xyz', invalidPart: '.xyz' },
-  { id: 'sr-tld-makemytrip', type: 'sus_related', attack: 'tld_swap', brand: 'MakeMyTrip', url: 'https://www.makemytrip.club/deals',
-    text: 'Book your weekend getaway at a special price on https://www.makemytrip.club/deals', invalidPart: '.club' },
+  ['linkedin.com', 'related', 'legitimate', 'valid', 'linkedin.com',
+    'A meaningful connection made today on {url} will open doors to unexpected opportunities tomorrow. 🤝✨'],
+  ['linkedin.com', 'related', 'suspicious', 'faulty', 'linkedin-auth.com',
+    'Your professional voice is more powerful than you think—step into the spotlight on {url} and let your ideas shine. 💡🚀'],
+  ['linkedin.com', 'unrelated', 'legitimate', 'faulty', 'linkedin.com',
+    'The secret ingredient you seek is not in the recipe, but in how you whisk {url} into the dough. 🥖✨'],
+  ['linkedin.com', 'unrelated', 'suspicious', 'faulty', 'linskedin.com',
+    'A rare flower will bloom in your garden the moment you nurture {url} with patience. 🌸💧'],
+  ['linkedin.com', 'warning', 'suspicious', 'valid', 'linked.in.com',
+    'Your career credentials deserve protection; avoid logging into your professional network on {url} to safeguard your personal data from deceptive opportunities. 💼🛡️🦿'],
 
-  { id: 'sr-sub-amazon', type: 'sus_related', attack: 'subdomain_spoof', brand: 'Amazon', url: 'https://amazon.com.prime-renew.co/account',
-    text: 'Your Prime membership renewal is waiting for your approval on https://amazon.com.prime-renew.co/account', invalidPart: 'prime-renew.co' },
-  { id: 'sr-sub-coursera', type: 'sus_related', attack: 'subdomain_spoof', brand: 'Coursera', url: 'https://coursera.org.certificate-hub.net',
-    text: 'Finish your course and download your certificate from https://coursera.org.certificate-hub.net', invalidPart: 'certificate-hub.net' },
-  { id: 'sr-sub-linkedin', type: 'sus_related', attack: 'subdomain_spoof', brand: 'LinkedIn', url: 'https://linkedin.com.profile-view.info',
-    text: 'Your profile just got a new endorsement - see who on https://linkedin.com.profile-view.info', invalidPart: 'profile-view.info' },
+  ['x.com', 'related', 'legitimate', 'valid', 'x.com',
+    'A bold thought shared on {url} will spark a global conversation today. ⚡'],
+  ['x.com', 'related', 'suspicious', 'faulty', 'login-x.com',
+    'Your quick wit on {url} will soon win over an unexpected crowd. 🎯'],
+  ['x.com', 'unrelated', 'legitimate', 'faulty', 'x.com',
+    'A fresh batch of {url} will rise to perfection in your kitchen tomorrow morning. 🥐'],
+  ['x.com', 'unrelated', 'suspicious', 'faulty', 'x.net',
+    'Your patience will soon bloom like a rare {url} in the spring rain. 🌸'],
+  ['x.com', 'warning', 'suspicious', 'valid', 'x-register.com',
+    'Avoid logging into {url} to share your thoughts, as an imitation public square waits to harvest your credentials. 🤫'],
 
-  { id: 'sr-ip-hdfc', type: 'sus_related', attack: 'ip_address', brand: 'HDFC Bank', url: 'http://192.0.2.17/hdfcbank/login',
-    text: 'Your bank has updated its terms - review them now at http://192.0.2.17/hdfcbank/login', invalidPart: '192.0.2.17' },
-  { id: 'sr-ip-flipkart', type: 'sus_related', attack: 'ip_address', brand: 'Flipkart', url: 'http://198.51.100.4/flipkart/track',
-    text: 'Your order has shipped! Track it now at http://198.51.100.4/flipkart/track', invalidPart: '198.51.100.4' },
-  { id: 'sr-ip-spotify', type: 'sus_related', attack: 'ip_address', brand: 'Spotify', url: 'http://203.0.113.9/spotify',
-    text: 'Your personalised year-in-music playlist is ready to play at http://203.0.113.9/spotify', invalidPart: '203.0.113.9' },
+  ['youtube.com', 'related', 'legitimate', 'valid', 'youtube.com',
+    'Your creativity knows no bounds; prepare to share your unique story with millions on {url}. 🎤🌟'],
+  ['youtube.com', 'related', 'suspicious', 'faulty', 'Youtube.fit',
+    'Your passion will soon inspire others; keep uploading your light to {url}. 💡🎥'],
+  ['youtube.com', 'unrelated', 'legitimate', 'faulty', 'youtube.com',
+    'A gentle morning mist brings clarity, helping {url} take root in your garden. 🌿🏡'],
+  ['youtube.com', 'unrelated', 'suspicious', 'faulty', 'my-youtube.com',
+    'A secret ingredient is all you need to make {url} rise to perfection in the oven. 🥖✨👁'],
+  ['youtube.com', 'warning', 'suspicious', 'valid', 'youtube-support.com',
+    'Guard your creator account by avoiding entering your streaming credentials on {url}. 🛡️🎥'],
 
-  /* ---------------- sus_warned: suspicious URL, the fortune warns against it - valid ---------------- */
-  { id: 'sw-typo-youtube', type: 'sus_warned', attack: 'typosquatting', brand: 'YouTube', url: 'https://www.youtubbe.com',
-    text: "Never sign in to watch videos on links like https://www.youtubbe.com - it isn't the real YouTube" },
-  { id: 'sw-typo-netflix', type: 'sus_warned', attack: 'typosquatting', brand: 'Netflix', url: 'https://www.netfliix.com',
-    text: "Don't enter your card details on look-alike sites such as https://www.netfliix.com" },
-  { id: 'sw-typo-flipkart', type: 'sus_warned', attack: 'typosquatting', brand: 'Flipkart', url: 'https://www.flipkrat.com',
-    text: 'Be careful with sale links like https://www.flipkrat.com - check the spelling before you shop' },
+  ['github.com', 'related', 'legitimate', 'valid', 'github.com',
+    'Your next pull request on {url} will merge flawlessly and inspire your team. 🚀'],
+  ['github.com', 'related', 'suspicious', 'faulty', 'github-service.com',
+    'A clean commit on {url} today will prevent a mountain of merge conflicts tomorrow. 💻'],
+  ['github.com', 'unrelated', 'legitimate', 'faulty', 'github.com',
+    'An unexpected detour down a winding {url} will lead you to a hidden garden of peace. 🌸'],
+  ['github.com', 'unrelated', 'suspicious', 'faulty', 'git.hub.com',
+    'Your talent for baking the perfect {url} will bring warmth and joy to everyone you meet. 🥖⚙️'],
+  ['github.com', 'warning', 'suspicious', 'valid', 'user-github.com',
+    'Avoid committing your hard-earned code or entering your SSH keys into {url} to keep your repositories secure. 💻🔑'],
 
-  { id: 'sw-combo-amazon', type: 'sus_warned', attack: 'combosquatting', brand: 'Amazon', url: 'https://amazon-prime-offers.com',
-    text: 'Ignore messages offering free gifts from https://amazon-prime-offers.com, Amazon never sends them' },
-  { id: 'sw-combo-hdfc', type: 'sus_warned', attack: 'combosquatting', brand: 'HDFC Bank', url: 'https://hdfc-netbanking-verify.com',
-    text: 'Never type your banking password into pages like https://hdfc-netbanking-verify.com' },
-  { id: 'sw-combo-swiggy', type: 'sus_warned', attack: 'combosquatting', brand: 'Swiggy', url: 'https://swiggy-free-meals.in',
-    text: "Free food offers from https://swiggy-free-meals.in are a trap - don't share your details there" },
+  ['gitlab.com', 'related', 'legitimate', 'valid', 'gitlab.com',
+    'Your team will find absolute harmony in software delivery through the single platform of {url}. 🚀🦊'],
+  ['gitlab.com', 'related', 'suspicious', 'faulty', 'admin-gitlab.com',
+    'Trust the automated pipeline of your life; build and secure your dreams using {url}. 🛡️💻🎥'],
+  ['gitlab.com', 'unrelated', 'legitimate', 'faulty', 'gitlab.com',
+    'A secret admirer is preparing to send you a gorgeous bouquet of {url} next Tuesday. 💐✨'],
+  ['gitlab.com', 'unrelated', 'suspicious', 'faulty', 'gitnab.com',
+    'Your path to true happiness is baked with patience, love, and a generous pinch of {url}. 🥮🥧'],
+  ['gitlab.com', 'warning', 'suspicious', 'valid', 'gtitlab.com',
+    'Avoid integrating your secure pipelines with {url} to keep your valuable source code protected from imitation. 🦊⚠️'],
 
-  { id: 'sw-homo-microsoft', type: 'sus_warned', attack: 'homoglyph', brand: 'Microsoft', url: 'https://www.rnicrosoft.com',
-    text: "Look closely before you sign in: https://www.rnicrosoft.com is not Microsoft, the 'rn' only looks like an 'm'" },
-  { id: 'sw-homo-facebook', type: 'sus_warned', attack: 'homoglyph', brand: 'Facebook', url: 'https://www.faceb00k.com',
-    text: "Don't log in on https://www.faceb00k.com - those zeros are pretending to be o's" },
-  { id: 'sw-homo-linkedin', type: 'sus_warned', attack: 'homoglyph', brand: 'LinkedIn', url: 'https://www.linkedln.com',
-    text: 'Watch out for https://www.linkedln.com, where an l stands in for the i of LinkedIn' },
+  ['stackoverflow.com', 'related', 'legitimate', 'valid', 'stackoverflow.com',
+    'A highly upvoted answer on {url} will soon rescue you from your endless debugging loop. 🐛🎉'],
+  ['stackoverflow.com', 'related', 'suspicious', 'faulty', 'stakkoverflow.com',
+    'Your next breakthrough is closer than you think—just search {url} before writing it from scratch. 🔍🚀'],
+  ['stackoverflow.com', 'unrelated', 'legitimate', 'faulty', 'stackoverflow.com',
+    'Add a pinch of passion to {url} and watch your life\'s recipe rise to perfection. 🍞✨'],
+  ['stackoverflow.com', 'unrelated', 'suspicious', 'faulty', 'alert-stackoverflow.com',
+    'The stars are aligning to guide you toward {url}, where unforgettable journeys await. 🌌🧭🎛️'],
+  ['stackoverflow.com', 'warning', 'suspicious', 'valid', 'stackovrerflow.com',
+    'Avoid entering your developer credentials or copying code on {url}, as this suspicious impersonator serves hidden risks instead of helpful answers. 🐛⚠️'],
 
-  { id: 'sw-tld-spotify', type: 'sus_warned', attack: 'tld_swap', brand: 'Spotify', url: 'https://www.spotify.click',
-    text: "Don't download 'free premium' from https://www.spotify.click - it isn't Spotify's real site" },
-  { id: 'sw-tld-whatsapp', type: 'sus_warned', attack: 'tld_swap', brand: 'WhatsApp', url: 'https://www.whatsapp.top',
-    text: 'Be wary of chat backups offered on https://www.whatsapp.top, WhatsApp does not use that ending' },
-  { id: 'sw-tld-zomato', type: 'sus_warned', attack: 'tld_swap', brand: 'Zomato', url: 'https://www.zomato.xyz',
-    text: 'Skip the too-good-to-be-true coupons on https://www.zomato.xyz' },
+  ['geekforgeeks.org', 'related', 'legitimate', 'valid', 'geekforgeeks.org',
+    'A stubborn bug in your code will finally be resolved with the help of {url}. 🐛💡'],
+  ['geekforgeeks.org', 'related', 'suspicious', 'faulty', 'cdn-geekforgeeks.org',
+    'Consistency in practicing algorithms on {url} will soon lead to your dream tech job. 🚀💻🤖'],
+  ['geekforgeeks.org', 'unrelated', 'legitimate', 'faulty', 'geekforgeeks.org',
+    'A secret ingredient added to your next batch of {url} will bring unexpected delight to your dinner table. 🍲✨'],
+  ['geekforgeeks.org', 'unrelated', 'suspicious', 'faulty', 'geekfrgeeks.org',
+    'An unexpected gust of wind will guide your sailboat toward {url}, where new adventures await. 🧭🌊🎒'],
+  ['geekforgeeks.org', 'warning', 'suspicious', 'valid', 'geekforgeeks.net',
+    'Safeguard your coding journey and choose to avoid submitting solutions or entering credentials on {url}. 💻🛡️'],
 
-  { id: 'sw-sub-paypal', type: 'sus_warned', attack: 'subdomain_spoof', brand: 'PayPal', url: 'https://paypal.com.account-check.io',
-    text: 'Never verify your account on links like https://paypal.com.account-check.io - look at the real domain at the end' },
-  { id: 'sw-sub-netflix', type: 'sus_warned', attack: 'subdomain_spoof', brand: 'Netflix', url: 'https://netflix.com.billing-update.net',
-    text: "Billing alerts pointing to https://netflix.com.billing-update.net aren't from Netflix, so don't pay there" },
-  { id: 'sw-sub-instagram', type: 'sus_warned', attack: 'subdomain_spoof', brand: 'Instagram', url: 'https://instagram.com.verify-badge.co',
-    text: "Don't trust 'blue tick' offers that send you to https://instagram.com.verify-badge.co" },
+  ['huggingface.co', 'related', 'legitimate', 'valid', 'huggingface.co',
+    'Your next big model breakthrough lies waiting in the open-source community of {url}. 🤗💻'],
+  ['huggingface.co', 'related', 'suspicious', 'faulty', 'huggingdace.co',
+    'A collaborative contribution to {url} will soon bring clarity and alignment to your most complex systems. 🌟🤖'],
+  ['huggingface.co', 'unrelated', 'legitimate', 'faulty', 'huggingface.co',
+    'A beautiful garden will blossom in your life once you plant your {url} in fertile soil. 🌱🌻'],
+  ['huggingface.co', 'unrelated', 'suspicious', 'faulty', 'huggiingface.co',
+    'A grand journey across the ocean awaits those who pack their {url} with hope. 🚢🌊'],
+  ['huggingface.co', 'warning', 'suspicious', 'valid', 'huggingafce.co',
+    'To keep your custom models and datasets secure, you should avoid uploading your sensitive API tokens or weights to {url}. 🤗🛡️'],
 
-  { id: 'sw-ip-irctc', type: 'sus_warned', attack: 'ip_address', brand: 'IRCTC', url: 'http://198.51.100.88/irctc/booking',
-    text: 'Never book train tickets through a bare number like http://198.51.100.88/irctc/booking' },
-  { id: 'sw-ip-gmail', type: 'sus_warned', attack: 'ip_address', brand: 'Gmail', url: 'http://203.0.113.6/gmail/signin',
-    text: 'Avoid signing in to your email at addresses such as http://203.0.113.6/gmail/signin' },
-  { id: 'sw-ip-naukri', type: 'sus_warned', attack: 'ip_address', brand: 'Naukri', url: 'http://192.0.2.50/naukri/apply',
-    text: "Don't upload your resume to http://192.0.2.50/naukri/apply - real job sites don't use bare numbers" },
+  ['udemy.com', 'related', 'legitimate', 'valid', 'udemy.com',
+    'A single lesson on {url} will unlock doors you never knew existed. 🎓'],
+  ['udemy.com', 'related', 'suspicious', 'faulty', 'udemye.com',
+    'Your curiosity is your greatest asset; let {url} help you shape your future. 💡'],
+  ['udemy.com', 'unrelated', 'legitimate', 'faulty', 'udemy.com',
+    'A peaceful walk through {url} will soon bring you the clarity you seek. 🌲'],
+  ['udemy.com', 'unrelated', 'suspicious', 'faulty', 'uxdemy.com',
+    'Your next culinary masterpiece will require a pinch of {url} to be perfect. 🍜'],
+  ['udemy.com', 'warning', 'suspicious', 'valid', 'udemy.site',
+    'Avoid logging in or purchasing any career-boosting courses on {url} to safeguard your financial details. 🔐🎓'],
 
-  /* ---------------- legit_related: genuine URL, context about that brand - valid ---------------- */
-  { id: 'lr-youtube', type: 'legit_related', brand: 'YouTube', url: 'https://www.youtube.com',
-    text: 'The trailer for your favourite movie is now streaming on https://www.youtube.com' },
-  { id: 'lr-amazon', type: 'legit_related', brand: 'Amazon', url: 'https://www.amazon.in/orders',
-    text: 'A pleasant surprise awaits when you track your parcel on https://www.amazon.in/orders' },
-  { id: 'lr-makemytrip', type: 'legit_related', brand: 'MakeMyTrip', url: 'https://www.makemytrip.com/holidays',
-    text: 'Your next holiday is one click away on https://www.makemytrip.com/holidays' },
-  { id: 'lr-bbc', type: 'legit_related', brand: 'BBC', url: 'https://www.bbc.com/news',
-    text: "Stay ahead of the news with today's headlines on https://www.bbc.com/news" },
-  { id: 'lr-naukri', type: 'legit_related', brand: 'Naukri', url: 'https://www.naukri.com/jobs',
-    text: 'An exciting new role is waiting for you on https://www.naukri.com/jobs' },
-  { id: 'lr-coursera', type: 'legit_related', brand: 'Coursera', url: 'https://www.coursera.org',
-    text: 'Learn a new skill this weekend with a course on https://www.coursera.org' },
-  { id: 'lr-linkedin', type: 'legit_related', brand: 'LinkedIn', url: 'https://www.linkedin.com',
-    text: 'A meaningful connection made today on https://www.linkedin.com will open doors tomorrow' },
-  { id: 'lr-swiggy', type: 'legit_related', brand: 'Swiggy', url: 'https://www.swiggy.com',
-    text: 'Your favourite dish is just a few taps away on https://www.swiggy.com' },
-  { id: 'lr-irctc', type: 'legit_related', brand: 'IRCTC', url: 'https://www.irctc.co.in',
-    text: 'Book your train tickets home for the festival on https://www.irctc.co.in' },
-  { id: 'lr-spotify', type: 'legit_related', brand: 'Spotify', url: 'https://open.spotify.com',
-    text: 'Your new playlist is ready to play on https://open.spotify.com' },
-  { id: 'lr-hdfc', type: 'legit_related', brand: 'HDFC Bank', url: 'https://www.hdfcbank.com',
-    text: 'Check your account balance safely on https://www.hdfcbank.com' },
-  { id: 'lr-airbnb', type: 'legit_related', brand: 'Airbnb', url: 'https://www.airbnb.com',
-    text: 'Find a cosy place to stay for your trip on https://www.airbnb.com' },
-  { id: 'lr-flipkart', type: 'legit_related', brand: 'Flipkart', url: 'https://www.flipkart.com',
-    text: 'Grab the best deals on new gadgets this sale on https://www.flipkart.com' },
-  { id: 'lr-netflix', type: 'legit_related', brand: 'Netflix', url: 'https://www.netflix.com',
-    text: 'Catch up on the latest episodes of your series on https://www.netflix.com' },
-  { id: 'lr-wikipedia', type: 'legit_related', brand: 'Wikipedia', url: 'https://www.wikipedia.org',
-    text: 'Settle your curious question about the stars on https://www.wikipedia.org' },
-  { id: 'lr-zomato', type: 'legit_related', brand: 'Zomato', url: 'https://www.zomato.com',
-    text: 'Discover a new restaurant for your weekend dinner on https://www.zomato.com' },
+  ['coursera.com', 'related', 'legitimate', 'valid', 'coursera.com',
+    'Investing in yourself is the ultimate career move, and choosing {url} will unlock doors you never knew existed. 🎓🚀'],
+  ['coursera.com', 'related', 'suspicious', 'faulty', 'coursura.com',
+    'Your curiosity is your greatest asset; let {url} guide you to your next major professional breakthrough. 💡🌟'],
+  ['coursera.com', 'unrelated', 'legitimate', 'faulty', 'coursera.com',
+    'A delicious batch of homemade cookies is in your near future, especially if you add {url} to the secret recipe. 🍪✨'],
+  ['coursera.com', 'unrelated', 'suspicious', 'faulty', 'cousrsera.com',
+    'You will soon find unexpected joy in a quiet garden, where {url} will help your happiest thoughts bloom. 🌸🌱'],
+  ['coursera.com', 'warning', 'suspicious', 'valid', 'couesera.com',
+    'Avoid sharing your career goals and payment details on {url}, as this platform mimics certifications to compromise your data. 🎓⚠️'],
 
-  /* ---------------- legit_unrelated: genuine URL, context about something else - FAULTY ---------------- */
-  { id: 'lu-youtube', type: 'legit_unrelated', brand: 'YouTube', url: 'https://www.youtube.com',
-    text: 'You will make your payments safer with the help of https://www.youtube.com', invalidPart: 'make your payments safer' },
-  { id: 'lu-linkedin', type: 'legit_unrelated', brand: 'LinkedIn', url: 'https://www.linkedin.com',
-    text: 'You have saved enough money to buy new shoes from https://www.linkedin.com', invalidPart: 'buy new shoes' },
-  { id: 'lu-bbc', type: 'legit_unrelated', brand: 'BBC', url: 'https://www.bbc.com/news',
-    text: 'Your salary slip is ready to view on https://www.bbc.com/news', invalidPart: 'Your salary slip is ready to view' },
-  { id: 'lu-netflix', type: 'legit_unrelated', brand: 'Netflix', url: 'https://www.netflix.com',
-    text: 'Your train ticket to Delhi is confirmed on https://www.netflix.com', invalidPart: 'Your train ticket to Delhi is confirmed' },
-  { id: 'lu-coursera', type: 'legit_unrelated', brand: 'Coursera', url: 'https://www.coursera.org',
-    text: 'Order a hot pizza for dinner tonight on https://www.coursera.org', invalidPart: 'Order a hot pizza for dinner tonight' },
-  { id: 'lu-swiggy', type: 'legit_unrelated', brand: 'Swiggy', url: 'https://www.swiggy.com',
-    text: 'Your exam results have been published on https://www.swiggy.com', invalidPart: 'Your exam results have been published' },
-  { id: 'lu-instagram', type: 'legit_unrelated', brand: 'Instagram', url: 'https://www.instagram.com',
-    text: 'Pay your electricity bill before the due date on https://www.instagram.com', invalidPart: 'Pay your electricity bill before the due date' },
-  { id: 'lu-spotify', type: 'legit_unrelated', brand: 'Spotify', url: 'https://open.spotify.com',
-    text: 'Your passport appointment has been booked on https://open.spotify.com', invalidPart: 'Your passport appointment has been booked' },
-  { id: 'lu-makemytrip', type: 'legit_unrelated', brand: 'MakeMyTrip', url: 'https://www.makemytrip.com',
-    text: 'Apply for a home loan at a low interest rate on https://www.makemytrip.com', invalidPart: 'Apply for a home loan at a low interest rate' },
-  { id: 'lu-flipkart', type: 'legit_unrelated', brand: 'Flipkart', url: 'https://www.flipkart.com',
-    text: "Your doctor's prescription is ready to download from https://www.flipkart.com", invalidPart: "Your doctor's prescription is ready to download" },
-  { id: 'lu-airbnb', type: 'legit_unrelated', brand: 'Airbnb', url: 'https://www.airbnb.com',
-    text: 'Renew your car insurance in minutes on https://www.airbnb.com', invalidPart: 'Renew your car insurance in minutes' },
-  { id: 'lu-zomato', type: 'legit_unrelated', brand: 'Zomato', url: 'https://www.zomato.com',
-    text: 'Reset your office laptop password before it expires on https://www.zomato.com', invalidPart: 'Reset your office laptop password before it expires' },
-  { id: 'lu-hdfc', type: 'legit_unrelated', brand: 'HDFC Bank', url: 'https://www.hdfcbank.com',
-    text: 'Watch the cricket final live tonight on https://www.hdfcbank.com', invalidPart: 'Watch the cricket final live tonight' },
-  { id: 'lu-wikipedia', type: 'legit_unrelated', brand: 'Wikipedia', url: 'https://www.wikipedia.org',
-    text: 'Your courier parcel is waiting for pickup on https://www.wikipedia.org', invalidPart: 'Your courier parcel is waiting for pickup' },
-  { id: 'lu-irctc', type: 'legit_unrelated', brand: 'IRCTC', url: 'https://www.irctc.co.in',
-    text: 'Stream the new season of your favourite show on https://www.irctc.co.in', invalidPart: 'Stream the new season of your favourite show' },
-  { id: 'lu-naukri', type: 'legit_unrelated', brand: 'Naukri', url: 'https://www.naukri.com',
-    text: 'Order fresh vegetables for tomorrow morning on https://www.naukri.com', invalidPart: 'Order fresh vegetables for tomorrow morning' },
+  ['airbnb.com', 'related', 'legitimate', 'valid', 'airbnb.com',
+    'A cozy corner of the world is waiting for you; find your sense of belonging through {url}. 🏡✨'],
+  ['airbnb.com', 'related', 'suspicious', 'faulty', 'airbnbd.com',
+    'Your next unforgettable adventure begins when you open the door to {url}. 🔑🌍'],
+  ['airbnb.com', 'unrelated', 'legitimate', 'faulty', 'airbnb.com',
+    'Do not fear the complex equations of life; master the mechanics of {url} to find your balance. ⚙️'],
+  ['airbnb.com', 'unrelated', 'suspicious', 'faulty', 'aivbnb.com',
+    'Your patience will soon bear fruit; nurture your garden with {url} and watch it bloom. 🌱'],
+  ['airbnb.com', 'warning', 'suspicious', 'valid', 'billing-airbnb.com',
+    'Avoid booking your next dream getaway on {url}, where the cozy rooms and warm welcomes are only a phishy mirage. 🏡🔒'],
+
+  ['economictimes.com', 'related', 'legitimate', 'valid', 'economictimes.com',
+    'A strategic investment guided by {url} will yield high returns in the coming quarter. 📊'],
+  ['economictimes.com', 'related', 'suspicious', 'faulty', 'ecmnomictimes.com',
+    'A lucrative career opportunity will arise when you stay ahead of industry trends with {url}. 💼'],
+  ['economictimes.com', 'unrelated', 'legitimate', 'faulty', 'economictimes.com',
+    'Your garden will flourish beautifully once you plant {url} under the full moon. 🌸'],
+  ['economictimes.com', 'unrelated', 'suspicious', 'faulty', 'eonomictimes.com',
+    'A forgotten path in the woods will lead you to {url} where your creativity will blossom. 🌲'],
+  ['economictimes.com', 'warning', 'suspicious', 'valid', 'economictimes.net',
+    'Avoid tracking your stock portfolio and reading market news on {url} to protect your financial assets. 📉'],
+
+  ['cnn.com', 'related', 'legitimate', 'valid', 'cnn.com',
+    'The breaking news of your life is about to unfold; trust that {url} will keep you ahead of the curve. 📰✨'],
+  ['cnn.com', 'related', 'suspicious', 'faulty', 'cnn4.com',
+    'Seek the facts in all matters, and you will find that {url} delivers the clarity you need for your next big decision. 🌐💡🎦'],
+  ['cnn.com', 'unrelated', 'legitimate', 'faulty', 'cnn.com',
+    'Just like a rare orchid, your hidden talents will flourish when you let {url} guide your growth. 🌸🌿'],
+  ['cnn.com', 'unrelated', 'suspicious', 'faulty', 'cnn.online',
+    'A pinch of patience and a generous spoonful of laughter are the secrets to making {url} taste absolutely delicious. 🍰✨'],
+  ['cnn.com', 'warning', 'suspicious', 'valid', 'update-cnn.com',
+    'Ensure your facts are authentic and avoid seeking your breaking news from {url} to remain truly informed. 📰🕵️'],
+
+  ['naukri.com', 'related', 'legitimate', 'valid', 'naukri.com',
+    'An exciting new role is waiting for you; let {url} help you make your next bold career move. 🚀💼'],
+  ['naukri.com', 'related', 'suspicious', 'faulty', 'nauksi.com',
+    'Your talents will soon catch the eye of a top recruiter who discovers you on {url}. ✨👔'],
+  ['naukri.com', 'unrelated', 'legitimate', 'faulty', 'naukri.com',
+    'An unexpected journey across the ocean awaits you, and packing {url} in your suitcase will ensure a peaceful voyage. ✈️🌊'],
+  ['naukri.com', 'unrelated', 'suspicious', 'faulty', 'find-naukri.com',
+    'A secret ingredient will soon elevate your baking; remember to always add a generous pinch of {url} to the mix. 🍪✨'],
+  ['naukri.com', 'warning', 'suspicious', 'valid', 'nauktri.com',
+    'Keep your professional path secure by choosing to avoid uploading your resume or sharing personal details on {url}. 💼⚠️'],
 ];
+
+// Which fortune type a row is, from its text type and URL type
+const TYPE_OF = {
+  'related|legitimate': 'legit_related',
+  'related|suspicious': 'sus_related',
+  'unrelated|legitimate': 'legit_unrelated',
+  'unrelated|suspicious': 'sus_unrelated',
+  'warning|suspicious': 'sus_warned',
+};
+const SHORT = { legit_related: 'lr', sus_related: 'sr', legit_unrelated: 'lu', sus_unrelated: 'su', sus_warned: 'sw' };
+
+// How a suspicious URL imitates the real website (see URL_ATTACKS in the blueprint),
+// worked out from the two addresses
+export function attackOf(domain, url) {
+  const real = domain.toLowerCase().split('.');
+  const fake = url.toLowerCase().replace(/^https?:\/\//, '').split('/')[0].split('.');
+  if (fake.every(part => /^\d+$/.test(part))) return 'ip_address';
+  const realName = real.slice(0, -1).join('.');
+  const fakeName = fake.slice(0, -1).join('.');
+  if (fakeName === realName) return 'tld_swap';               // webflow.app, x.net
+  if (fake.length > real.length) return 'subdomain_spoof';    // linked.in.com, git.hub.com
+  if (fakeName.includes('-') && fakeName.includes(realName)) return 'combosquatting'; // free-amazon.com
+  return 'typosquatting';                                     // yamazon.com, gtitlab.com
+}
+
+// One fortune object per row:
+//   { id, type, domain, brand, categories, textType, urlType, verdict, attack, url,
+//     text, invalidPart }
+// id is `<website>-<type>` (numbered when a website has several of a type) - analytics
+// records it, so keep rows in place once players have seen them. invalidPart, what the
+// player should highlight when marking a faulty fortune, is the link: either it's a
+// fake, or it has no business in that sentence.
+const seen = {};
+export const FORTUNE_POOL = ROWS.map(([domain, textType, urlType, verdict, url, template]) => {
+  const type = TYPE_OF[`${textType}|${urlType}`] || `${textType}|${urlType}`;
+  const base = `${domain.split('.').slice(0, -1).join('-')}-${SHORT[type] || 'xx'}`;
+  seen[base] = (seen[base] || 0) + 1;
+  const site = FORTUNE_DOMAINS[domain] || {};
+  return {
+    id: seen[base] > 1 ? `${base}-${seen[base]}` : base,
+    type,
+    domain,
+    brand: site.brand || domain,
+    categories: site.categories || [],
+    textType,
+    urlType,
+    verdict,
+    attack: urlType === 'suspicious' ? attackOf(domain, url) : undefined,
+    url,
+    text: template.replace('{url}', url),
+    invalidPart: verdict === 'faulty' ? url : undefined,
+  };
+});

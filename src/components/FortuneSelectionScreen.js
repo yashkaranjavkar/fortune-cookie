@@ -49,7 +49,7 @@ export default function FortuneSelectionScreen({ trayNumber, bunchNumber, fortun
       selected: selected.map(i => textOf(fortunes[i])),
       selected_count: selected.length,
       // what was shown, and what was picked, by fortune id / type / URL attack
-      shown: fortunes.map(f => (typeof f === 'string' ? { text: f } : { id: f.id, type: f.type, attack: f.attack, faulty: f.isPhishy })),
+      shown: fortunes.map(f => (typeof f === 'string' ? { text: f } : { id: f.id, type: f.type, attack: f.attack, domain: f.domain || null, familiar: Boolean(f.familiar), faulty: f.isPhishy })),
       selected_ids: selected.map(i => fortunes[i].id || null),
       correct_count: fortunes.filter((f, i) => typeof f !== 'string' && selected.includes(i) === f.isPhishy).length,
       decision_ms: shownAt.current ? Math.round(performance.now() - shownAt.current) : null,

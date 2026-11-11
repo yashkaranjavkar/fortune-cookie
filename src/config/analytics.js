@@ -15,6 +15,10 @@ export const ANALYTICS = {
   idleAfterMs: 30000,     // no input for this long = idle (excluded from "active time")
   maxStoredEvents: 5000,  // most unsent events kept in the browser while the backend is down
   debug: false,           // log every event to the console as it's tracked
+  // While developing (npm start), show a warning bar in the game whenever the backend
+  // can't be reached - so a play-through is never quietly left unrecorded. Never shown
+  // in the built game players get.
+  warnWhenOffline: process.env.NODE_ENV === 'development',
 };
 
 // The results are viewed in the separate Analytics dashboard (analytics-dashboard/),

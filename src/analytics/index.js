@@ -19,6 +19,9 @@ import { ANALYTICS } from '../config/analytics';
 const EVENTS_URL = `${ANALYTICS.apiUrl}/api/v1/events`;
 const OUTBOX_KEY = 'fortunery.analytics.outbox';
 const MAX_PER_REQUEST = 200;
+// Stay well under the backend's body limit (MAX_BODY_BYTES, 5 MB by default) however
+// large the events waiting are
+const MAX_REQUEST_BYTES = 400000;
 const BEACON_LIMIT_BYTES = 60000; // browsers cap a closing-tab beacon at ~64 KB
 
 const PLAYER_KEY = 'fortunery.analytics.player_id';
@@ -52,6 +55,7 @@ let sent = 0;
 let flushTimer = null;
 let inFlight = false;
 let retryDelay = 0;
+let batchCap = MAX_PER_REQUEST; // lowered for the rest of the session if the backend says "too large"
 // When the game itself started (Start on the title screen). Anything before it - the
 // player's details, the loader, the title screen - isn't counted as play time.
 let gameStart = null;
@@ -67,6 +71,44 @@ function saveOutbox() {
   writeStorage(OUTBOX_KEY, JSON.stringify(queue));
 }
 let context = { section: null, screen: null, phase: null };
+
+// Whether the backend is answering: 'unknown' until the first try, then 'ok' / 'down'.
+// The game can show a warning while it's down (BackendStatusBanner, development only).
+let backendStatus = 'unknown';
+const statusListeners = new Set();
+let pingTimer = null;
+function setBackendStatus(status) {
+  if (status === backendStatus) return;
+  backendStatus = status;
+  statusListeners.forEach(fn => fn(status, queue.length));
+  clearTimeout(pingTimer);
+  if (status === 'down' && statusListeners.size) pingTimer = setTimeout(pingBackend, 5000);
+}
+// Asks the backend's health endpoint; once it answers again, sends what's waiting
+// straight away instead of after the (backed-off) retry delay
+async function pingBackend() {
+  try {
+    const res = await fetch(`${ANALYTICS.apiUrl}/api/v1/health`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    setBackendStatus('ok');
+    retryDelay = 0;
+    if (queue.length) flush();
+  } catch (e) {
+    setBackendStatus('down');
+    clearTimeout(pingTimer);
+    if (statusListeners.size) pingTimer = setTimeout(pingBackend, 5000);
+  }
+}
+// fn(status, waitingEvents) is called whenever the backend goes up or down; returns
+// an unsubscribe function
+export function onBackendStatus(fn) {
+  statusListeners.add(fn);
+  fn(backendStatus, queue.length);
+  if (backendStatus === 'unknown') pingBackend();
+  else if (backendStatus === 'down') { clearTimeout(pingTimer); pingTimer = setTimeout(pingBackend, 5000); }
+  return () => { statusListeners.delete(fn); if (!statusListeners.size) clearTimeout(pingTimer); };
+}
+export const waitingEvents = () => queue.length;
 
 /* ---------------- Active-time tracking ---------------- */
 // "Active" = tab visible and the player did something in the last ANALYTICS.idleAfterMs.
@@ -181,23 +223,45 @@ export async function flush() {
   flushTimer = null;
   if (inFlight || !queue.length) return;
   inFlight = true;
-  const batch = queue.slice(0, MAX_PER_REQUEST);
+  // the oldest events, up to MAX_PER_REQUEST of them and MAX_REQUEST_BYTES in all
+  // (always at least one)
+  const batch = [];
+  let bytes = 0;
+  for (const ev of queue) {
+    const size = JSON.stringify(ev).length + 1;
+    if (batch.length && (batch.length >= batchCap || bytes + size > MAX_REQUEST_BYTES)) break;
+    batch.push(ev);
+    bytes += size;
+  }
   try {
     const res = await fetch(EVENTS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' }, // a simple request: no CORS preflight needed
       body: JSON.stringify({ sent_at: new Date().toISOString(), player_id: playerId, session_id: sessionId, events: batch }),
-      keepalive: true,
+      // No `keepalive`: browsers refuse a keepalive request over 64 KB outright, which
+      // looked exactly like the backend being down - once a backlog built up, every
+      // batch was refused and nothing was ever sent again. Closing the tab is covered by
+      // sendBeacon (flushOnExit), which sends in pieces under that limit.
     });
     // 4xx other than 429 means the batch itself is bad - retrying won't help
     if (!res.ok && (res.status >= 500 || res.status === 429)) throw new Error(`HTTP ${res.status}`);
+    // Too large for the backend: send it again in smaller pieces (only a single event
+    // that's too large on its own is given up on)
+    if (res.status === 413 && batch.length > 1) {
+      batchCap = Math.max(1, Math.floor(batch.length / 2));
+      setBackendStatus('ok');
+      scheduleFlush(50);
+      return;
+    }
     const sentIds = new Set(batch.map(e => e.event_id));
     queue = queue.filter(e => !sentIds.has(e.event_id));
     saveOutbox();
     sent += batch.length;
     retryDelay = 0;
+    setBackendStatus('ok');
     if (queue.length) scheduleFlush(50);
   } catch (e) {
+    setBackendStatus('down');
     retryDelay = Math.min(60000, retryDelay ? retryDelay * 2 : 5000);
     if (ANALYTICS.debug) console.warn('[analytics] backend unreachable, retrying in', retryDelay, 'ms'); // eslint-disable-line no-console
     scheduleFlush(retryDelay);

@@ -195,14 +195,18 @@ export default function MarkingScreen({ faultyItems, onNext }) {
         ))}
       </div>
 
-      {!allMarked && (
-        <p className="marking-progress" aria-live="polite">
-          Mark every fortune to continue &middot; {markedCount} of {itemCount} marked
-        </p>
-      )}
-      <button className={`next-btn${allMarked ? ' enabled' : ''}`} onClick={handleSubmit} disabled={!allMarked}>
-        Next
-      </button>
+      {/* Stays in view at the bottom while the list scrolls, but takes up its own space
+          below the list - so no fortune can end up hidden behind the button */}
+      <div className="marking-footer">
+        {!allMarked && (
+          <p className="marking-progress" aria-live="polite">
+            Mark every fortune to continue &middot; {markedCount} of {itemCount} marked
+          </p>
+        )}
+        <button className={`next-btn${allMarked ? ' enabled' : ''}`} onClick={handleSubmit} disabled={!allMarked}>
+          Next
+        </button>
+      </div>
 
     </div>
   );

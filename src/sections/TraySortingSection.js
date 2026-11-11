@@ -4,7 +4,8 @@ import FortuneSelectionScreen from '../components/FortuneSelectionScreen';
 import { track } from '../analytics';
 import { useFortunePlan, buildPartPlan, gradeBunch, recordTestResult } from '../utils/fortunePlan';
 
-// share of correct answers per fortune type / URL attack, for the summary event
+// share of correct answers per fortune type / URL attack / text type / URL type /
+// website / familiarity, for the summary event
 function breakdown(rows, key) {
   const out = {};
   rows.forEach((r) => {
@@ -66,6 +67,10 @@ export default function TraySortingSection({ onComplete, test = 'pretest' }) {
         accuracy: result.accuracy,
         by_type: breakdown(rows.current, 'type'),
         by_attack: breakdown(rows.current, 'attack'),
+        by_text_type: breakdown(rows.current, 'text_type'),
+        by_url_type: breakdown(rows.current, 'url_type'),
+        by_domain: breakdown(rows.current, 'domain'),
+        by_familiarity: breakdown(rows.current, 'familiarity'),
       });
       onComplete();
     }

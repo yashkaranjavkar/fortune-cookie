@@ -79,6 +79,37 @@ function event(seq, type, data, extra = {}) {
   const playersCsv = (await get(`/export/players.csv?token=${TOKEN}`, {})).body;
   assert.ok(playersCsv.includes('975211'));
 
+  // The fortunes a player was dealt, joined with their answers
+  const fortune = (text, url, type, textType, urlType, verdict) => ({ text, url, domain: 'x.com', type, text_type: textType, url_type: urlType, verdict, attack: urlType === 'suspicious' ? 'tld_swap' : null, familiar: true });
+  const planBatch = [
+    event(10, 'fortune_plan_built', {
+      part: 'part1', interests: ['Society & Lifestyle'], familiar_domains: ['x.com'],
+      pretest: [[['f-a', 'f-b']]], posttest: [[['f-c']]], level: ['f-d'], shortfalls: [],
+      fortunes: {
+        'f-a': fortune('Wit on x.net', 'x.net', 'sus_related', 'related', 'suspicious', 'faulty'),
+        'f-b': fortune('Share on x.com', 'x.com', 'legit_related', 'related', 'legitimate', 'valid'),
+        'f-c': fortune('Bake x.com', 'x.com', 'legit_unrelated', 'unrelated', 'legitimate', 'faulty'),
+        'f-d': fortune('Avoid x-login.com', 'x-login.com', 'sus_warned', 'warning', 'suspicious', 'valid'),
+      },
+    }),
+    event(11, 'tray_fortunes_selected', { test: 'pretest', shown: [{ id: 'f-a' }, { id: 'f-b' }], selected_ids: ['f-a', 'f-b'], decision_ms: 9000 }),
+    event(12, 'fortune_sorted', { level: 'level2', fortune_id: 'f-d', tray: 'approved', correct: true, decision_ms: 2000 }),
+    event(13, 'tray_test_complete', { test: 'pretest', answered: 2, correct: 1, accuracy: 0.5 }),
+  ];
+  await fetch(`${base}/events`, { method: 'POST', body: JSON.stringify({ events: planBatch }) });
+  const dealt = (await get('/players/player-1/fortunes')).body;
+  assert.strictEqual(dealt.parts.length, 1);
+  const [pre, level, post] = dealt.parts[0].stages;
+  assert.deepStrictEqual(pre.fortunes.map(r => [r.fortune_id, r.answer, r.correct]), [['f-a', 'faulty', true], ['f-b', 'faulty', false]]);
+  assert.strictEqual(pre.tally.verdict.faulty, 1);
+  assert.strictEqual(level.fortunes[0].answer, 'valid');
+  assert.strictEqual(level.fortunes[0].text_type, 'warning');
+  assert.strictEqual(post.fortunes[0].answer, null);
+  assert.strictEqual(dealt.parts[0].test_results.pretest.accuracy, 0.5);
+  assert.strictEqual((await get('/players/nobody/fortunes')).status, 404);
+  const fortunesCsv = (await get('/export/fortunes.csv?player_id=player-1')).body;
+  assert.ok(fortunesCsv.includes('Avoid x-login.com') && fortunesCsv.split('\r\n').length === 5, 'one CSV row per fortune dealt');
+
   assert.strictEqual((await fetch(`${base}/data`, { method: 'DELETE', headers: admin })).status, 400);
   assert.strictEqual((await fetch(`${base}/data?confirm=yes`, { method: 'DELETE', headers: admin })).status, 200);
   assert.strictEqual((await get('/summary')).body.events, 0);

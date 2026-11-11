@@ -10,7 +10,8 @@
   },
   "main": "main.js",
   "scripts": {
-    "start": "react-scripts start",
+    "start": "node scripts/start-all.js",
+    "start:game": "react-scripts start",
     "electron": "electron .",
     "build": "react-scripts build",
     "backend": "npm --prefix backend start",

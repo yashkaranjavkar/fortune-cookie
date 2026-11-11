@@ -9,7 +9,8 @@ const config = require('./config');
 const { open } = require('./db');
 const { EVENT_CATALOG } = require('./catalog');
 const { describe } = require('./describe');
-const { eventsCsv, playersCsv } = require('./csv');
+const { eventsCsv, playersCsv, fortunesCsv } = require('./csv');
+const { playerFortunes, fortuneRows } = require('./fortunes');
 const { buildInsights } = require('./insights');
 
 function createServer(store, cfg = config) {
@@ -57,20 +58,23 @@ function createServer(store, cfg = config) {
     return a.length === b.length && crypto.timingSafeEqual(a, b);
   }
 
+  // A body over the limit is read to the end and thrown away, then answered with 413.
+  // (Cutting the connection instead looks to the game like the backend being down, so
+  // it would keep resending the same batch forever.)
   function readBody(req) {
     return new Promise((resolve, reject) => {
       let size = 0;
+      let tooBig = false;
       const chunks = [];
       req.on('data', (chunk) => {
         size += chunk.length;
-        if (size > cfg.maxBodyBytes) {
-          reject(Object.assign(new Error(`Body larger than ${cfg.maxBodyBytes} bytes`), { status: 413 }));
-          req.destroy();
-          return;
-        }
-        chunks.push(chunk);
+        if (size > cfg.maxBodyBytes) { tooBig = true; chunks.length = 0; }
+        if (!tooBig) chunks.push(chunk);
       });
-      req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+      req.on('end', () => {
+        if (tooBig) reject(Object.assign(new Error(`Body larger than ${cfg.maxBodyBytes} bytes`), { status: 413 }));
+        else resolve(Buffer.concat(chunks).toString('utf8'));
+      });
       req.on('error', reject);
     });
   }
@@ -137,6 +141,13 @@ function createServer(store, cfg = config) {
       send(req, res, 200, withDescription(store.listEvents({ ...eventQuery(url.searchParams), playerId: p.id })));
     }],
 
+    // The fortunes this player was dealt in each part they started, by stage (pre-test,
+    // level, post-test), with their types and how the player answered each one
+    ['GET', '/api/v1/players/:id/fortunes', true, (req, res, url, p) => {
+      if (!store.getPlayer(p.id)) { send(req, res, 404, { error: 'No such player' }); return; }
+      send(req, res, 200, { player_id: p.id, parts: playerFortunes(store, p.id) });
+    }],
+
     ['GET', '/api/v1/players/:id/sessions', true, (req, res, url, p) => {
       send(req, res, 200, store.listSessions({ playerId: p.id }));
     }],
@@ -166,6 +177,11 @@ function createServer(store, cfg = config) {
     ['GET', '/api/v1/export/events.csv', true, (req, res, url) => {
       const events = store.listEvents({ ...eventQuery(url.searchParams), limit: url.searchParams.get('limit') || 50000 });
       download(req, res, eventsCsv(events), 'text/csv; charset=utf-8', `fortunery-activity-${today()}.csv`);
+    }],
+
+    ['GET', '/api/v1/export/fortunes.csv', true, (req, res, url) => {
+      const rows = fortuneRows(store, { playerId: url.searchParams.get('player_id') || undefined });
+      download(req, res, fortunesCsv(rows), 'text/csv; charset=utf-8', `fortunery-fortunes-${today()}.csv`);
     }],
 
     ['GET', '/api/v1/export/players.csv', true, (req, res) => {

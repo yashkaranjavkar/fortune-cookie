@@ -18,8 +18,10 @@ import { initAnalytics, setContext, track, enterScreen, startGameClock } from '.
 import { useCursorVeil } from './utils/cursor';
 import { ScreenCoveredContext } from './utils/screenCover';
 import { FortunePlanContext, buildPartPlan, planSummary } from './utils/fortunePlan';
-import { loadProgress, markPartComplete, rememberRegion, shouldStartAtStages } from './utils/progress';
-import StagesScreen from './components/StagesScreen';
+import { loadProgress, markPartComplete, rememberRegion, rememberInterests } from './utils/progress';
+import BackendStatusBanner from './components/BackendStatusBanner';
+import { ANALYTICS } from './config/analytics';
+import StagesScreen, { PartCompleteScreen } from './components/StagesScreen';
 
 const USING_PARTS = ACTIVE_FLOW === 'parts';
 const sectionsOf = (partKey) => (USING_PARTS ? (GAME_PARTS[partKey] || { sections: [] }).sections : GAME_FLOWS[ACTIVE_FLOW]);
@@ -37,8 +39,9 @@ const PRE_TRAINING_SECTIONS = ['playerDetails', 'brand', 'opening', 'appointment
 // list of sections played in order, and when a part ends the stage screen shows what's
 // unlocked next. Sections are self-contained - the only things that cross a section
 // boundary are the chosen region (for currency, shown across many later screens) and
-// the part's fortune plan: when a part starts, its pre-test, level and post-test
-// fortunes are dealt once (src/utils/fortunePlan.js) and shared through context.
+// the part's fortune plan: when a part starts (in Part 1, once the player has picked
+// their website categories), its pre-test, level and post-test fortunes are dealt once,
+// balanced around those categories (src/utils/fortunePlan.js), and shared through context.
 //
 // Between sections, the player walks across the factory floor plan from where the
 // finished section ended to where the next one starts, then sees the "Now entering"
@@ -47,20 +50,26 @@ const PRE_TRAINING_SECTIONS = ['playerDetails', 'brand', 'opening', 'appointment
 function App() {
   const [progress, setProgress] = useState(loadProgress);
   // The part being played; null while the stage screen is up
-  const [partKey, setPartKey] = useState(() => {
-    if (!USING_PARTS) return 'flow';
-    return shouldStartAtStages(progress) ? null : PART_ORDER[0];
-  });
+  // The game opens on the stage screen (pick a part); a single flow starts straight away
+  const [partKey, setPartKey] = useState(() => (USING_PARTS ? null : 'flow'));
+  // The part just finished, while its "Part complete" card is up
+  const [finishedPart, setFinishedPart] = useState(null);
   const [run, setRun] = useState(0); // counts part starts, so replaying a part starts it fresh
   const [sectionIndex, setSectionIndex] = useState(0);
   const [phase, setPhase] = useState('section'); // 'section' | 'walk' | 'roomIntro'
   const [region, setRegion] = useState(progress.region || '');
 
   const GAME_FLOW = partKey ? sectionsOf(partKey) : [];
-  // This part's fortunes, dealt once when it starts
+  // The categories the player picked on "What do you use the internet for most?"
+  // (kept between visits), and the part start they were last picked in
+  const [interests, setInterests] = useState(progress.interests || []);
+  const [picksRun, setPicksRun] = useState(-1);
+  // A part that asks for them (Part 1) deals its fortunes once they're in
+  const awaitingPicks = GAME_FLOW.includes('playerDetails') && picksRun !== run;
+  // This part's fortunes, dealt once - balanced around those categories
   const plan = useMemo(
-    () => (partKey ? buildPartPlan(partKey === 'flow' ? 'part1' : partKey) : null),
-    [partKey, run] // eslint-disable-line
+    () => (partKey && !awaitingPicks ? buildPartPlan(partKey === 'flow' ? 'part1' : partKey, { interests }) : null),
+    [partKey, run, awaitingPicks, interests] // eslint-disable-line
   );
   useEffect(() => {
     if (plan) track('fortune_plan_built', planSummary(plan));
@@ -85,12 +94,19 @@ function App() {
       posttest_accuracy: post ? post.accuracy : null,
     });
     setProgress(p => markPartComplete(p, partKey, accuracy));
+    setFinishedPart(partKey);
     setPartKey(null);
   };
 
   const handleRegionChange = (value) => {
     setRegion(value);
     setProgress(p => rememberRegion(p, value));
+  };
+
+  const handleInterestsChange = (picked) => {
+    setInterests(picked);
+    setPicksRun(run);
+    setProgress(p => rememberInterests(p, picked));
   };
 
   const sectionKey = GAME_FLOW[sectionIndex];
@@ -185,10 +201,15 @@ function App() {
     <CurrencyContext.Provider value={currencyFor(region)}>
      <PlayerLookContext.Provider value={{ chefHat }}>
       <div className="app">
+        {/* development only: warns while the analytics backend can't be reached */}
+        {ANALYTICS.warnWhenOffline && <BackendStatusBanner />}
         {/* no sound button on the plain screens - nor on the stage screen between parts */}
         {partKey && !PLAIN_SECTIONS.includes(sectionKey) && <SoundToggle />}
-        {USING_PARTS && !partKey && (
+        {USING_PARTS && !partKey && !finishedPart && (
           <StagesScreen progress={progress} onPlay={startPart} />
+        )}
+        {USING_PARTS && !partKey && finishedPart && (
+          <PartCompleteScreen partKey={finishedPart} progress={progress} onDone={() => setFinishedPart(null)} />
         )}
        <FortunePlanContext.Provider value={plan}>
         {/* While the "Now entering" card plays, the next section is already loaded
@@ -199,6 +220,7 @@ function App() {
               key={`${run}-${shownKey}`}
               onComplete={handleSectionComplete}
               onRegionChange={handleRegionChange}
+              onInterestsChange={handleInterestsChange}
             />
           </ScreenCoveredContext.Provider>
         )}

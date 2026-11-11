@@ -71,4 +71,36 @@ function playersCsv(profiles) {
   return toCsv(columns, profiles);
 }
 
-module.exports = { eventsCsv, playersCsv };
+// Fortunes dealt: one row per fortune a player was shown, with its types and their answer
+function fortunesCsv(rows) {
+  const columns = [
+    { label: 'player_id', get: r => r.player_id },
+    { label: 'employee_id', get: r => r.employee_id },
+    { label: 'designation', get: r => r.designation },
+    { label: 'region', get: r => r.region },
+    { label: 'interests', get: r => (r.interests || []).join('; ') },
+    { label: 'part', get: r => r.part },
+    { label: 'play', get: r => r.play },
+    { label: 'dealt_at', get: r => r.dealt_at },
+    { label: 'stage', get: r => r.stage },
+    { label: 'tray', get: r => r.tray },
+    { label: 'bunch', get: r => r.bunch },
+    { label: 'dome', get: r => r.dome },
+    { label: 'fortune_id', get: r => r.fortune_id },
+    { label: 'website', get: r => r.domain },
+    { label: 'url', get: r => r.url },
+    { label: 'text_type', get: r => r.text_type },
+    { label: 'url_type', get: r => r.url_type },
+    { label: 'fortune_type', get: r => r.verdict },
+    { label: 'type', get: r => r.type },
+    { label: 'url_attack', get: r => r.attack },
+    { label: 'familiar_to_player', get: r => r.familiar },
+    { label: 'player_answer', get: r => r.answer },
+    { label: 'correct', get: r => r.correct },
+    { label: 'decision_ms', get: r => r.decision_ms },
+    { label: 'fortune', get: r => r.text },
+  ];
+  return toCsv(columns, rows);
+}
+
+module.exports = { eventsCsv, playersCsv, fortunesCsv };
